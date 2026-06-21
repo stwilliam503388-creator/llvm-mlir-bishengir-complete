@@ -1,6 +1,6 @@
 # AscendNPU-IR 相关文档
 
-> 💡 **术语不懂？** → 查 `参考/技术术语速查手册.md`（`docs/reference/`），有"hfusion/hivm/Cube/CANN/ConversionTarget"等 bishengir 专用术语的解释。
+> 💡 **术语不懂？** → 查 `参考/技术术语速查手册.md`（`docs/reference/`），有"hfusion/hivm/Cube/CANN/ConversionTarget"等 AscendNPU-IR 专用术语的解释。
 
 ## 目录说明
 
@@ -34,7 +34,7 @@ docs/ascendnpu-ir/
 
 | 这些文档 | 对应本项目笔记 |
 |---------|--------------|
-| 翻译文档 | `docs/mlir/L00-速通与bishengir实战.md` |
+| 翻译文档 | `docs/mlir/L00-速通与AscendNPU-IR实战.md` |
 | 代码仓库解读 | `docs/mlir/L06-TritonMLIR体系分析.md`, `L07-triton-ascend后端分析.md` |
 | 文档总结 | `docs/mlir/L00.md` + `references/ascendnpu-ir-mapping.md` |
 

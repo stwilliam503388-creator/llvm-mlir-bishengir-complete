@@ -163,7 +163,7 @@ toy.return        ───────→        func.return
 **文件**：`Ch5/mlir/LowerToAffineLoops.cpp`
 
 ```cpp
-// 这是 bishengir 的 ConvertLinalgToHFusion / ConvertHFusionToHIVM 的 Toy 版对照
+// 这是 AscendNPU-IR 的 ConvertLinalgToHFusion / ConvertHFusionToHIVM 的 Toy 版对照
 
 void ToyToAffineLoweringPass::runOnOperation() {
   // Step 1: 设置 ConversionTarget（哪些算"合法"）
@@ -239,9 +239,9 @@ scf.for %i = 0 to 4 {
 }
 ```
 
-### 6.4 Toy → bishengir 对照
+### 6.4 Toy → AscendNPU-IR 对照
 
-| 概念 | Toy Tutorial | bishengir |
+| 概念 | Toy Tutorial | AscendNPU-IR |
 |------|-------------|-----------|
 | **高级 dialect** | `toy.constant/add/mul/transpose` | `hfusion.elemwise_binary{add}` |
 | **低级 dialect** | `affine.for + arith.addf + memref` | `hivm.vadd + hivm.load + hivm.store` |
@@ -329,7 +329,7 @@ mlir-opt \
 
 ## 八、七章总结
 
-| Chapter | 核心内容 | 关键概念 | 与 bishengir 对照 |
+| Chapter | 核心内容 | 关键概念 | 与 AscendNPU-IR 对照 |
 |---------|---------|----------|------------------|
 | **Ch1** | Toy AST/Parser | Lexer, Parser, AST | 前端解析器（不同项目各有差异）|
 | **Ch2 ⭐** | **Toy Dialect 定义** | **TableGen Ops.td, MLIRGen** | **HFusion/HIVM .td 定义** |

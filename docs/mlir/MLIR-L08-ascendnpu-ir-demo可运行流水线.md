@@ -1,12 +1,12 @@
 ---
 created: 2026-06-21
-tags: [bishengir, demo, mlir, ascend]
-aliases: [bishengir demo, bishengir 可运行 demo]
+tags: [ascendnpu-ir, demo, mlir, ascend]
+aliases: [ascendnpu-ir demo, AscendNPU-IR 可运行 demo]
 ---
 
-# bishengir-demo：可运行的 MLIR 降级流水线
+# ascendnpu-ir-demo：可运行的 MLIR 降级流水线
 
-> 用标准 `mlir-opt` 模拟 bishengir 三阶段降级（Linalg → HFusion → HIVM）。
+> 用标准 `mlir-opt` 模拟 AscendNPU-IR 三阶段降级（Linalg → HFusion → HIVM）。
 > 所有用例在当前 Mac 上可直接运行。
 
 ---
@@ -14,9 +14,9 @@ aliases: [bishengir demo, bishengir 可运行 demo]
 ## 项目位置
 
 ```text
-~/hermes-workspace/ascendnpu-ir/bishengir-demo/
+~/hermes-workspace/ascendnpu-ir/ascendnpu-ir-demo/
 ├── README.md
-├── bishengir-demo.py              — Python 生成器
+├── ascendnpu-ir-demo.py              — Python 生成器
 ├── run-demo.sh                    — 批量运行脚本
 ├── test-cases/
 │   ├── vecadd_128.mlir            — 向量加法
@@ -41,13 +41,13 @@ matmul 膨胀 72x 的原因：三个嵌套循环被展开为 `scf.for` + `affine
 
 ---
 
-## bishengir 对应
+## AscendNPU-IR 对应
 
 ```mlir
-// bishengir 输入 (test-cases/vecadd_128.mlir):
+// AscendNPU-IR 输入 (test-cases/vecadd_128.mlir):
 module {
   func.func @vecadd(%A, %B, %C) {
-    linalg.generic { arith.addf }     ← 同 bishengir linalg-to-hfusion.mlir
+    linalg.generic { arith.addf }     ← 同 AscendNPU-IR linalg-to-hfusion.mlir
   }
 }
 

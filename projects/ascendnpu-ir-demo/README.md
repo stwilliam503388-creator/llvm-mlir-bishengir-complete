@@ -1,6 +1,6 @@
-1|# bishengir-demo — 可运行 MLIR 降级流水线
+1|# ascendnpu-ir-demo — 可运行 MLIR 降级流水线
 2|
-3|用标准 `mlir-opt` 模拟 bishengir 三阶段降级（Linalg → HFusion → HIVM）。
+3|用标准 `mlir-opt` 模拟 AscendNPU-IR 三阶段降级（Linalg → HFusion → HIVM）。
 4|
 5|---
 6|
@@ -44,7 +44,7 @@
 42|| **功能** | `C[i] = A[i] + B[i]`，逐元素向量加法 |
 43|| **AI 角色** | **残差连接 (Residual Connection/Shortcut)**：ResNet、Transformer 每层输出 + 输入直接相加，解决深层网络梯度消失。LLM 中每个 Attention/FFN 层后都有 `x + sublayer(x)` |
 44|| **MLIR 模式** | `linalg.generic` + `arith.addf`，3 行 → 38 行 LLVM（12.7×）|
-45|| **对应 bishengir** | `hfusion.elemwise_binary {fun = add}` |
+45|| **对应 AscendNPU-IR** | `hfusion.elemwise_binary {fun = add}` |
 46|
 47|#### relu_4x4（ReLU 激活）— 全模型通用激活函数
 48|
@@ -53,7 +53,7 @@
 51|| **功能** | `y = max(0, x)`，负值截断为 0 |
 52|| **AI 角色** | **ReLU (Rectified Linear Unit)**：CNN 全系标配，计算量最低的激活函数，GPU 友好。LLM 中 FFN 层用 ReLU 变体 (GELU/SwiGLU) 替代 |
 53|| **MLIR 模式** | `arith.cmpf` + `arith.select`，条件分支 |
-54|| **对应 bishengir** | `hfusion.elemwise_unary {fun = relu}` |
+54|| **对应 AscendNPU-IR** | `hfusion.elemwise_unary {fun = relu}` |
 55|
 56|#### tanh_4（Tanh 激活）— RNN / LSTM
 57|
@@ -62,7 +62,7 @@
 60|| **功能** | `y = tanh(x)`，S 形函数，输出范围 (-1, 1) |
 61|| **AI 角色** | **Tanh (Hyperbolic Tangent)**：RNN/LSTM 的默认激活函数，用于控制信息流。LLM 中较少使用，但在某些门控机制中仍有出现 |
 62|| **MLIR 模式** | `math.tanh` 内建函数调用 |
-63|| **对应 bishengir** | `hfusion.elemwise_unary {fun = tanh}` |
+63|| **对应 AscendNPU-IR** | `hfusion.elemwise_unary {fun = tanh}` |
 64|
 65|#### softmax_4（Softmax 指数）— Attention 核心
 66|
@@ -71,7 +71,7 @@
 69|| **功能** | `y = exp(x)`，指数运算（softmax 的前半部分）|
 70|| **AI 角色** | **Softmax 指数**：Transformer 的 Attention 机制核心——计算 query 和 key 的匹配分数。完整 softmax = `exp(x - max(x)) / Σexp(x - max(x))`，本文件只演示 exp 部分 |
 71|| **MLIR 模式** | `math.exp` 内建函数 |
-72|| **对应 bishengir** | 逐元素 `math` 操作映射 |
+72|| **对应 AscendNPU-IR** | 逐元素 `math` 操作映射 |
 73|
 74|#### broadcast_4x4（标量广播）— Bias 加法
 75|
@@ -80,7 +80,7 @@
 78|| **功能** | `B[i][j] = A`，把标量复制到矩阵每个位置 |
 79|| **AI 角色** | **Broadcasting (广播)**：神经网络的基础操作——卷积层的 bias、Batch Norm 的 γ/β、Attention 中的位置编码都需要 broadcast 后与特征图相加 |
 80|| **MLIR 模式** | `affine_map<(i,j) -> ()>`，标量→矩阵 |
-81|| **对应 bishengir** | `hfusion.broadcast` |
+81|| **对应 AscendNPU-IR** | `hfusion.broadcast` |
 82|
 83|#### dropout_4x4（Dropout 训练）— 防止过拟合
 84|
@@ -89,7 +89,7 @@
 87|| **功能** | `y = x * scale`，训练时按概率缩放（简化版，不含 mask）|
 88|| **AI 角色** | **Dropout (随机丢弃)**：训练时随机忽略部分神经元，防止过拟合。Transformer 早期使用（BERT），现代 LLM (GPT-4/LLaMA) 趋向于不用 |
 89|| **MLIR 模式** | `arith.mulf` 逐元素乘法 |
-90|| **对应 bishengir** | `hfusion.elemwise_binary {fun = mul}` |
+90|| **对应 AscendNPU-IR** | `hfusion.elemwise_binary {fun = mul}` |
 91|
 92|#### fill_4x4（张量填充）— 初始化缓冲区
 93|
@@ -98,7 +98,7 @@
 96|| **功能** | 用常数值填充整个张量 |
 97|| **AI 角色** | **初始化 (Initialization)**：在卷积/矩阵乘前初始化输出缓冲区。几乎每个模型的第一层和中间层都会用到 |
 98|| **MLIR 模式** | `linalg.generic` + `yield %cst` |
-99|| **对应 bishengir** | `linalg.fill`（Homebrew 未编译，用 generic 替代）|
+99|| **对应 AscendNPU-IR** | `linalg.fill`（Homebrew 未编译，用 generic 替代）|
 100|
 101|#### fused_128（add + mul 融合）— 算子融合概念
 102|
@@ -107,7 +107,7 @@
 105|| **功能** | 连续两个 `linalg.generic`：先加后乘 |
 106|| **AI 角色** | **算子融合 (Kernel Fusion)**：编译器核心优化——将连续两个 kernel 合并为一个，减少内存读写。深度学习编译器 (TVM/XLA) 的核心能力 |
 107|| **MLIR 模式** | 连续 `linalg.generic` 两次 |
-108|| **对应 bishengir** | HFusion 的"算子融合"概念演示 |
+108|| **对应 AscendNPU-IR** | HFusion 的"算子融合"概念演示 |
 109|
 110|---
 111|
@@ -131,7 +131,7 @@
 129|| **功能** | `silu(x) = x * σ(x)`，Sigmoid 门控的输入 |
 130|| **AI 角色** | **SiLU (Sigmoid Linear Unit)**：LLaMA 2/3、Mistral、Gemma 等现代 LLM 的 FFN 层使用 SwiGLU (SiLU 的变体)。比 ReLU 平滑，比 GELU 计算量低 |
 131|| **MLIR 模式** | `sigmoid` + `arith.mulf`，5 步组合 |
-132|| **对应 bishengir** | 组合模式→可融合为单个 hfusion |
+132|| **对应 AscendNPU-IR** | 组合模式→可融合为单个 hfusion |
 133|
 134|#### leaky_relu_4（Leaky ReLU）— GAN
 135|
@@ -140,7 +140,7 @@
 138|| **功能** | `y = x if x > 0 else 0.01*x`，负数侧有微小斜率 |
 139|| **AI 角色** | **Leaky ReLU (带泄漏的线性整流)**：解决 ReLU 死亡问题（负数区梯度为零）。GAN (生成对抗网络) 标配，部分传统 CNN 也使用 |
 140|| **MLIR 模式** | `arith.cmpf` + `arith.mulf` + `arith.select` |
-141|| **对应 bishengir** | 条件分支模式 |
+141|| **对应 AscendNPU-IR** | 条件分支模式 |
 142|
 143|#### gelu_tanh_4（GELU 近似）— BERT / GPT
 144|
@@ -149,7 +149,7 @@
 147|| **功能** | `gelu(x) ≈ 0.5 * x * (1 + tanh(x))` |
 148|| **AI 角色** | **GELU (Gaussian Error Linear Unit)**：BERT/GPT-2/GPT-3 的 FFN 激活函数。比 ReLU 平滑，性能更好。GPT-4 和 LLaMA 改用 SwiGLU |
 149|| **MLIR 模式** | `math.tanh` + `arith.addf` + `arith.mulf`，4 步组合 |
-150|| **对应 bishengir** | 组合模式可融合 |
+150|| **对应 AscendNPU-IR** | 组合模式可融合 |
 151|
 152|#### hard_sigmoid_4（Hard Sigmoid）— MobileNet
 153|
@@ -158,7 +158,7 @@
 156|| **功能** | `hard_sigmoid(x) = clamp(0.2*x + 0.5, 0, 1)`，sigmoid 的线性近似 |
 157|| **AI 角色** | **Hard Sigmoid (硬 Sigmoid)**：MobileNetV3 等轻量化模型使用，计算量比 sigmoid 小 3×。适合移动端部署 |
 158|| **MLIR 模式** | `arith.maximumf` + `arith.minimumf`，数值裁剪 |
-159|| **对应 bishengir** | 分段线性函数映射 |
+159|| **对应 AscendNPU-IR** | 分段线性函数映射 |
 160|
 161|#### prelu_4x4（PReLU）— 图像超分辨率
 162|
@@ -175,7 +175,7 @@
 173|| **功能** | `sum = ΣᵢΣⱼ x[i][j]`，矩阵所有元素求和 |
 174|| **AI 角色** | **Sum Reduction (求和归约)**：Layer Norm 需要计算 `mean = Σx / N` 和 `variance = Σ(x - mean)² / N`，求和是第一步 |
 175|| **MLIR 模式** | **`reduction` iterator**，多维→标量 |
-176|| **对应 bishengir** | `hfusion.reduce {fun = add, axes = [0, 1]}` |
+176|| **对应 AscendNPU-IR** | `hfusion.reduce {fun = add, axes = [0, 1]}` |
 177|| **难度提示** | 这是第一个 `reduction` 用法的例子，理解后其他 reduction 都类似 |
 178|
 179|#### reduce_max_4x4（最大值归约）— Softmax 数值稳定
@@ -202,7 +202,7 @@
 200|| **功能** | `y = clamp(x, min, max)`，限制值在 [min, max] 区间 |
 201|| **AI 角色** | **Gradient Clipping (梯度裁剪)**：训练时限制梯度范围，防止梯度爆炸。LLM 训练必用。推理时可用于激活值截断（量化友好） |
 202|| **MLIR 模式** | 两次 `arith.cmpf` + `arith.select` |
-203|| **对应 bishengir** | 分段线性函数映射 |
+203|| **对应 AscendNPU-IR** | 分段线性函数映射 |
 204|
 205|---
 206|
@@ -217,8 +217,8 @@
 215|| **功能** | `C = A @ B` (矩阵乘法)，4×4 × 4×4 → 4×4 |
 216|| **AI 角色** | **Linear Layer (全连接层 / 线性层)**：`y = x @ W^T + b`。LLM 中 Attention 的 Q/K/V 投影、FFN 的 up/down projection 全部是 matmul。**这是 AI 模型最核心的算子，占算力 60-80%** |
 217|| **MLIR 模式** | `linalg.matmul` named op，1 行 → **74 行 LLVM**（74× 膨胀）|
-218|| **对应 bishengir** | `hfusion.cube_matmul` → `hivm.mmul`（1 行，硬件指令）|
-219|| **难度提示** | 74× 膨胀不是问题——bishengir 保持 1 行 NPU 指令。膨胀展示了"不保留语义会怎样" |
+218|| **对应 AscendNPU-IR** | `hfusion.cube_matmul` → `hivm.mmul`（1 行，硬件指令）|
+219|| **难度提示** | 74× 膨胀不是问题——AscendNPU-IR 保持 1 行 NPU 指令。膨胀展示了"不保留语义会怎样" |
 220|
 221|#### gemm_relu_4x4（矩阵乘 + ReLU 融合）— MLP 标准模式
 222|
@@ -227,7 +227,7 @@
 225|| **功能** | `y = ReLU(x @ W)`，先矩阵乘后激活 |
 226|| **AI 角色** | **算子融合 (GEMM + Activation)**：MLP 层的标准模式——`x @ W1 + b → ReLU → x @ W2 + b`。编译器可以将 matmul + relu 融合为单个 kernel，减少一次中間 buffer 读写 |
 227|| **MLIR 模式** | `linalg.matmul` + `linalg.generic` 两阶段 pipeline |
-228|| **对应 bishengir** | 融合优化 |
+228|| **对应 AscendNPU-IR** | 融合优化 |
 229|| **难度提示** | 需要理解两阶段 lowering 的配合 |
 230|
 231|#### depthwise_conv_4x4（深度卷积）— MobileNet
@@ -237,7 +237,7 @@
 235|| **功能** | 逐通道 3×3 卷积，输入 1×4×4×1，输出 1×4×4×1 |
 236|| **AI 角色** | **Depthwise Convolution (深度可分离卷积)**：MobileNet/EfficientNet 的核心算子，计算量是标准卷积的 1/C (C 为通道数)。结合 pointwise conv 组成 depthwise separable conv |
 237|| **MLIR 模式** | `linalg.depthwise_conv_2d_nhwc_hwcm` named op，3 行 → 113 行 LLVM |
-238|| **对应 bishengir** | named op 映射 |
+238|| **对应 AscendNPU-IR** | named op 映射 |
 239|| **难度提示** | 113 行 LLVM = 稠密的卷积展开，最复杂的单独 op |
 240|
 241|#### conv2d_4x4（二维卷积）— 标准卷积层
@@ -247,7 +247,7 @@
 245|| **功能** | 2D valid 卷积：输入 4×4，kernel 3×3，输出 2×2 |
 246|| **AI 角色** | **Convolution (卷积)**：CNN 的绝对核心——ResNet/VGG/YOLO/UNet 等视觉模型全部依赖卷积。LLM 中虽然不直接用，但多模态模型 (GPT-4V) 的视觉编码器仍用卷积 |
 247|| **MLIR 模式** | `linalg.generic` + `reduction` × 2，6 行 → 85 行 LLVM |
-248|| **对应 bishengir** | 可被 bishengir 模式匹配优化 |
+248|| **对应 AscendNPU-IR** | 可被 AscendNPU-IR 模式匹配优化 |
 249|| **难度提示** | 需要理解 `reduction` iterator 与 affine_map 的配合 |
 250|
 251|#### max_pool_4x4（最大池化）— 下采样
@@ -257,7 +257,7 @@
 255|| **功能** | 2×2 窗口内取最大值，stride=2，4×4 → 2×2 |
 256|| **AI 角色** | **Max Pooling (最大池化)**：CNN 的下采样层——保留最强激活值，丢弃位置信息。经典 CNN (LeNet/AlexNet/VGG) 标配，现代模型趋向于用 stride=2 的卷积替代 |
 257|| **MLIR 模式** | `affine.for` × 4 + `arith.cmpf` + `select` |
-258|| **对应 bishengir** | `linalg.pooling_nhwc_max`（Homebrew 不可用，用 affine 替代）|
+258|| **对应 AscendNPU-IR** | `linalg.pooling_nhwc_max`（Homebrew 不可用，用 affine 替代）|
 259|| **难度提示** | 需要理解手动循环的 affine.for 语法 |
 260|
 261|#### avg_pool_4x4（平均池化）— 下采样
@@ -267,7 +267,7 @@
 265|| **功能** | 2×2 窗口内取平均值，stride=2，4×4 → 2×2 |
 266|| **AI 角色** | **Average Pooling (平均池化)**：比 max pooling 更平滑的下采样。ResNet 中使用 `avg_pool` 做分类头前的下采样 |
 267|| **MLIR 模式** | `affine.for` × 4 + 累加 + 除法 |
-268|| **对应 bishengir** | `linalg.pooling_nchw_sum` + 除法 |
+268|| **对应 AscendNPU-IR** | `linalg.pooling_nchw_sum` + 除法 |
 269|
 270|#### global_avg_pool_4x4（全局平均池化）— 分类头
 271|
@@ -285,7 +285,7 @@
 283|| **功能** | Part1: 每个通道求均值 `mean[j] = Σᵢ x[i][j] / N`，Part2: `y = γ × (x - μ) / √(σ² + ε) + β` |
 284|| **AI 角色** | **Batch Normalization (批归一化, BN)**：CNN 训练的核心技巧——稳定训练、允许更高学习率。ResNet 中每层卷积后都有 BN。LLM 中已被 Layer Norm 替代，但视觉模型仍用 BN |
 285|| **MLIR 模式** | Part1: `reduction` + `parallel` 混合 iterator；Part2: 5 个 ins 操作数的 `linalg.generic` |
-286|| **对应 bishengir** | 需拆解为 reduce + broadcast + elemwise 组合 |
+286|| **对应 AscendNPU-IR** | 需拆解为 reduce + broadcast + elemwise 组合 |
 287|| **难度提示** | ⭐⭐⭐ 最复杂的用例——需要理解多步 pipeline、reduction 与 broadcast 的配合 |
 288|
 289|#### layer_norm_4x4（层归一化）— Transformer
@@ -295,7 +295,7 @@
 293|| **功能** | `y = (x - mean) / sqrt(var + eps) * γ + β`，平方差部分 |
 294|| **AI 角色** | **Layer Normalization (层归一化, LN)**：Transformer 的标配归一化——每个 token 自己做归一化，不依赖 batch 内其他 token。GPT/BERT/LLaMA 每层都有 LN。**比 BN 更适合变长序列** |
 295|| **MLIR 模式** | `linalg.generic` + `arith.subf` + `arith.mulf` |
-296|| **对应 bishengir** | 组合模式 |
+296|| **对应 AscendNPU-IR** | 组合模式 |
 297|| **难度提示** | 概念上相对简单（逐元素），但与 reduce 配合才能完成完整的 LN |
 298|
 299|---
@@ -309,7 +309,7 @@
 307|    ↓
 308|掌握 MLIR 核心概念 → 看 ⭐⭐⭐ 9 个 → matmul / conv / 多步 pipeline
 309|    ↓
-310|理解 bishengir 降级 → 再跑一遍 variants/compare.sh → 观察 28 个用例的膨胀率
+310|理解 AscendNPU-IR 降级 → 再跑一遍 variants/compare.sh → 观察 28 个用例的膨胀率
 311|```
 312|
 313|---
@@ -380,13 +380,13 @@
 346|| **V2** | 向量化 (tile+vectorize) | 77 行 | +3 行 | SIMD 指令，减少指令数 |
 347|| **V3** | **硬件映射 (模拟 mmul)** | **5 行** | **-69 行 (-93%)** | func.call 保留语义，不展开 |
 348|
-349|### V3 的核心思路 — bishengir 实际采用的方案
+349|### V3 的核心思路 — AscendNPU-IR 实际采用的方案
 350|
 351|```text
 352|标准 MLIR 路径 (V0):
 353|  linalg.matmul → affine.for×3 → scf.for+arith → llvm.load/add/mul/store  (74行)
 354|
-355|bishengir 路径 (≈V3):
+355|AscendNPU-IR 路径 (≈V3):
 356|  linalg.matmul → hfusion.cube_matmul (1行) → hivm.mmul (1行)
 357|                                                 ↑
 358|                                           Ascend NPU Cube 单元
@@ -400,7 +400,7 @@
 366|详见 `LIMITATIONS.md`。
 367|
 368|**一句话总结**: Homebrew LLVM 22 未编译 Linalg named ops（conv/pooling/fill 等 named 版本），
-369|但全部可通过 `linalg.generic` 替代（pooling 除外——需 bishengir 自编译版本）。
+369|但全部可通过 `linalg.generic` 替代（pooling 除外——需 AscendNPU-IR 自编译版本）。
 370|bishengir-opt 自编译时包含这些 named op，功能不受影响。
 371|
 372|```bash
@@ -409,7 +409,7 @@
 375|
 376|---
 377|
-378|## bishengir ↔ 标准 MLIR 对照
+378|## AscendNPU-IR ↔ 标准 MLIR 对照
 379|
 380|```text
 381|bishengir:                      标准 MLIR (本 demo):
@@ -421,3 +421,15 @@
 387|hivm.load/vadd/store            llvm.load + llvm.add + llvm.store
 388|```
 389|
+---
+
+## Triton 对应代码
+
+每个 MLIR 测试用例对应一个 Triton Python kernel，位于 `test-cases/triton/` 目录下。
+
+| 操作 | 命令 |
+|------|------|
+| 查看映射 | `cat test-cases/triton/MAPPING.md` |
+| 跑 Triton (需 NVIDIA GPU) | `python3 test-cases/triton/01_basic/01_vecadd.py` |
+
+详见 `test-cases/triton/README.md`。

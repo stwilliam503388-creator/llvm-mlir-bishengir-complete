@@ -15,10 +15,10 @@ aliases: [standalone MLIR 项目实战]
 
 ### ✅ 标准 MLIR 流水线验证通过
 
-用 `mlir-opt` 跑通完整降级链，效果等价于 bishengir 三阶段流水线：
+用 `mlir-opt` 跑通完整降级链，效果等价于 AscendNPU-IR 三阶段流水线：
 
 ```bash
-# bishengir: linalg → hfusion → hivm
+# AscendNPU-IR: linalg → hfusion → hivm
 # 标准:  linalg → affine → scf → cf → llvm
 mlir-opt \
   --convert-linalg-to-affine-loops \
@@ -28,7 +28,7 @@ mlir-opt \
   vecadd.mlir
 ```
 
-**输入**（与 bishengir 的 `linalg-to-hfusion.mlir` 完全相同的结构）：
+**输入**（与 AscendNPU-IR 的 `linalg-to-hfusion.mlir` 完全相同的结构）：
 ```mlir
 func.func @vecadd(%A: memref<1024xf16>, %B: memref<1024xf16>, %C: memref<1024xf16>) {
   linalg.generic {

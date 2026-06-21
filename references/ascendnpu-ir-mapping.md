@@ -160,8 +160,8 @@
 160|Step 4: 测试用例 ── test/Conversion/LinalgToHFusion/linalg-to-hfusion.mlir
 161|  看输入 IR 和输出 IR 的格式，理解 Pass 的效果
 162|
-163|Step 5: 自定义 Pass ── 对照本项目的 bishengir-op-counter
-164|  按 bishengir-op-counter 的注释提示注册到 bishengir-opt
+163|Step 5: 自定义 Pass ── 对照本项目的 ascendnpu-ir-op-counter
+164|  按 ascendnpu-ir-op-counter 的注释提示注册到 bishengir-opt
 165|```
 166|
 167|**对应本项目的学习路径**:
@@ -178,7 +178,7 @@
 178|
 179|## 6. 项目工程源码追踪
 180|
-181|### 6.1 bishengir-demo ↔ AscendNPU-IR
+181|### 6.1 ascendnpu-ir-demo ↔ AscendNPU-IR
 182|
 183|| 本项目的文件 | 对应 AscendNPU-IR 源码 | 关系 |
 184||------------|----------------------|------|
@@ -188,7 +188,7 @@
 188|| `variants/variant0_baseline.sh` | `bishengir-opt --convert-linalg-to-hfusion` | 等价命令行 |
 189|| `variants/variant3_hw_mapping.sh` | `lib/Conversion/HFusionToHIVM/HFusionToHIVM.cpp` | 模式对照 |
 190|
-191|### 6.2 bishengir-op-counter ↔ AscendNPU-IR
+191|### 6.2 ascendnpu-ir-op-counter ↔ AscendNPU-IR
 192|
 193|| 本项目的文件 | 对应 AscendNPU-IR 源码 | 模式关系 |
 194||------------|----------------------|---------|
@@ -213,9 +213,9 @@
 213|| `include/bishengir/Dialect/` | Dialect 的 .td 定义 | `standalone-mlir/include/standalone/StandaloneOps.td` |
 214|| `lib/Dialect/HFusion/` | HFusion dialect 实现 | — |
 215|| `lib/Dialect/HIVM/` | HIVM dialect 实现 | — |
-216|| `lib/Conversion/LinalgToHFusion/` | Pass1 实现 | bishengir-demo Stage1 |
-217|| `lib/Conversion/ArithToHFusion/` | Pass2 实现 | bishengir-demo Stage2 |
-218|| `lib/Conversion/HFusionToHIVM/` | Pass3 实现 | bishengir-demo Stage3 |
-219|| `test/Conversion/` | 测试用例 | bishengir-demo test-cases |
+216|| `lib/Conversion/LinalgToHFusion/` | Pass1 实现 | ascendnpu-ir-demo Stage1 |
+217|| `lib/Conversion/ArithToHFusion/` | Pass2 实现 | ascendnpu-ir-demo Stage2 |
+218|| `lib/Conversion/HFusionToHIVM/` | Pass3 实现 | ascendnpu-ir-demo Stage3 |
+219|| `test/Conversion/` | 测试用例 | ascendnpu-ir-demo test-cases |
 220|| `docs/cn/` | 中文文档 | `docs/ascendnpu-ir/translations/` |
 221|

@@ -16,7 +16,7 @@
 ```
 AscendNPU-IR (华为官方)
     └── fork → ascendnpu-ir (Nous Research 维护)
-                  └── bishengir (另一个名称, 同一代码库)
+                  └── AscendNPU-IR (另一个名称, 同一代码库)
 ```
 
 本项目分析的是 `ascendnpu-ir`（Nous Research fork），它基于华为官方 `AscendNPU-IR` 扩展了自定义 Pass 和 dialect 定义。
@@ -29,7 +29,7 @@ AscendNPU-IR (华为官方)
 | `bishengir/lib/Conversion/` | 转换 Pass：LinalgToHFusion / ArithToHFusion / HFusionToHIVM |
 | `bishengir/tools/bishengir-opt/` | 主入口（类似 mlir-opt）|
 
-**对应笔记**: `docs/mlir/L00-速通与bishengir实战.md`, `L08-bishengir-demo可运行流水线.md`
+**对应笔记**: `docs/mlir/L00-速通与AscendNPU-IR实战.md`, `L08-ascendnpu-ir-demo可运行流水线.md`
 
 ---
 

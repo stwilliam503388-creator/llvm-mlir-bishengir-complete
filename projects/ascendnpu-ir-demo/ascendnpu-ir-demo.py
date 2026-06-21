@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-bishengir-demo.py — 生成 MLIR 测试用例，模拟 bishengir 三阶段降级。
+ascendnpu-ir-demo.py — 生成 MLIR 测试用例，模拟 bishengir 三阶段降级。
 
 生成三种测试用例，展示 bishengir 的核心功能：
   1. vecadd   → 向量加法（最简，linalg.generic + arith.addf）
@@ -206,7 +206,7 @@ def write_file(name: str, content: str):
 def generate():
     """生成所有测试用例"""
     print("╔═══════════════════════════════════════╗")
-    print("║  bishengir-demo: 生成测试用例         ║")
+    print("║  ascendnpu-ir-demo: 生成测试用例         ║")
     print("╚═══════════════════════════════════════╝")
     print()
 

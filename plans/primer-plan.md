@@ -1,3 +1,5 @@
+> ✅ **此计划已执行完毕**。结果见 `docs/primer/`（4 篇文档）。
+
 # 补充计划：面向非编译器背景读者的入门指引
 
 ## 问题
@@ -32,11 +34,11 @@
 ├── 4. Pass — IR 的转换器
 │   ├── 类比: 流水线上的工作站
 │   ├── 分析 Pass (只看不改) vs 转换 Pass (改了再写)
-│   └── 在我们的项目中: bishengir-op-counter 的两种 Pass
+│   └── 在我们的项目中: ascendnpu-ir-op-counter 的两种 Pass
 ├── 5. Lowering — 从抽象到具体
 │   ├── 类比: 建筑设计图 → 施工图 → 钢筋清单
 │   ├── 多层 IR 的核心价值
-│   └── 在我们的项目中: bishengir-demo 的三阶段降级
+│   └── 在我们的项目中: ascendnpu-ir-demo 的三阶段降级
 └── 6. 接下来该读什么
     └── 指向 LLVM L01 / MLIR L00
 ```

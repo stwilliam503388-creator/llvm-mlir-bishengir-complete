@@ -13,7 +13,7 @@ mkdir -p "$RESULT_DIR"
 LLVM_VERSION=$(mlir-opt --version 2>&1 | head -1 || echo "unknown")
 
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  bishengir-demo: 模拟三阶段降级                            ║"
+echo "║  ascendnpu-ir-demo: 模拟三阶段降级                            ║"
 echo "║  MLIR: $LLVM_VERSION"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""

@@ -86,7 +86,7 @@
 84|
 85|```bash
 86|# 在 NVIDIA GPU 上运行
-87|cd projects/bishengir-demo/
+87|cd projects/ascendnpu-ir-demo/
 88|python test-cases/triton/20_matmul.py   # 跑矩阵乘
 89|python test-cases/triton/10_silu.py     # 跑SiLU
 90|
