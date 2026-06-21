@@ -73,3 +73,12 @@ LogicalResult matchAndRewrite(TransposeOp op, ...) {
     return failure();
 }
 ```
+
+
+## AscendNPU-IR 关系
+
+本 Pass 参考了 AscendNPU-IR 中 `LinalgToHFusion.cpp` 的 `OpRewritePattern` 模式实现。
+- `BishengirOpCounter.cpp`: 分析 Pass, 类似于 AscendNPU-IR 中的 `OpStats`
+- `BishengirPeelTranspose.cpp`: 转换 Pass, 类似于 AscendNPU-IR 中的 transpose 优化
+
+要注册到 bishengir-opt: 需修改 `InitAllPasses.h` 和 `CMakeLists.txt`。

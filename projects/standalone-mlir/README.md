@@ -66,3 +66,17 @@ make -C build
 | Dialect 定义 | TableGen | TableGen |
 | Pass 注册 | `registerPasses()` | `InitAllPasses.h` |
 | 主工具 | `standalone-opt` | `bishengir-opt` |
+
+
+## AscendNPU-IR 关系
+
+本仓库演示了如何在 AscendNPU-IR 之外**从零构建**一个 MLIR dialect，核心差异:
+
+| 概念 | standalone-mlir | AscendNPU-IR |
+|------|----------------|-------------|
+| Dialect | `Standalone` | `hfusion` / `hivm` |
+| Ops | `standalone.add` 等 3 个 | 100+ op |
+| Pass | 2 个演示 | 50+ Conversion/Analysis Pass |
+| 构建 | 纯 Makefile (无需 cmake) | CMake + LLVM external project |
+
+学习路径: 先理解 standalone-mlir 的 .td → .inc → Pass 流程，再读 AscendNPU-IR 的实际 dialect 定义。

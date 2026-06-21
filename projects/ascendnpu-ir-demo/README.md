@@ -433,3 +433,13 @@
 | 跑 Triton (需 NVIDIA GPU) | `python3 test-cases/triton/01_basic/01_vecadd.py` |
 
 详见 `test-cases/triton/README.md`。
+
+
+## AscendNPU-IR 关系
+
+本仓库**直接模拟** AscendNPU-IR 的三阶段降级流水线:
+- Stage 0: Linalg → Affine (对应 AscendNPU-IR 的 LinalgToHFusion)
+- Stage 1: Affine → SCF (对应 ArithToHFusion)
+- Stage 2: SCF → LLVM (对应 HFusionToHIVM)
+
+每个 test-case 的注释中标明了对应的 AscendNPU-IR 源码路径。
