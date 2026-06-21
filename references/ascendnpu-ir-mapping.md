@@ -184,6 +184,13 @@ Step 5: 自定义 Pass ── 对照本项目的 bishengir-op-counter
 |------------|----------------------|------|
 | `test-cases/vecadd_128.mlir` | `test/Conversion/LinalgToHFusion/linalg-to-hfusion.mlir` | 同类型输入，本 demo 用标准 MLIR |
 | `test-cases/matmul_4x4x4.mlir` | `test/Conversion/LinalgToHFusion/matmul-to-hfusion.mlir` | 同类型输入 |
+| `test-cases/relu_4x4.mlir` | `test/Conversion/ArithToHFusion/` 同类 | 通过 arith.cmpf + select 模拟 |
+| `test-cases/softmax_4.mlir` | `test/Conversion/` 无直接对应 | math.exp 是通用 MLIR op |
+| `test-cases/tanh_4.mlir` | `test/Conversion/` 无直接对应 | math.tanh 是通用 MLIR op |
+| `test-cases/reduce_sum_4x4.mlir` | `test/Conversion/LinalgToHFusion/reduce-to-hfusion.mlir` | reduction iterator |
+| `test-cases/reduce_max_4x4.mlir` | 同上 | arith.cmpf 替代 arith.addf |
+| `test-cases/broadcast_4x4.mlir` | `test/Conversion/` 无直接对应 | affine_map<()> 广播语义 |
+| `test-cases/depthwise_conv_4x4.mlir` | `test/Conversion/` 需查找 | depthwise conv named op |
 | `test-cases/fused_128.mlir` | 无直接对应 | 演示融合概念 |
 | `variants/variant0_baseline.sh` | `bishengir-opt --convert-linalg-to-hfusion` | 等价命令行 |
 | `variants/variant3_hw_mapping.sh` | `lib/Conversion/HFusionToHIVM/HFusionToHIVM.cpp` | 模式对照 |

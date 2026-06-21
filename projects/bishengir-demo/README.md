@@ -4,13 +4,52 @@
 
 ---
 
-## 测试用例
+## 测试用例（10 个）
 
-| 文件 | 操作 | 对应 bishengir | 行数变化 |
-|------|------|---------------|---------|
-| `test-cases/vecadd_128.mlir` | 向量加法 | `LinalgToHFusion` → `HFusionToHIVM` | 3 → 18 → 38 行 |
-| `test-cases/matmul_4x4x4.mlir` | 矩阵乘法 | `linalg.matmul` → Cube 指令 | 1 → 18 → **74 行** |
-| `test-cases/fused_128.mlir` | add + mul 融合 | 融合优化演示 | 15 → 20 → 59 行 |
+### 逐元素操作（5 个）
+
+| 文件 | 操作 | MLIR 核心模式 | 对应深度学场景 |
+|------|------|-------------|--------------|
+| `vecadd_128.mlir` | 向量加法 | `linalg.generic` + `arith.addf` | 残差连接 |
+| `relu_4x4.mlir` | ReLU 激活 | `linalg.generic` + `arith.cmpf` + `select` | 全模型通用 |
+| `tanh_4.mlir` | Tanh 激活 | `linalg.generic` + `math.tanh` | RNN / LSTM |
+| `softmax_4.mlir` | 指数运算 (exp) | `linalg.generic` + `math.exp` | Attention softmax |
+| `broadcast_4x4.mlir` | 标量广播 | `linalg.generic` + `affine_map<()>` | Bias 加法 |
+
+### 归约操作（2 个）
+
+| 文件 | 操作 | MLIR 核心模式 | 对应场景 |
+|------|------|-------------|---------|
+| `reduce_sum_4x4.mlir` | 求和归约 | `linalg.generic` + `reduction` iter | Layer Norm |
+| `reduce_max_4x4.mlir` | 最大值归约 | `linalg.generic` + `arith.cmpf` + `reduction` | Softmax 数值稳定 |
+
+### 矩阵运算（2 个）
+
+| 文件 | 操作 | MLIR 核心模式 | 对应场景 |
+|------|------|-------------|---------|
+| `matmul_4x4x4.mlir` | 矩阵乘法 | `linalg.matmul` (named op) | Linear/MLP |
+| `depthwise_conv_4x4.mlir` | 深度卷积 | `linalg.depthwise_conv_2d_nhwc_hwcm` | MobileNet |
+
+### 融合操作（1 个）
+
+| 文件 | 操作 | MLIR 核心模式 | 对应场景 |
+|------|------|-------------|---------|
+| `fused_128.mlir` | add + mul 融合 | 连续 `linalg.generic` × 2 | 算子融合演示 |
+
+### 降级验证
+
+| 用例 | 输入行数 | Lower 到 LLVM | 膨胀率 |
+|------|---------|--------------|--------|
+| vecadd_128 | 3 行 | 38 行 | 12.7× |
+| matmul_4x4x4 | 1 行 | 74 行 | **74×** |
+| relu_4x4 | 5 行 | 42 行 | 8.4× |
+| softmax_4 | 5 行 | 17 行 | 3.4× |
+| tanh_4 | 4 行 | 17 行 | 4.3× |
+| reduce_sum_4x4 | 5 行 | 37 行 | 7.4× |
+| reduce_max_4x4 | 5 行 | 47 行 | 9.4× |
+| broadcast_4x4 | 5 行 | 24 行 | 4.8× |
+| depthwise_conv_4x4 | 3 行 | 113 行 | 37.7× |
+| fused_128 | 15 行 | 59 行 | 3.9× |
 
 ---
 
