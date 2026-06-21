@@ -164,9 +164,10 @@ llvm-mlir-bishengir-complete/
 │       ├── 02-Pass与Lowering.md      — 分析/转换 Pass、dialect、降级
 │   │   └── 03-从Triton到Ascend.md    — 全路径串联到本项目
 │   │
-│   └── ascendnpu-ir/                 ★ AscendNPU-IR 对接（11 篇）
-│       ├── translations/             — 9 篇中文翻译文档（Pass + Dialect）
-│       ├── analysis/                 — 2 篇深度分析笔记
+│   └── reference/                    ★ 术语速查手册（298 条术语, 按主题分组）
+│       └── 技术术语速查手册.md       — SSA/Dialect/Pass/Lowering/Linalg 等, 每条含一句话+类比
+│
+├── projects/                         ← 工程项目（4 个）
 │       └── README.md                 — 阅读顺序
 │
 ├── projects/                         ← 工程项目（4 个）
