@@ -1,27 +1,31 @@
-// ==- vecadd_128.mlir - 向量加法（bishengir demo）-==//
+// VecAdd — 向量加法
 //
-// 对应 AscendNPU-IR 源码:
-//   输入格式: bishengir/test/Conversion/LinalgToHFusion/linalg-to-hfusion.mlir
-//   Pass 实现: bishengir/lib/Conversion/LinalgToHFusion/LinalgToHFusion.cpp
-//   等价 bishengir-opt 命令:
-//     bishengir-opt --convert-linalg-to-hfusion --convert-hfusion-to-hivm
-//   预期 bishengir 输出: hfusion.elemwise_binary {fun = add}
+// 功能: C[i] = A[i] + B[i], 逐元素加法
+// AI 角色: 残差连接 (Residual Connection)
+//   ResNet/Transformer 中每层输出与输入直接相加, 解决深层网络梯度消失.
+// 应用场景: ResNet / Transformer / GPT 全系列
+// MLIR 模式: linalg.generic + arith.addf, 3行→38行LLVM (12.7×)
+// 对应 bishengir: hfusion.elemwise_binary {fun = add}
 //
-// 本文件用标准 MLIR (mlir-opt) 模拟上述降级过程.
-// 区别: 标准路径输出 affine.for + arith.addf, bishengir 输出 hivm.vadd.
-//===
-
-module {
-  func.func @vecadd(%A: memref<128xf16>, %B: memref<128xf16>, %C: memref<128xf16>) {
-    linalg.generic {
-      indexing_maps = [affine_map<(i) -> (i)>, affine_map<(i) -> (i)>, affine_map<(i) -> (i)>],
-      iterator_types = ["parallel"]
-    } ins(%A, %B : memref<128xf16>, memref<128xf16>)
-      outs(%C : memref<128xf16>) {
-    ^bb0(%a: f16, %b: f16, %c: f16):
-      %sum = arith.addf %a, %b : f16
-      linalg.yield %sum : f16
-    }
-    return
-  }
-}
+1|// VecAdd — 向量加法
+2|//
+3|// 功能: C[i] = A[i] + B[i], 逐元素加法
+4|// AI 角色: 残差连接 (Residual Connection / Shortcut)
+5|//   ResNet/Transformer 中每层输出与输入直接相加, 解决深层网络梯度消失.
+6|//   每个 Attention/FFN 层后都有 x + sublayer(x) 的残差连接.
+7|// 应用场景: ResNet / Transformer / GPT 全系列, 无处不在
+8|// MLIR 模式: linalg.generic + arith.addf, 3行→38行LLVM (12.7×)
+9|// 对应 bishengir: hfusion.elemwise_binary {fun = add}
+10|//
+11|1|
+12|2|// VecAdd — 向量加法
+13|3|//
+14|4|// 功能: C[i] = A[i] + B[i], 逐元素加法
+15|5|// AI 角色: 残差连接 (Residual Connection / Shortcut)
+16|6|//   ResNet/Transformer 中每层输出与输入直接相加, 解决深层网络梯度消失.
+17|7|//   LLM 中每个 Attention/FFN 层后都有 x + sublayer(x) 的残差连接.
+18|8|// 应用场景: ResNet / Transformer / GPT 全系列
+19|9|// MLIR 模式: linalg.generic + arith.addf, 3行→38行LLVM
+20|10|// 对应 bishengir: hfusion.elemwise_binary {fun = add}
+21|11|//
+22|12|
