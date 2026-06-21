@@ -1,9 +1,11 @@
 ---
 type: plan
-status: approved
+status: executed
 project: llvm-mlir-bishengir-complete
 created: 2026-06-21
 ---
+
+> ✅ **此计划已执行完毕**。结果见 `docs/primer/`（4 篇文档）。
 
 # 零基础编译器入门：扩充方案
 
