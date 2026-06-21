@@ -116,9 +116,9 @@ created: 2026-06-21
 │   │   ├── 分析 Pass = 质检员数一数今天产了多少件
 │   │   └── 转换 Pass = 质检员发现有瑕疵，直接修复
 │   ├── 在项目中的样子:
-│   │   └── bishengir-op-counter/BishengirOpCounter.cpp
+│   │   └── ascendnpu-ir-op-counter/BishengirOpCounter.cpp
 │   │       - 遍历所有 op → 计数 → 打印 (分析 Pass)
-│   │   └── bishengir-op-counter/BishengirPeelTranspose.cpp
+│   │   └── ascendnpu-ir-op-counter/BishengirPeelTranspose.cpp
 │   │       - 检测冗余 transpose → 删除 → 替换 (转换 Pass)
 │   └── Pass 管线: 多个 Pass 按顺序执行
 │
@@ -131,7 +131,7 @@ created: 2026-06-21
 │   ├── 为什么不能一步到位？
 │   │   └── 中间层可以做优化: 比如发现两个循环可以合并
 │   ├── 在项目中的样子:
-│   │   └── bishengir-demo: 三阶段降级
+│   │   └── ascendnpu-ir-demo: 三阶段降级
 │   │       Linalg → affine → scf → LLVM (74× 膨胀)
 │   │   └── AscendNPU-IR 实际: 
 │   │       Linalg → HFusion → HIVM → NPU (保持 1 行，硬件指令)
@@ -154,7 +154,7 @@ created: 2026-06-21
 │       └── triton: TT dialect → TritonGPU dialect → LLVM
 │
 └── 4. 读完本节后你能回答
-    ├── bishengir-demo 的 74 行 LLVM 是"问题"还是"过程"？
+    ├── ascendnpu-ir-demo 的 74 行 LLVM 是"问题"还是"过程"？
     ├── 为什么 MLIR 不用一个 IR 而用多个 dialect？
     └── 分析 Pass 和转换 Pass 的区别是什么？
 ```
@@ -194,8 +194,8 @@ created: 2026-06-21
 │   ├── docs/llvm/L01-L06:  理解 LLVM IR
 │   ├── docs/mlir/L00-L02:  理解 MLIR dialect + Pass
 │   ├── standalone-mlir:    自己定义一个 dialect + Pass
-│   ├── bishengir-demo:     模拟降级过程
-│   ├── bishengir-op-counter:写自定义 Pass
+│   ├── ascendnpu-ir-demo:     模拟降级过程
+│   ├── ascendnpu-ir-op-counter:写自定义 Pass
 │   ├── toy-mini:           自己写一个 AST 解析器
 │   └── docs/mlir/L06-L07:  Triton 怎么接 AscendNPU-IR
 │

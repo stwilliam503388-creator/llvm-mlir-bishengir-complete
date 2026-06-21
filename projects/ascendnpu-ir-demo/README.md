@@ -1,4 +1,4 @@
-# bishengir-demo — 可运行 MLIR 降级流水线
+# ascendnpu-ir-demo — 可运行 MLIR 降级流水线
 
 用标准 `mlir-opt` 模拟 AscendNPU-IR 三阶段降级（Linalg → HFusion → HIVM）。
 

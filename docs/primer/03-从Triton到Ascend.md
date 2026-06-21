@@ -74,8 +74,8 @@ def vecadd_kernel(A, B, C, N):
   Triton Python ──→ AST ──→ Triton IR ──→ AscendNPU-IR ──→ Ascend NPU
                               ██████████████████████████████████
                               ↑                              ↑
-                          docs/llvm/                     bishengir-demo
-                          docs/mlir/                     bishengir-op-counter
+                          docs/llvm/                     ascendnpu-ir-demo
+                          docs/mlir/                     ascendnpu-ir-op-counter
                           standalone-mlir                docs/mlir/L06-L07
                           toy-mini
 
@@ -94,8 +94,8 @@ def vecadd_kernel(A, B, C, N):
 | `docs/mlir/L03-L04` | 自定义 Pass、Standalone 构建 | 从读到写，产出自己的 dialect |
 | `projects/toy-mini` | AST 构建 + IR 生成 | 手写一个语言前端 |
 | `projects/standalone-mlir` | dialect 定义 + 构建 | CMake + TableGen |
-| `projects/bishengir-demo` | Lowering 全过程 | 实际跑通 3 个用例 |
-| `projects/bishengir-op-counter` | 分析 + 转换 Pass | 手写自定义 Pass |
+| `projects/ascendnpu-ir-demo` | Lowering 全过程 | 实际跑通 3 个用例 |
+| `projects/ascendnpu-ir-op-counter` | 分析 + 转换 Pass | 手写自定义 Pass |
 | `docs/mlir/L05-L07` | Triton MLIR 体系 | 理解 triton-ascend 全貌 |
 
 ---
@@ -106,8 +106,8 @@ def vecadd_kernel(A, B, C, N):
 Step 1: 读 docs/llvm/L00-速通总览.md
         了解 LLVM IR 的全貌（10 分钟）
 
-Step 2: 运行 bishengir-demo
-        cd projects/bishengir-demo
+Step 2: 运行 ascendnpu-ir-demo
+        cd projects/ascendnpu-ir-demo
         bash variants/compare.sh
         感受从 1 行到 74 行的 Lowering 过程（5 分钟）
 
@@ -129,7 +129,7 @@ Step 4: 动手实践
    - 答：至少 4 次（Triton AST → tt dialect → TritonGPU → AIR → HIVM → NPU），取决于具体路径
 
 2. **本项目中哪个工程最接近"真正的编译器降级"？为什么？**
-   - 答：bishengir-demo。因为它用 mlir-opt 实际跑通了从 Linalg 到 LLVM 的完整降级过程
+   - 答：ascendnpu-ir-demo。因为它用 mlir-opt 实际跑通了从 Linalg 到 LLVM 的完整降级过程
 
 3. **学完本项目后，你能做什么？**
    - 读懂 `bishengir-opt` 的 Pass 管线输出

@@ -7,7 +7,7 @@ aliases: [自定义 MLIR Pass, AscendNPU-IR Pass 实战]
 # 自定义 AscendNPU-IR MLIR Pass 实战
 
 > 基于 Toy Tutorial 学到的知识，写两个针对 AscendNPU-IR 的自定义 Pass。
-> 源码位置：`~/hermes-workspace/toy-tutorial/bishengir-op-counter/`
+> 源码位置：`~/hermes-workspace/toy-tutorial/ascendnpu-ir-op-counter/`
 
 ---
 
@@ -29,7 +29,7 @@ aliases: [自定义 MLIR Pass, AscendNPU-IR Pass 实战]
 class OpCounterPass
     : public PassWrapper<OpCounterPass, OperationPass<ModuleOp>> {
 
-  StringRef getArgument() const override { return "bishengir-op-counter"; }
+  StringRef getArgument() const override { return "ascendnpu-ir-op-counter"; }
 
   void runOnOperation() override {
     ModuleOp module = getOperation();
@@ -196,7 +196,7 @@ bishengir-opt \
   -convert-linalg-to-hfusion \    # Dialect Conversion
   -convert-arith-to-hfusion \     # Dialect Conversion  
   -convert-hfusion-to-hivm \      # Dialect Conversion
-  -bishengir-op-counter \         # ★ 自定义分析 Pass
+  -ascendnpu-ir-op-counter \         # ★ 自定义分析 Pass
   -bishengir-peel-transpose \     # ★ 自定义转换 Pass
   vecadd.mlir
 ```
@@ -223,7 +223,7 @@ bishengir-opt \
 ```text
 ~/hermes-workspace/toy-tutorial/
 ├── example.toy                              # Toy 语言测试文件
-├── bishengir-op-counter/
+├── ascendnpu-ir-op-counter/
 │   ├── BishengirOpCounter.cpp               # ★ 分析 Pass（op 计数）
 │   └── BishengirPeelTranspose.cpp           # ★ 转换 Pass（冗余消除）
 ├── src/Ch1~Ch7/                              # Toy Tutorial 官方源码

@@ -17,7 +17,7 @@ echo "║  matmul 优化方案对比                                       ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
-# 基准行数 (从 bishengir-demo 根目录取)
+# 基准行数 (从 ascendnpu-ir-demo 根目录取)
 BASE=$(mlir-opt \
   --convert-linalg-to-affine-loops \
   --lower-affine --convert-scf-to-cf --convert-func-to-llvm \

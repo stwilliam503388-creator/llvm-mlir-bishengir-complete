@@ -4,7 +4,7 @@ tags: [AscendNPU-IR, demo, mlir, ascend]
 aliases: [AscendNPU-IR demo, AscendNPU-IR 可运行 demo]
 ---
 
-# bishengir-demo：可运行的 MLIR 降级流水线
+# ascendnpu-ir-demo：可运行的 MLIR 降级流水线
 
 > 用标准 `mlir-opt` 模拟 AscendNPU-IR 三阶段降级（Linalg → HFusion → HIVM）。
 > 所有用例在当前 Mac 上可直接运行。
@@ -14,9 +14,9 @@ aliases: [AscendNPU-IR demo, AscendNPU-IR 可运行 demo]
 ## 项目位置
 
 ```text
-~/hermes-workspace/ascendnpu-ir/bishengir-demo/
+~/hermes-workspace/ascendnpu-ir/ascendnpu-ir-demo/
 ├── README.md
-├── bishengir-demo.py              — Python 生成器
+├── ascendnpu-ir-demo.py              — Python 生成器
 ├── run-demo.sh                    — 批量运行脚本
 ├── test-cases/
 │   ├── vecadd_128.mlir            — 向量加法
