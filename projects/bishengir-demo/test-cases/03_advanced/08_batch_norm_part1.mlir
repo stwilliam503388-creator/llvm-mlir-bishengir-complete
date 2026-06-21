@@ -5,6 +5,11 @@
 // 用在哪: ResNet/CNN 全系 (训练阶段)
 // 降级: reduction + parallel 混合 iterator
 // bishengir: 拆为 reduce + broadcast + elemwise 三步
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: affine.for
+// CHECK: arith.addf
 
 module {
   func.func @bn_mean(%A: memref<4x4xf32>, %mean: memref<4xf32>) {

@@ -5,6 +5,13 @@
 // 用在哪: Linear / Attention / FFN
 // 降级: linalg.matmul, 1行->74行LLVM (74x展开)
 // bishengir: hfusion.cube_matmul -> hivm.mmul (1行NPU指令)
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: affine.for
+// CHECK: affine.for
+// CHECK: arith.mulf
+// CHECK: arith.addf
 
 module {
   func.func @matmul(%A: memref<4x4xf32>, %B: memref<4x4xf32>, %C: memref<4x4xf32>) {

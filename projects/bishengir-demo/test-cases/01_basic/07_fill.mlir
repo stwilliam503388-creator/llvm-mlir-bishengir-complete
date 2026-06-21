@@ -6,6 +6,11 @@
 // 降级: linalg.generic + yield 常数
 // bishengir: linalg.fill (Homebrew 未编译, 用 generic 替代)
 
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: arith.constant 0.000000e+00
+
 module {
   func.func @fill(%A: memref<4x4xf32>) {
     %c0 = arith.constant 0.0 : f32

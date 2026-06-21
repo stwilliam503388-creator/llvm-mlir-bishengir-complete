@@ -6,6 +6,11 @@
 // 降级: math.exp 内建函数
 // bishengir: 逐元素 math 操作映射
 
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf %s
+// CHECK: affine.for
+// CHECK: math.exp
+
 module {
   func.func @softmax_exp(%A: memref<4xf32>, %B: memref<4xf32>) {
     linalg.generic {indexing_maps = [affine_map<(i) -> (i)>, affine_map<(i) -> (i)>], iterator_types = ["parallel"]} ins(%A : memref<4xf32>) outs(%B : memref<4xf32>) {

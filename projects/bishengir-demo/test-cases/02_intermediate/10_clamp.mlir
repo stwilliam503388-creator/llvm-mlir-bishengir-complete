@@ -6,6 +6,14 @@
 // 降级: 两次 cmpf + select
 // bishengir: 分段线性函数映射
 
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: arith.cmpf olt
+// CHECK: arith.select
+// CHECK: arith.cmpf ogt
+// CHECK: arith.select
+
 module {
   func.func @clamp(%A: memref<4x4xf32>, %B: memref<4x4xf32>) {
     %min = arith.constant -1.0 : f32

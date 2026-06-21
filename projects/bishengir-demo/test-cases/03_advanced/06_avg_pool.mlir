@@ -5,6 +5,12 @@
 // 用在哪: ResNet 分类头 / 平滑下采样
 // 降级: affine.for x4 + 累加 + 除法
 // bishengir: linalg.pooling_nchw_sum + 除法 (需自编译)
+// RUN: mlir-opt --lower-affine %s | FileCheck %s
+// RUN: mlir-opt --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK-NOT: affine.for
+// CHECK: scf.for
+// CHECK: arith.addf
+// CHECK: arith.mulf
 
 module {
   func.func @avg_pool(%input: memref<4x4xf32>, %output: memref<2x2xf32>) {

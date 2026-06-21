@@ -5,6 +5,12 @@
 // 用在哪: MobileNet/EfficientNet
 // 降级: linalg.depthwise_conv_2d_nhwc_hwcm
 // bishengir: named op 直接映射
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: affine.for
+// CHECK: arith.mulf
+// CHECK: arith.addf
 
 module {
   func.func @depthwise_conv(%input: memref<1x4x4x1xf32>, %filter: memref<3x3x1xf32>, %output: memref<1x4x4x1xf32>) {

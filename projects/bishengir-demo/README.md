@@ -336,9 +336,41 @@
 334|
 335|---
 336|
-337|## 矩阵乘法优化方案对比
+337|## 自动化测试
 338|
-339|matmul 的 74× 膨胀源于三重循环完全展开为标量。
+339|每个 `.mlir` 文件都包含 FileCheck 风格的 `// RUN:` 和 `// CHECK:` 标注，支持两种验证方式：
+340|
+341|### 方式 1：使用 run-tests.sh 脚本
+342|
+343|```bash
+344|# 运行全部 28 个测试
+345|bash run-tests.sh
+346|
+347|# 详细模式
+348|bash run-tests.sh --verbose
+349|
+350|# 只运行匹配的用例
+351|bash run-tests.sh matmul
+352|```
+353|
+354|### 方式 2：使用 LLVM lit + FileCheck
+355|
+356|```bash
+357|# 单个文件
+358|mlir-opt --convert-linalg-to-affine-loops test-cases/01_basic/01_vecadd.mlir | FileCheck test-cases/01_basic/01_vecadd.mlir
+359|```
+360|
+361|### 测试标注说明
+362|
+363|- `// RUN:` — 要执行的 mlir-opt 命令（`%s` = 当前文件路径）
+364|- `// CHECK:` — 验证输出中必须包含的 IR 模式
+365|- `// CHECK-NOT:` — 验证输出中不能包含的 IR 模式
+366|
+367|---
+368|
+369|## 矩阵乘法优化方案对比
+370|
+371|matmul 的 74× 膨胀源于三重循环完全展开为标量。
 340|`variants/compare.sh` 直接对比 4 种优化策略：
 341|
 342|| Variant | 策略 | LLVM 行数 | vs 基准 | 原理 |
