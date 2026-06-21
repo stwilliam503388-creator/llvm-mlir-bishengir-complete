@@ -1,5 +1,7 @@
 # AscendNPU-IR 相关文档
 
+> 💡 **术语不懂？** → 查 `参考/技术术语速查手册.md`（`docs/reference/`），有"hfusion/hivm/Cube/CANN/ConversionTarget"等 bishengir 专用术语的解释。
+
 ## 目录说明
 
 ```
