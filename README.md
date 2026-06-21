@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![LLVM](https://img.shields.io/badge/LLVM-22.1.6-blue)](https://llvm.org)
-[![macOS](https://img.shields.io/badge/macOS-26.5.1-ff69b4)(https://www.apple.com/macos)
+[![macOS](https://img.shields.io/badge/macOS-26.5.1-ff69b4)](https://www.apple.com/macos)
 [![AscendNPU-IR](https://img.shields.io/badge/AscendNPU--IR-官方-blueviolet)](https://github.com/Ascend/AscendNPU-IR)
 
 ---
