@@ -125,7 +125,7 @@ run_test_file() {
         return
     fi
 
-    if ! $HAS_MLIR_OPT; then
+    if [ "$HAS_MLIR_OPT" != "true" ]; then
         # 无 mlir-opt 时，只验证标注存在
         log_pass "$label (标注存在, 需 mlir-opt 执行)"
         return
