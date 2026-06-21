@@ -54,12 +54,18 @@
 | `gemm_relu_4x4.mlir` | 矩阵乘 + ReLU | 融合 Linear+激活 | **77** |
 | `depthwise_conv_4x4.mlir` | 深度卷积 | MobileNet | **113** |
 
-### 卷积与填充（2 个）
+### 卷积与池化（5 个）
 
-| 文件 | 操作 | 用途 | LLVM 行数 |
-|------|------|------|-----------|
-| `conv2d_4x4.mlir` | 二维卷积 4x4 (valid) | 标准卷积层 | 85 |
-| `fill_4x4.mlir` | 张量填充 | 初始化缓冲区 | 39 |
+| 文件 | 操作 | 实现方式 | LLVM 行数 |
+|------|------|---------|-----------|
+| `conv2d_4x4.mlir` | 二维卷积 4x4 (valid) | `linalg.generic` | 85 |
+| `fill_4x4.mlir` | 张量填充 | `linalg.generic` | 39 |
+| `max_pool_4x4.mlir` | 最大池化 2x2 (stride 2) | `affine.for` 手动 | 80 |
+| `avg_pool_4x4.mlir` | 平均池化 2x2 (stride 2) | `affine.for` 手动 | 83 |
+| `global_avg_pool_4x4.mlir` | 全局平均池化 | `affine.for` 手动 | 52 |
+
+> pooling 用 `affine.for` 而非 `linalg.generic`，因为 linalg.generic 要求索引可逆，
+> 而 stride>1 导致非可逆映射。详见 `LIMITATIONS.md`。
 
 ### 批归一化（2 个，需串联使用）
 
