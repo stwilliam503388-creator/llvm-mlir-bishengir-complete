@@ -1,7 +1,7 @@
 ---
 type: plan
 status: draft
-project: llvm-mlir-bishengir-complete
+project: ascend-npu-compiler-learning
 created: 2026-06-21
 target: AscendNPU-IR 对接方案
 ---

@@ -1,4 +1,4 @@
-# LLVM → MLIR → AscendNPU-IR: Ascend NPU 编译器全链路学习
+# Ascend NPU Compiler Learning
 
 > 从 LLVM IR 入门到 MLIR Dialect 开发，最终对接 AscendNPU-IR 的完整学习路径与工程合集
 
@@ -152,7 +152,7 @@ LLVM IR            MLIR Dialect          ascendnpu-ir-demo / AscendNPU-IR
 ### 项目结构
 
 ```
-llvm-mlir-bishengir-complete/
+ascend-npu-compiler-learning/
 ├── README.md                         ← 本文件（项目总览）
 ├── SUMMARY.md                        ← 完整输出总结文档
 ├── LICENSE                           ← MIT 许可证
