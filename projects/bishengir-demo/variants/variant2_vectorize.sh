@@ -1,7 +1,13 @@
 #!/bin/bash
 # variant2_vectorize.sh — 向量化优化
+#
+# 对应 AscendNPU-IR:
+#   等价命令: bishengir-opt --convert-linalg-to-hfusion --convert-hfusion-to-hivm input.mlir
+#   bishengir 的 hivm.vadd 是一条向量指令，
+#   本 demo 的 --affine-super-vectorize 模拟同等功能.
+#   对应源码: bishengir/lib/Conversion/HFusionToHIVM/HFusionToHIVM.cpp
+#
 # 原理: 用 SIMD 指令一次处理 2 个元素，减少指令数
-# 等价于 bishengir 的 hivm.vadd 向量指令
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 MATMUL="$SCRIPT_DIR/../test-cases/matmul_4x4x4.mlir"

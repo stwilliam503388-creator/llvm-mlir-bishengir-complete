@@ -1,9 +1,13 @@
 #!/bin/bash
 # variant3_hw_mapping.sh — 硬件指令映射模拟
+#
+# 对应 AscendNPU-IR:
+#   等价命令: bishengir-opt --convert-hfusion-to-hivm input_after_hfusion.mlir
+#   bishengir 实际: hfusion.cube_matmul → hivm.mmul (1 行 NPU 指令)
+#   本 demo 模拟: func.call @mmul_4x4xf32 (保留语义，不展开)
+#   对应源码: bishengir/lib/Conversion/HFusionToHIVM/HFusionToHIVM.cpp
+#
 # 原理: 用 func.call 代替完整展开，模拟 bishengir 的 hivm.mmul
-# bishengir 实际做法:
-#   linalg.matmul → hfusion.cube_matmul → hivm.mmul (1行NPU指令)
-# 本 demo 模拟: 保留 matmul 语义，不展开到标量
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULT_DIR="$SCRIPT_DIR/results"

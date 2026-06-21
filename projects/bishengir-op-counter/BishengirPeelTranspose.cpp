@@ -1,11 +1,13 @@
 // ==- BishengirPeelTranspose.cpp - 剥离冗余 transpose 的转换 Pass -==//
 //
-// 第二个自定义 Pass — Pattern Rewriting 实战。
-// 基于 Toy Tutorial Ch5 的 LowerToAffineLoops + Ch3 的 ToyCombine。
+// 转换 Pass — Pattern Rewriting 实战。
 //
-// 功能：
-//   检测 hfusion.elemwise_binary 的输入是否来自 hivm.load 加载的
-//   已转置数据，如果是则剥离冗余转置并在 load 时调整索引。
+// 对应 AscendNPU-IR:
+//   模式参考: bishengir/lib/Conversion/LinalgToHFusion/LinalgToHFusion.cpp
+//   核心接口: OpRewritePattern<Operation> + ConversionTarget
+//   测试参考: bishengir/test/Conversion/
+//
+// 基于 Toy Tutorial Ch5 的 LowerToAffineLoops + Ch3 的 ToyCombine。
 //
 // 教学价值：
 //   展示 MLIR Pattern 匹配的完整流程，跟 bishengir 现有的
