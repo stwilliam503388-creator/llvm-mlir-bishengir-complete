@@ -5,6 +5,15 @@
 // 用在哪: ResNet/CNN 全系 (归一化通用模式)
 // 降级: 5个ins的linalg.generic + math.sqrt
 // bishengir: 拆为 elemwise + math 组合
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf %s
+// CHECK: affine.for
+// CHECK: arith.subf
+// CHECK: arith.addf
+// CHECK: math.sqrt
+// CHECK: arith.divf
+// CHECK: arith.mulf
+// CHECK: arith.addf
 
 module {
   func.func @bn_norm(%A: memref<4x4xf32>, %B: memref<4x4xf32>, %mean: memref<4xf32>, %var: memref<4xf32>, %gamma: memref<4xf32>, %beta: memref<4xf32>) {

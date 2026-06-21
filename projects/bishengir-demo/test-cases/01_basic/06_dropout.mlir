@@ -6,6 +6,11 @@
 // 降级: arith.mulf 逐元素乘法
 // bishengir: hfusion.elemwise_binary {fun = mul}
 
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: arith.mulf
+
 module {
   func.func @dropout(%A: memref<4x4xf32>, %B: memref<4x4xf32>, %scale: f32) {
     linalg.generic {indexing_maps = [affine_map<(i,j) -> (i,j)>, affine_map<(i,j) -> (i,j)>], iterator_types = ["parallel", "parallel"]} ins(%A : memref<4x4xf32>) outs(%B : memref<4x4xf32>) {

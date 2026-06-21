@@ -6,6 +6,13 @@
 // 降级: math.tanh + addf + mulf, 4步
 // bishengir: 组合后可融合
 
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf %s
+// CHECK: affine.for
+// CHECK: math.tanh
+// CHECK: arith.addf
+// CHECK: arith.mulf
+
 module {
   func.func @gelu_tanh(%A: memref<4xf32>, %B: memref<4xf32>) {
     %c1 = arith.constant 1.0 : f32

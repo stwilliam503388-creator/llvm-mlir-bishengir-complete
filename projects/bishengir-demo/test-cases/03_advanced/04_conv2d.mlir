@@ -5,6 +5,14 @@
 // 用在哪: ResNet/VGG/YOLO/CNN 全系
 // 降级: linalg.generic + reduction x2, 6行->85行LLVM
 // bishengir: 可被 pattern matching 优化
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: affine.for
+// CHECK: affine.for
+// CHECK: affine.for
+// CHECK: arith.mulf
+// CHECK: arith.addf
 
 module {
   func.func @conv2d(%input: memref<4x4xf32>, %kernel: memref<3x3xf32>, %output: memref<2x2xf32>) {

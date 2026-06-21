@@ -5,6 +5,12 @@
 // 用在哪: LeNet/AlexNet/VGG 下采样
 // 降级: affine.for x4 + cmpf + select (手动循环)
 // bishengir: linalg.pooling_nhwc_max (需自编译)
+// RUN: mlir-opt --lower-affine %s | FileCheck %s
+// RUN: mlir-opt --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK-NOT: affine.for
+// CHECK: scf.for
+// CHECK: arith.cmpf ogt
+// CHECK: arith.select
 
 module {
   func.func @max_pool(%input: memref<4x4xf32>, %output: memref<2x2xf32>) {

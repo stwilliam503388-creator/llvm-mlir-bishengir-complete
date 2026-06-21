@@ -5,6 +5,14 @@
 // 用在哪: MLP 层 / FFN 层
 // 降级: linalg.matmul + linalg.generic 两阶段
 // bishengir: 可融合为单个kernel
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: arith.mulf
+// CHECK: arith.addf
+// CHECK: affine.for
+// CHECK: arith.cmpf ogt
+// CHECK: arith.select
 
 module {
   func.func @gemm_relu(%A: memref<4x4xf32>, %B: memref<4x4xf32>, %C: memref<4x4xf32>) {

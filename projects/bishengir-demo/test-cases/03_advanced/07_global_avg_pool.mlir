@@ -5,6 +5,12 @@
 // 用在哪: ResNet/MobileNet/GoogleNet 分类头
 // 降级: affine.for x2 + 累加 + 平均因子
 // bishengir: 组合 reduce + 除法
+// RUN: mlir-opt --lower-affine %s | FileCheck %s
+// RUN: mlir-opt --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK-NOT: affine.for
+// CHECK: scf.for
+// CHECK: arith.addf
+// CHECK: arith.mulf
 
 module {
   func.func @global_avg_pool(%input: memref<4x4xf32>, %output: memref<f32>) {

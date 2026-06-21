@@ -6,6 +6,14 @@
 // 降级: memref.alloc + reduction + memref.store
 // bishengir: 组合 reduce + broadcast + elemwise
 
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: memref.alloc
+// CHECK: affine.for
+// CHECK: affine.for
+// CHECK: arith.cmpf ogt
+// CHECK: arith.select
+
 module {
   func.func @softmax_stable(%A: memref<4x4xf32>) {
     %max_init = memref.alloc() : memref<f32>

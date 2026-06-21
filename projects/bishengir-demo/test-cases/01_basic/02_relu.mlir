@@ -6,6 +6,12 @@
 // 降级: arith.cmpf (比较) + arith.select (选择)
 // bishengir: hfusion.elemwise_unary {fun = relu}
 
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: arith.cmpf ogt
+// CHECK: arith.select
+
 module {
   func.func @relu(%A: memref<4x4xf32>, %B: memref<4x4xf32>) {
     %c0 = arith.constant 0.0 : f32

@@ -6,6 +6,13 @@
 // 降级: mulf + cmpf + select
 // bishengir: 条件分支映射
 
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: arith.mulf
+// CHECK: arith.cmpf ogt
+// CHECK: arith.select
+
 module {
   func.func @prelu(%A: memref<4x4xf32>, %B: memref<4x4xf32>) {
     %c0 = arith.constant 0.0 : f32

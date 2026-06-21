@@ -6,6 +6,14 @@
 // 降级: sigmoid + mulf, 5步
 // bishengir: 组合后可融合
 
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf %s
+// CHECK: affine.for
+// CHECK: arith.negf
+// CHECK: math.exp
+// CHECK: arith.divf
+// CHECK: arith.mulf
+
 module {
   func.func @silu(%A: memref<4xf32>, %B: memref<4xf32>) {
     linalg.generic {indexing_maps = [affine_map<(i) -> (i)>, affine_map<(i) -> (i)>], iterator_types = ["parallel"]} ins(%A : memref<4xf32>) outs(%B : memref<4xf32>) {

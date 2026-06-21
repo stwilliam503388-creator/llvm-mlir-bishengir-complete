@@ -6,6 +6,13 @@
 // 降级: maximumf + minimumf 数值裁剪
 // bishengir: 分段线性函数映射
 
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: arith.mulf
+// CHECK: arith.maximumf
+// CHECK: arith.minimumf
+
 module {
   func.func @hard_sigmoid(%A: memref<4xf32>, %B: memref<4xf32>) {
     %c0 = arith.constant 0.0 : f32
