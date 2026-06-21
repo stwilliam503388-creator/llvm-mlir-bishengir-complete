@@ -4,52 +4,63 @@
 
 ---
 
-## 测试用例（10 个）
+## 测试用例（21 个）
 
-### 逐元素操作（5 个）
+覆盖 7 类神经网络常见算子。
 
-| 文件 | 操作 | MLIR 核心模式 | 对应深度学场景 |
-|------|------|-------------|--------------|
-| `vecadd_128.mlir` | 向量加法 | `linalg.generic` + `arith.addf` | 残差连接 |
-| `relu_4x4.mlir` | ReLU 激活 | `linalg.generic` + `arith.cmpf` + `select` | 全模型通用 |
-| `tanh_4.mlir` | Tanh 激活 | `linalg.generic` + `math.tanh` | RNN / LSTM |
-| `softmax_4.mlir` | 指数运算 (exp) | `linalg.generic` + `math.exp` | Attention softmax |
-| `broadcast_4x4.mlir` | 标量广播 | `linalg.generic` + `affine_map<()>` | Bias 加法 |
+### 逐元素运算（8 个）
 
-### 归约操作（2 个）
+| 文件 | 公式 | 对应 AI 场景 | LLVM 行数 |
+|------|------|-------------|-----------|
+| `vecadd_128.mlir` | `C = A + B` | 残差连接 | 38 |
+| `relu_4x4.mlir` | `max(0, x)` | 全模型通用 | 42 |
+| `leaky_relu_4.mlir` | `max(0.01x, x)` | GAN / 解决 ReLU 死亡 | 37 |
+| `prelu_4x4.mlir` | `max(αx, x)` | 图像超分辨率 | 52 |
+| `gelu_tanh_4.mlir` | `0.5x(1+tanh(x))` | BERT/GPT | 38 |
+| `silu_4.mlir` | `x·σ(x)` | LLaMA 系列 | 23 |
+| `sigmoid_4.mlir` | `1/(1+e^(-x))` | 二分类 / RNN 门控 | 33 |
+| `hard_sigmoid_4.mlir` | `clamp(0.2x+0.5)` | MobileNet | 39 |
 
-| 文件 | 操作 | MLIR 核心模式 | 对应场景 |
-|------|------|-------------|---------|
-| `reduce_sum_4x4.mlir` | 求和归约 | `linalg.generic` + `reduction` iter | Layer Norm |
-| `reduce_max_4x4.mlir` | 最大值归约 | `linalg.generic` + `arith.cmpf` + `reduction` | Softmax 数值稳定 |
+### 激活函数（5 个，包含在上表中，按用途独立列出）
 
-### 矩阵运算（2 个）
+| 文件 | 类型 | 计算量 | 是否可微 | 主要模型 |
+|------|------|--------|---------|---------|
+| `relu_4x4` | 分段线性 | 最低 | 分段可微 | CNN 全系 |
+| `leaky_relu_4` | 分段线性 | 低 | 是 | GAN |
+| `gelu_tanh_4` | 平滑 | 中 | 是 | BERT/GPT |
+| `silu_4` | 平滑 | 中高 | 是 | LLaMA |
+| `sigmoid_4` | S 形 | 高 | 是 | RNN |
 
-| 文件 | 操作 | MLIR 核心模式 | 对应场景 |
-|------|------|-------------|---------|
-| `matmul_4x4x4.mlir` | 矩阵乘法 | `linalg.matmul` (named op) | Linear/MLP |
-| `depthwise_conv_4x4.mlir` | 深度卷积 | `linalg.depthwise_conv_2d_nhwc_hwcm` | MobileNet |
+### 归约操作（3 个）
 
-### 融合操作（1 个）
+| 文件 | 操作 | 用途 | LLVM 行数 |
+|------|------|------|-----------|
+| `reduce_sum_4x4.mlir` | 求和 | Layer Norm 分母 | 37 |
+| `reduce_max_4x4.mlir` | 最大值 | Softmax 数值稳定 | 47 |
+| `softmax_complete_4.mlir` | 减最大值 + 指数 | Attention 核心 | 44 |
 
-| 文件 | 操作 | MLIR 核心模式 | 对应场景 |
-|------|------|-------------|---------|
-| `fused_128.mlir` | add + mul 融合 | 连续 `linalg.generic` × 2 | 算子融合演示 |
+### 规范化（2 个）
 
-### 降级验证
+| 文件 | 操作 | 用途 | LLVM 行数 |
+|------|------|------|-----------|
+| `layer_norm_4x4.mlir` | 平方差 | Transformer 归一化 | 44 |
+| `clamp_4x4.mlir` | 数值裁剪 | 梯度裁剪 | 53 |
 
-| 用例 | 输入行数 | Lower 到 LLVM | 膨胀率 |
-|------|---------|--------------|--------|
-| vecadd_128 | 3 行 | 38 行 | 12.7× |
-| matmul_4x4x4 | 1 行 | 74 行 | **74×** |
-| relu_4x4 | 5 行 | 42 行 | 8.4× |
-| softmax_4 | 5 行 | 17 行 | 3.4× |
-| tanh_4 | 4 行 | 17 行 | 4.3× |
-| reduce_sum_4x4 | 5 行 | 37 行 | 7.4× |
-| reduce_max_4x4 | 5 行 | 47 行 | 9.4× |
-| broadcast_4x4 | 5 行 | 24 行 | 4.8× |
-| depthwise_conv_4x4 | 3 行 | 113 行 | 37.7× |
-| fused_128 | 15 行 | 59 行 | 3.9× |
+### 矩阵运算（3 个）
+
+| 文件 | 操作 | 用途 | LLVM 行数 |
+|------|------|------|-----------|
+| `matmul_4x4x4.mlir` | 矩阵乘法 | Linear/MLP 层 | **74** |
+| `gemm_relu_4x4.mlir` | 矩阵乘 + ReLU | 融合 Linear+激活 | **77** |
+| `depthwise_conv_4x4.mlir` | 深度卷积 | MobileNet | **113** |
+
+### 其他（3 个）
+
+| 文件 | 操作 | 用途 | LLVM 行数 |
+|------|------|------|-----------|
+| `broadcast_4x4.mlir` | 标量广播 | Bias 加法 | 24 |
+| `dropout_4x4.mlir` | 缩放（简化） | 防止过拟合 | 24 |
+| `fused_128.mlir` | add + mul 融合 | 算子融合演示 | 59 |
 
 ---
 
