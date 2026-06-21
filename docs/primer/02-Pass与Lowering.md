@@ -1,5 +1,7 @@
 # 003：Pass 与 Lowering（IR 是怎么变成机器码的）
 
+> 预估时间：15 分钟 | 前置：[01-AST与IR](./01-AST与IR.md)
+
 > 阅读时间：8 分钟 | 前置知识：Primer 00, 01
 
 ---
@@ -232,3 +234,15 @@ def TransposeOp : Standalone_Op<"transpose"> { ... }
 
 4. **ascendnpu-ir-demo 中 matmul 从 1 行变成 74 行，这是个问题吗？**
    - 答：不是问题，是 Lowering 的正常过程。AscendNPU-IR 之所以能保持 1 行（hivm.mmul），是因为它有硬件支持——不需要展开到标量
+
+---
+
+## 动手试试？
+
+光看概念不够，来写个真的 Pass 吧：
+
+→ **[HelloPass — 你的第一个 LLVM Pass](../../projects/hello-pass/)**
+
+30 行代码，一键运行，打印每个函数的名字和结构。看完这章 + 跑通 HelloPass，你就算真正入门了。
+
+> 📖 遇到不认识的术语？→ [术语表](../glossary.md)

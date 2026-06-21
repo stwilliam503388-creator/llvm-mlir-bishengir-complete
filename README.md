@@ -437,121 +437,43 @@ g++ -std=c++17 -o toymini toymini.cpp
 cd projects/standalone-mlir
 export MLIR_DIR="/opt/homebrew/opt/llvm/lib/cmake/mlir"
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-./build/standalone-opt test/example.mlir
-```
+### 3️⃣ 阶段三：MLIR 编译器基础设施（⏳ 计划中）
 
-### 5.5 快速调试技巧
+> 🚧 **内容正在开发中**
+>
+> 预计涵盖：
+> - MLIR 基本概念和 Dialect 系统
+> - 自定义 Dialect 和 Operation 定义
+> - Pattern 改写和 Dialect Conversion
+> - 从 MLIR 到 LLVM IR 的 Lowering
+>
+> 如果你已学完前两阶段，可先看 [MLIR 官方教程](https://mlir.llvm.org/docs/Tutorials/) 预热。
+
+### 4️⃣ 阶段四：Ascend NPU 编译器后端（⏳ 计划中）
+
+> 🚧 **内容正在开发中**
+>
+> 预计涵盖：
+> - Ascend NPU 硬件架构概述
+> - CANN 软件栈和 TBE 算子开发
+> - 从 MLIR 到 Ascend 的 Lowering 全流程
+> - 性能调优和 Profiling
+>
+> 如果你已学完前三个阶段，可先看 [华为 Ascend 社区](https://www.hiascend.com/) 了解生态。
+
+---
+
+## 🚀 快速开始
 
 ```bash
-# 查看 IR 的某个 stage
-mlir-opt --print-ir-after=<pass-name> input.mlir
+# 1. 检查环境
+./setup.sh
 
-# 只跑某个 pass
-mlir-opt --pass-pipeline="builtin.module(func.func(count-ops))" input.mlir
+# 2. 开始学习
+# 从 docs/primer/ 开始，或直接进 projects/hello-pass/
 ```
 
----
+详见 [快速入门指南](./docs/quickstart.md)
 
-## 六、三项目技术对照
+> 🤔 还不确定值不值得学？→ [为什么学 Ascend NPU 编译器？](./docs/why-ascend.md)
 
-| 维度 | LLVM IR | MLIR | AscendNPU-IR |
-|------|---------|------|-----------|
-| **设计哲学** | 单一 IR | 多层 IR (dialect) | 专用 dialect 链 |
-| **类型系统** | `iN`, `ptr`, `struct` | `tensor<T>`, `memref<T>` | `hfusion.tensor<T>` |
-| **操作** | 指令 (add/load/store) | Operation (可嵌套) | hivm.vadd/madd |
-| **优化** | Pass (FunctionPass) | Pass + Pattern Rewriting | ConversionTarget |
-| **降级** | 前端 → IR → 后端 | dialect → dialect → ... | Linalg → HFusion → HIVM |
-| **元编程** | TableGen (指令描述) | TableGen (dialect 定义) | TableGen |
-
-### 对应关系
-
-```
-Triton Python kernel
-  ↓ Frontend
-Triton IR (tt.load/tt.dot/tt.store)
-  ↓ [本项目的分析对象]
-AscendNPU-IR (华为官方开源)
-  ├── ascendnpu-ir (Nous Research fork)
-  ├── LinalgToHFusion   →  Linalg ops  →  HFusion ops
-  ├── ArithToHFusion    →  Arith ops    →  HFusion ops
-  └── HFusionToHIVM     →  HFusion ops  →  HIVM ops (NPU)
-      ↓
-CANN Runtime (华为 SDK, 硬件执行)
-```
-
-**相关文档**: https://ascendnpu-ir.gitcode.com/zh_cn/index.html
-**项目地址**: https://github.com/Ascend/AscendNPU-IR
-
----
-
-## 七、依赖与环境
-
-| 工具 | 版本 | 安装方式 | 用途 |
-|------|------|---------|------|
-| LLVM/MLIR | 22.1.6 | `brew install llvm` | mlir-opt, mlir-tblgen |
-| cmake | ≥ 3.20 | `brew install cmake` | standalone-mlir 构建 |
-| ninja | (可选) | `brew install ninja` | 加速构建 |
-| g++/clang++ | C++17 | `xcode-select --install` | Toy Mini 编译 |
-| python3 | ≥ 3.8 | 系统自带 | 用例生成器 |
-
-**环境变量**:
-
-```bash
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-export MLIR_DIR="/opt/homebrew/opt/llvm/lib/cmake/mlir"
-```
-
----
-
-## 八、笔记与项目对照表
-
-| 笔记 | 对应项目 | 核心知识点 |
-|------|---------|-----------|
-| `primer/00` | — | 编译器三步工作法 |
-| `primer/01` | toy-mini, standalone-mlir | AST、SSA |
-| `primer/02` | ascendnpu-ir-demo, ascendnpu-ir-op-counter | Pass、Lowering、dialect |
-| `primer/03` | 全部 | 全路径串联 |
-| `MLIR-L00` | ascendnpu-ir-demo | AscendNPU-IR 三段降级全景 |
-| `MLIR-L01` | toy-mini | TableGen dialect 定义 |
-| `MLIR-L02` | ascendnpu-ir-op-counter | Pattern Rewriting 模式 |
-| `MLIR-L03` | ascendnpu-ir-op-counter | Pass 架构：分析 vs 转换 |
-| `MLIR-L04` | standalone-mlir | CMake + Makefile + LLVM22 适配 |
-| `MLIR-L05` | toy-mini | 解析器四组件架构 |
-| `MLIR-L06` | — | Triton TT/TritonGPU 双 Dialect |
-| `MLIR-L07` | — | triton-ascend 后端对接 |
-| `MLIR-L08` | ascendnpu-ir-demo | 3 用例 mlir-opt 验证 |
-
----
-
-## 九、License
-
-MIT License. 详见 [LICENSE](LICENSE)。
-
----
-
-## 十、相关资源
-
-### AscendNPU-IR 官方
-
-| 资源 | 链接 | 说明 |
-|------|------|------|
-| **代码仓** | https://github.com/Ascend/AscendNPU-IR | 华为官方 Ascend NPU MLIR 编译器 |
-| **中文文档** | https://ascendnpu-ir.gitcode.com/zh_cn/index.html | GitCode 镜像，含完整 API 参考 |
-| **本文分析的 fork** | [ascendnpu-ir](https://github.com/nousresearch/ascendnpu-ir) | Nous Research 维护的活跃 fork（即 BishengIR）|
-
-### 学习资源
-
-| 资源 | 链接 | 在本项目中的对应 |
-|------|------|----------------|
-| LLVM 官方文档 | https://llvm.org/docs/ | `docs/llvm/` |
-| MLIR Toy Tutorial | https://mlir.llvm.org/docs/Tutorials/Toy/ | `docs/mlir/L01-L02` |
-| Triton 官网 | https://triton-lang.org/ | `docs/mlir/L06-L07` |
-
-### 参考源码
-
-| 项目 | 位置 | 在本项目中的对应 |
-|------|------|----------------|
-| AscendNPU-IR 源码 | `~/hermes-workspace/ascendnpu-ir/` | `projects/ascendnpu-ir-demo/` |
-| triton-ascend 源码 | `~/Documents/GitHub-Projects/triton-ascend/` | `docs/mlir/L06-L07` |
-| LLVM Toy Tutorial 源码 | `~/hermes-workspace/toy-tutorial/src/` | `projects/toy-mini/` |

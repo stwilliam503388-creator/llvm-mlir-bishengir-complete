@@ -1,41 +1,46 @@
-# projects/ — 工程实践项目
+# 动手项目
 
-> **声明**：本目录下所有工程均为**独立的学习/教学项目**，非 [AscendNPU-IR](https://github.com/Ascend/AscendNPU-IR) 官方出品，不包含其源码。
+本目录包含与学习路线各阶段配套的动手实践项目。每个项目力求最小化——不需要复杂的项目结构，也不需要理解额外的上下文，只需聚焦对应学习阶段的核心概念。
 
----
+## 已完成项目
 
-## 与 AscendNPU-IR 的关系
+| 项目 | 难度 | 对应阶段 | 说明 |
+|------|------|---------|------|
+| [hello-pass](./hello-pass/) | ⭐ | Phase 2 LLVM | 第一个 LLVM Pass：打印函数信息 |
 
-本项目中的各个子工程，均围绕华为昇腾 NPU 编译器 AscendNPU-IR 进行学习与实践。它们通过**模拟、对照、参考**等方式帮助开发者理解 AscendNPU-IR 的设计思想，但**不直接包含** AscendNPU-IR 的任何源码。
+## 计划中项目
 
-| 工程 | 中文说明 | 与 AscendNPU-IR 的关系 | 性质 |
-|------|---------|----------------------|------|
-| `ascendnpu-ir-demo` | 可运行降级流水线 | 用 `mlir-opt` **模拟** AscendNPU-IR 三阶段降级 | 教学模拟 |
-| `ascendnpu-ir-op-counter` | 自定义 Pass | **参考** AscendNPU-IR 的 Pass 注册方式编写 | 独立代码 |
-| `toy-mini` | Toy 解析器 | 从零实现，与 AscendNPU-IR 无关 | 纯学习 |
-| `standalone-mlir` | 自建 Dialect | 独立 CMake 项目，学习 MLIR 基础设施 | 纯学习 |
-
----
-
-## 命名说明
-
-```
-目录名:   ascendnpu-ir-*     ← 对齐官方品牌
-源码文件: Bishengir*.cpp     ← 对齐 AscendNPU-IR 源码中的实际命名空间
-Pass名:   --bishengir-*      ← AscendNPU-IR bishengir-opt 的命令行参数，不改
-```
-
----
+| 项目 | 难度 | 对应阶段 | 说明 | 状态 |
+|------|------|---------|------|------|
+| mini-pass | ⭐⭐ | Phase 3 MLIR | 编写简单 MLIR Pass | 待开发 |
+| mini-demo | ⭐⭐⭐ | Phase 4 Ascend | 综合性 Demo：端到端编译流程 | 待开发 |
 
 ## 快速开始
 
 ```bash
-# 1. ascendnpu-ir-demo: 运行降级流水线
-cd ascendnpu-ir-demo && bash run-demo.sh
-
-# 2. toy-mini: 编译 Toy 解析器
-cd toy-mini && g++ -std=c++17 -o toymini toymini.cpp && ./toymini
-
-# 3. standalone-mlir: 查看 TableGen 定义
-cd standalone-mlir && cat include/standalone/StandaloneOps.td
+# 以 hello-pass 为例
+cd hello-pass
+chmod +x run.sh
+./run.sh
 ```
+
+## 编写指南
+
+为达到上述目标，每个项目应遵守：
+
+- 提供最小、最直接的功能复现（项目的核心概念）
+- 清晰直白的注释
+- 通过文件树展示清晰的项目结构
+- 必要的测试用例和预期输出
+- 提供一键运行的 `run.sh` 脚本
+
+## 相关问题
+
+### 与编译原理实践的区别
+
+编译原理实践偏向传统的"实现一个简单编译器"。
+在这里，我们更专注于在现有工业编译器基础设施（如 LLVM 和 MLIR）上构建自定义的编译流程和专用 Pass。
+
+### 与 LLVM 官方示例的区别
+
+本项目将 LLVM 和 MLIR 的官方示例重新组织和改编为更易于初学者理解的版本，并根据需要补充背景知识。

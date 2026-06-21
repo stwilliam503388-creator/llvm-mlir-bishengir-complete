@@ -149,76 +149,32 @@ def name(params) { var x = [[1,2],[3,4]]; print(x + y); return z; }
 ---
 
 ## 四、关键技术对照
-
-### AscendNPU-IR 三阶段 vs 本 Demo
-
-| 阶段 | AscendNPU-IR | 本 Demo (标准 MLIR) | 共同概念 |
-|------|-----------|--------------------|---------|
-| 1 | `-convert-linalg-to-hfusion` | `--convert-linalg-to-affine-loops` | `linalg.generic` → 更低级 IR |
-| 2 | `-convert-arith-to-hfusion` | `--lower-affine` | 处理算术操作 |
-| 3 | `-convert-hfusion-to-hivm` | `--convert-scf-to-cf --convert-func-to-llvm` | 最终降级到目标 IR |
-
-### 三项目对照
-
-| 维度 | Toy Tutorial | AscendNPU-IR (ascendnpu-ir) | Triton (triton-ascend) |
-|------|-------------|------------------------|----------------------|
-| **编程模型** | Toy 语言 | MLIR (Linalg dialect) | **Triton Python kernel** |
-| **高级 IR** | `toy.constant/add/mul` | `linalg.generic` | `tt.load/dot/store` |
-| **中间 IR** | `affine.for + arith` | `hfusion.elemwise_binary` | `TritonGPU (layout)` |
-| **低级 IR** | `scf + memref` | `hivm.vadd/load/store` | LLVM IR / AIR |
-| **最终目标** | CPU (LLVM JIT) | **Ascend NPU** | CPU / GPU / **Ascend** |
-| **Dialect 数** | 1 (toy) | 8 (hfusion, hivm 等) | 2 (TT + TritonGPU) |
-
----
-
-## 五、运行环境
-
-### 依赖
-
-| 工具 | 版本 | 安装方式 |
-|------|------|---------|
-| LLVM/MLIR | 22.1.6 | `brew install llvm` |
-| cmake | 4.3.2 | `brew install cmake` |
-| ninja | 1.13.2 | `brew install ninja` |
-| g++ / clang++ | (Xcode CLT) | `xcode-select --install` |
-
-### 环境变量
-
-```bash
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-# 或
-export LLVM_DIR="/opt/homebrew/opt/llvm"
-export PATH="$LLVM_DIR/bin:$PATH"
-```
-
----
-
-## 六、附录：文件清单
-
-### 文档 (15 篇)
+### 阶段二学习目录
 
 ```
-docs/llvm/ (7 篇, ~45KB)
-  LLVM-L00.md .. LLVM-L06.md
-
-docs/mlir/ (8 篇, ~76KB)
-  MLIR-L00.md .. MLIR-L08.md
+docs/llvm/
+├── README.md                    ← 阶段入口与学习路线
+├── 00-环境搭建.md               ← LLVM 安装与配置（macOS/Linux）
+├── 01-LLVM-IR快速入门.md        ← SSA、基本块、phi 节点
+├── 02-第一个LLVM-Pass.md        ← 逐行解读 HelloPass + 动手挑战
+├── 03-LLVM工具箱速览.md         ← 5 个核心工具速查
+│
+projects/hello-pass/             ← 动手项目：第一个 LLVM Pass
 ```
 
-### 代码 (13 个文件)
+（后续更多 LLVM 进阶文档持续更新中）
 
-```
-projects/
-├── ascendnpu-ir-demo/       (6 files)
-├── toy-mini/             (1 file)
-├── standalone-mlir/      (7 files)
-└── ascendnpu-ir-op-counter/ (2 files)
-```
+### 阶段三学习目录
 
-### 配置 (3 个)
+> 🚧 **计划中** — MLIR 学习内容正在开发
+> 
+> 预计包含：MLIR 基础概念、Dialect 定义、Pattern 改写、
+> 从 LLVM IR 到 MLIR 的转换
 
-```
-projects/standalone-mlir/CMakeLists.txt
-projects/standalone-mlir/Makefile
-projects/ascendnpu-ir-demo/run-demo.sh
-```
+## 🌳 阶段四: Ascend NPU 编译器后端开发
+
+> 🚧 **计划中** — Ascend NPU 编译器后端学习内容正在开发
+> 
+> 预计包含：Ascend NPU 硬件架构、CANN 软件栈、
+> TBE 算子开发、从 MLIR 到 Ascend 的 Lowering
+

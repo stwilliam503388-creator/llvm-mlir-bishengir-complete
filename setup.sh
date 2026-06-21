@@ -3,7 +3,7 @@
 set -e
 
 echo "╔════════════════════════════════════════════╗"
-echo "║  llvm-mlir-bishengir: 环境检查             ║"
+echo "║  ascend-npu-compiler-learning: 环境检查    ║"
 echo "╚════════════════════════════════════════════╝"
 
 check() {
@@ -18,10 +18,9 @@ check() {
 
 MISSING=0
 
-check mlir-opt
-check mlir-tblgen
+check llvm-config --version
+check clang++ --version
 check cmake --version
-check g++ --version
 check python3 --version
 check git --version
 
@@ -34,7 +33,13 @@ fi
 echo ""
 if [ $MISSING -eq 1 ]; then
     echo "❌ 部分依赖缺失，请安装:"
-    echo "   brew install llvm cmake   # LLVM/MLIR + CMake"
+    echo "   macOS: brew install llvm cmake"
+    echo "   Linux: sudo apt install llvm-18-dev clang-18 cmake"
+    echo ""
+    echo "   详见: docs/llvm/00-环境搭建.md"
 else
     echo "✅ 所有核心依赖就绪"
+    echo ""
+    echo "下一步: 从 docs/primer/ 开始学习，或直接进入"
+    echo "        projects/hello-pass/ 跑你的第一个 Pass"
 fi

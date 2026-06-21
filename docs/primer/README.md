@@ -1,54 +1,64 @@
-# 编译器零基础入门（Primer）
+# Primer：编译器入门基础
 
-> 写给 AI 工程师的编译器概念速成。
-> 不需要任何编译器经验。会用 Python 就能读。
+> 还不知道为什么学编译器？先看 [为什么学 Ascend NPU 编译器？](../why-ascend.md)（5 分钟）
 
-> 💡 **遇到不认识的术语？** 查 `docs/reference/技术术语速查手册.md`，每条术语含"一句话"+"类比"+"为什么重要"。
+本阶段面向零基础读者，用最少的预设知识、最多的生活化比喻，帮助你理解编译器的基本概念和工作原理。学完本阶段，你将能够：
 
-## 阅读顺序
+- 理解编译器、解释器、IR 和 Pass 的核心概念
+- 用"厨房做菜""蓝图纸"等比喻向外行讲清楚编译器
+- 知道 AI 编译器（Triton）是真实世界怎么用的
+- **为进入 LLVM/MLIR 动手阶段做好准备**
+
+## 目录结构
 
 ```
-00 ← 从这里开始 (8min) — 编译器为什么存在？三步工作法？
-  └─→ 01 (8min) — AST 和 IR 是什么？长得什么样？
-       └─→ 02 (8min) — Pass 和 Lowering 怎么把代码变成机器码？
-            └─→ 03 (5min) — 串联到本项目：从 Triton 到 Ascend NPU
+primer/
+├── README.md                      ← 你在这里
+├── 00-编译器是什么.md             ← 编译器 vs 解释器
+├── 01-AST与IR.md                 ← 抽象语法树 + 中间表示
+├── 02-Pass与Lowering.md          ← Pass 机制 + Lowering 过程
+└── 03-从Triton到Ascend.md        ← 实际 AI 编译流程案例
 ```
 
-**总共约 30 分钟。**
+## 学习路线
 
-读完这 4 篇后，你就能：
-- 知道编译器是干什么的
-- 区分 AST 和 IR
-- 理解 SSA 的"每个变量只赋值一次"
-- 知道 Pass 分为"分析"和"转换"两种
-- 理解 Lowering 为什么要把 1 行变成 74 行
-- 看懂本项目的学习路径图
+按顺序阅读，每篇 10-15 分钟：
 
-## 每个概念对应的项目位置
+| # | 文档 | 核心概念 | 时间 |
+|---|------|---------|------|
+| 00 | [编译器是什么](./00-编译器是什么.md) | 编译器 vs 解释器、前后端分工 | 10 min |
+| 01 | [AST 与 IR](./01-AST与IR.md) | 抽象语法树、中间表示 | 10 min |
+| 02 | [Pass 与 Lowering](./02-Pass与Lowering.md) | 编译器如何优化 IR | 15 min |
+| 03 | [从 Triton 到 Ascend](./03-从Triton到Ascend.md) | AI 编译器实战案例 | 10 min |
 
-| 概念 | 对应文件 |
-|------|---------|
-| AST | `projects/toy-mini/toymini.cpp` → `struct NumberExpr` |
-| IR | `projects/standalone-mlir/test/example.mlir` |
-| SSA | `projects/standalone-mlir/test/example.mlir` → `%0, %1, %2` |
-| 分析 Pass | `projects/ascendnpu-ir-op-counter/BishengirOpCounter.cpp` |
-| 转换 Pass | `projects/ascendnpu-ir-op-counter/BishengirPeelTranspose.cpp` |
-| Lowering | `projects/ascendnpu-ir-demo/variants/compare.sh` |
-| Dialect | `projects/standalone-mlir/include/standalone/StandaloneOps.td` |
+## 阅读建议
 
-## 读完 Primer 之后
+- **不要求一次全部理解** — 第一遍快速浏览，第二遍再深入
+- **先看比喻，再看技术细节** — 每篇都有"厨房做菜""蓝图纸"类的生活化类比
+- **遇到术语回来查** — 这里 → [术语表](../glossary.md)
 
-进入 `docs/` 目录，从 LLVM 笔记（L01）开始。遇到不理解的概念：
-1. 先查 `docs/reference/技术术语速查手册.md`
-2. 找不到再回 Primer 搜索
+---
 
-## 术语对照
+## 学完自检
 
-| 英文 | 中文 | 一句话 | 详见 |
-|------|------|--------|------|
-| AST | 抽象语法树 | 代码的"语法树"，告诉你代码结构 | Primer 01 |
-| IR | 中间表示 | 编译器的"通用语言" | Primer 01 |
-| SSA | 静态单赋值 | 每个变量只赋值一次 | Primer 01 |
-| Pass | 遍/趟 | 遍历 IR 做一次修改 | Primer 02 |
-| Lowering | 降级 | 从高级 IR 到低级 IR | Primer 02 |
-| Dialect | 方言 | MLIR 的"主题词汇表" | Primer 02 |
+回答以下 5 个问题，确认你真的理解了：
+
+- [ ] 编译器和解释器的核心区别是什么？（一句话）
+- [ ] IR 在编译流水线中的位置？前端和后端各做什么？
+- [ ] Pass 是什么？为什么编译器需要很多个 Pass？
+- [ ] SSA 是什么意思？为什么编译器喜欢它？
+- [ ] 不看文档，能说出 Triton → MLIR → LLVM IR → Ascend 的大致过程吗？
+
+> 至少答出 3 个才算过关。卡住了回对应章节重看。
+
+---
+
+## 学完 Primer 后
+
+你已经理解了编译器的基本概念和 Pass 机制。下一步：
+
+→ **[Phase 2: LLVM 学习](../llvm/README.md)** — 配环境、学 IR、写你的第一个 Pass
+
+或者直接动手：
+
+→ **[HelloPass — 第一个 LLVM Pass](../../projects/hello-pass/)** — 30 行代码，一键运行
