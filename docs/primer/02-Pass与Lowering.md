@@ -92,7 +92,7 @@ LogicalResult matchAndRewrite(TransposeOp op, ...) {
 输出 优化后的 IR
 ```
 
-这就是编译器的"优化管线"。bishengir 的管线就是：
+这就是编译器的"优化管线"。AscendNPU-IR 的管线就是：
 
 ```
 Linalg IR → HFusion → HIVM → NPU
@@ -231,4 +231,4 @@ def TransposeOp : Standalone_Op<"transpose"> { ... }
    - 答：每层只做自己擅长的事——Linalg 层做矩阵优化，Affine 层做循环优化，互不干扰
 
 4. **bishengir-demo 中 matmul 从 1 行变成 74 行，这是个问题吗？**
-   - 答：不是问题，是 Lowering 的正常过程。bishengir 之所以能保持 1 行（hivm.mmul），是因为它有硬件支持——不需要展开到标量
+   - 答：不是问题，是 Lowering 的正常过程。AscendNPU-IR 之所以能保持 1 行（hivm.mmul），是因为它有硬件支持——不需要展开到标量

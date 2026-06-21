@@ -12,7 +12,7 @@
 
 ## 1. 三阶段降级源码追踪
 
-bishengir 的核心是三阶段降级：Linalg → HFusion → HIVM。
+AscendNPU-IR 的核心是三阶段降级：Linalg → HFusion → HIVM。
 每个阶段在 ascendnpu-ir 源码中对应一个 Conversion Pass 目录。
 
 ### 1.1 Pass1: Linalg → HFusion

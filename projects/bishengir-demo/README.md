@@ -1,12 +1,12 @@
 # bishengir-demo — 可运行 MLIR 降级流水线
 
-用标准 `mlir-opt` 模拟 bishengir 三阶段降级（Linalg → HFusion → HIVM）。
+用标准 `mlir-opt` 模拟 AscendNPU-IR 三阶段降级（Linalg → HFusion → HIVM）。
 
 ---
 
 ## 测试用例
 
-| 文件 | 操作 | 对应 bishengir | 行数变化 |
+| 文件 | 操作 | 对应 AscendNPU-IR | 行数变化 |
 |------|------|---------------|---------|
 | `test-cases/vecadd_128.mlir` | 向量加法 | `LinalgToHFusion` → `HFusionToHIVM` | 3 → 18 → 38 行 |
 | `test-cases/matmul_4x4x4.mlir` | 矩阵乘法 | `linalg.matmul` → Cube 指令 | 1 → 18 → **74 行** |
@@ -48,13 +48,13 @@ matmul 的 74× 膨胀源于三重循环完全展开为标量。
 | **V2** | 向量化 (tile+vectorize) | 77 行 | +3 行 | SIMD 指令，减少指令数 |
 | **V3** | **硬件映射 (模拟 mmul)** | **5 行** | **-69 行 (-93%)** | func.call 保留语义，不展开 |
 
-### V3 的核心思路 — bishengir 实际采用的方案
+### V3 的核心思路 — AscendNPU-IR 实际采用的方案
 
 ```text
 标准 MLIR 路径 (V0):
   linalg.matmul → affine.for×3 → scf.for+arith → llvm.load/add/mul/store  (74行)
 
-bishengir 路径 (≈V3):
+AscendNPU-IR 路径 (≈V3):
   linalg.matmul → hfusion.cube_matmul (1行) → hivm.mmul (1行)
                                                  ↑
                                            Ascend NPU Cube 单元
@@ -71,10 +71,10 @@ bash variants/compare.sh
 
 ---
 
-## bishengir ↔ 标准 MLIR 对照
+## AscendNPU-IR ↔ 标准 MLIR 对照
 
 ```text
-bishengir:                      标准 MLIR (本 demo):
+AscendNPU-IR:                      标准 MLIR (本 demo):
 ────────────────────             ────────────────────
 linalg.generic                  linalg.generic
     ↓ -convert-linalg-to-hfusion    ↓ --convert-linalg-to-affine-loops

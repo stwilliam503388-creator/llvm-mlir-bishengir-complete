@@ -61,7 +61,7 @@ make -C build
 
 ## 对照
 
-| 组件 | 本项目 | bishengir (ascendnpu-ir) |
+| 组件 | 本项目 | AscendNPU-IR (ascendnpu-ir) |
 |------|--------|-------------------------|
 | Dialect 定义 | TableGen | TableGen |
 | Pass 注册 | `registerPasses()` | `InitAllPasses.h` |

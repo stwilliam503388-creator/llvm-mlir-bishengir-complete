@@ -1,12 +1,12 @@
 ---
 created: 2026-06-21
-tags: [mlir, pass, bishengir, pattern-rewriting]
-aliases: [自定义 MLIR Pass, bishengir Pass 实战]
+tags: [mlir, pass, AscendNPU-IR, pattern-rewriting]
+aliases: [自定义 MLIR Pass, AscendNPU-IR Pass 实战]
 ---
 
-# 自定义 bishengir MLIR Pass 实战
+# 自定义 AscendNPU-IR MLIR Pass 实战
 
-> 基于 Toy Tutorial 学到的知识，写两个针对 bishengir 的自定义 Pass。
+> 基于 Toy Tutorial 学到的知识，写两个针对 AscendNPU-IR 的自定义 Pass。
 > 源码位置：`~/hermes-workspace/toy-tutorial/bishengir-op-counter/`
 
 ---
@@ -60,7 +60,7 @@ MLIR 的遍历机制有多种层级，用于不同场景：
 | **OpIterator** | `func->getRegions()` → block → ops | 手动控制 | 复杂遍历 |
 | **Pattern** | `matchAndRewrite()` | 匹配+重写自动 | 转换 Pass |
 
-### walk() 源码追踪（bishengir 实际用例）
+### walk() 源码追踪（AscendNPU-IR 实际用例）
 
 ```
 LinalgToHFusion.cpp 中的匿名 walk：
@@ -122,7 +122,7 @@ struct RedundantAddToMul : public OpRewritePattern<hfusion::ElemwiseBinaryOp> {
 ### 注册 Pass
 
 ```cpp
-// 与 bishengir 现有 Pass 完全相同的注册方式
+// 与 AscendNPU-IR 现有 Pass 完全相同的注册方式
 void registerPeelTransposePass() {
   PassRegistration<PeleTransposePass> reg;
 }
@@ -164,7 +164,7 @@ class TransformPass : public PassWrapper<TP, OperationPass<func::FuncOp>> {
 ### 4.3 转换 Pass（Dialect Conversion 模式）
 
 ```cpp
-// 这是 bishengir 现有 Pass 用的模式
+// 这是 AscendNPU-IR 现有 Pass 用的模式
 class ConversionPass : public PassWrapper<CP, OperationPass<func::FuncOp>> {
   void runOnOperation() override {
     ConversionTarget target(getContext());
@@ -180,11 +180,11 @@ class ConversionPass : public PassWrapper<CP, OperationPass<func::FuncOp>> {
 
 ---
 
-## 五、三种 Pass 模式在 bishengir 中的实际分布
+## 五、三种 Pass 模式在 AscendNPU-IR 中的实际分布
 
-| 模式 | bishengir 实际 Pass | Toy Tutorial 对照 |
+| 模式 | AscendNPU-IR 实际 Pass | Toy Tutorial 对照 |
 |------|-------------------|------------------|
-| **Analysis（walk）** | 无（bishengir 目前无分析 Pass） | ShapeInferencePass |
+| **Analysis（walk）** | 无（AscendNPU-IR 目前无分析 Pass） | ShapeInferencePass |
 | **Pattern（greedy）** | （可添加） | ToyCombine |
 | **Conversion** | **ConvertLinalgToHFusion** | LowerToAffineLoops |
 | **Conversion** | **ConvertHFusionToHIVM** | LowerToAffineLoops |
@@ -205,7 +205,7 @@ bishengir-opt \
 
 ## 六、与 Toy Tutorial 的关键技术对照
 
-| 技术点 | Toy Tutorial | bishengir | 自定义 Pass |
+| 技术点 | Toy Tutorial | AscendNPU-IR | 自定义 Pass |
 |--------|-------------|-----------|------------|
 | **Op 类型匹配** | `toy::AddOp` | `hfusion::ElemwiseBinaryOp` | `OpRewritePattern<T>` |
 | **分析遍历** | `func->walk([](Op*){})` | 同上 | 同上 |

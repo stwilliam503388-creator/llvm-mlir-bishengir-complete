@@ -1,6 +1,6 @@
 # bishengir-op-counter — 自定义 MLIR Pass 参考代码
 
-针对 bishengir (ascendnpu-ir) dialect 编写的两个自定义 Pass，演示 MLIR 的两种核心模式。
+针对 AscendNPU-IR (ascendnpu-ir) dialect 编写的两个自定义 Pass，演示 MLIR 的两种核心模式。
 
 ## 结构
 
@@ -36,7 +36,7 @@ Statistics:
 
 ## 编译
 
-需要 bishengir 的构建系统。在 bishengir 源码树中:
+需要 AscendNPU-IR 的构建系统。在 AscendNPU-IR 源码树中:
 
 ```cmake
 # 添加到 bishengir/lib/Conversion/CMakeLists.txt

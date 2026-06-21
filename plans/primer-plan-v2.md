@@ -42,13 +42,13 @@ created: 2026-06-21
 ├── 3. 你在本项目中会看到什么
 │   ├── LLVM IR 基础   = 中端 IR 的一种通用形式
 │   ├── MLIR dialect   = 多阶段 IR，每层解决不同问题
-│   ├── bishengir      = 从通用 IR 到 Ascend NPU 专用 IR
+│   ├── AscendNPU-IR      = 从通用 IR 到 Ascend NPU 专用 IR
 │   └── 贯穿全项目: AST → IR1 → IR2 → IR3 → 机器码
 │
 └── 4. 读完本节后你能回答
     ├── 编译器和解释器有什么区别？
     ├── 为什么 Triton 需要 "编译" 而 Python 不用？
-    └── LLVM、MLIR、bishengir 都是 IR，为什么要有好几个？
+    └── LLVM、MLIR、AscendNPU-IR 都是 IR，为什么要有好几个？
 ```
 
 ### 文档 01: `AST 与 IR —— 代码的两种中间形态`
@@ -133,7 +133,7 @@ created: 2026-06-21
 │   ├── 在项目中的样子:
 │   │   └── bishengir-demo: 三阶段降级
 │   │       Linalg → affine → scf → LLVM (74× 膨胀)
-│   │   └── bishengir 实际: 
+│   │   └── AscendNPU-IR 实际: 
 │   │       Linalg → HFusion → HIVM → NPU (保持 1 行，硬件指令)
 │   └── 关键认识: 膨胀不是 bug——展开得越细，优化空间越大
 │
@@ -197,7 +197,7 @@ created: 2026-06-21
 │   ├── bishengir-demo:     模拟降级过程
 │   ├── bishengir-op-counter:写自定义 Pass
 │   ├── toy-mini:           自己写一个 AST 解析器
-│   └── docs/mlir/L06-L07:  Triton 怎么接 bishengir
+│   └── docs/mlir/L06-L07:  Triton 怎么接 AscendNPU-IR
 │
 └── 4. 读完本节后你能回答
     ├── 整个项目学完后我能做什么？

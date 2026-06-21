@@ -51,7 +51,7 @@ def vecadd_kernel(A, B, C, N):
                │  概念: Dialect (Primer 02)
                ▼                     ▼
     ┌────────────────────┐  ┌────────────────────┐
-    │    bishengir 路径   │  │   标准 LLVM 路径    │
+    │    AscendNPU-IR 路径   │  │   标准 LLVM 路径    │
     │  (本项目重点)       │  │  (CPU/GPU)         │
     │                    │  │                    │
     │  TT IR → AIR       │  │  TT IR → LLVM IR   │
@@ -71,7 +71,7 @@ def vecadd_kernel(A, B, C, N):
 ```
 本项目覆盖的范围（用 ████ 标记）：
 
-  Triton Python ──→ AST ──→ Triton IR ──→ bishengir ──→ Ascend NPU
+  Triton Python ──→ AST ──→ Triton IR ──→ AscendNPU-IR ──→ Ascend NPU
                               ██████████████████████████████████
                               ↑                              ↑
                           docs/llvm/                     bishengir-demo
@@ -134,5 +134,5 @@ Step 4: 动手实践
 3. **学完本项目后，你能做什么？**
    - 读懂 `bishengir-opt` 的 Pass 管线输出
    - 理解 Triton 报错中的 MLIR IR 信息
-   - 为 bishengir 编写自定义转换 Pass
+   - 为 AscendNPU-IR 编写自定义转换 Pass
    - 理解 ascendnpu-ir 源码中每个 Conversion Pass 的作用

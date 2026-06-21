@@ -7,7 +7,7 @@ aliases: [triton-ascend 后端, Ascend 编译管线]
 # triton-ascend 后端深度分析：Triton → Ascend 全链路
 
 > 基于源码分析 triton-ascend 如何把 Triton Python 代码编译到 Ascend NPU。
-> 对接之前学习的 MLIR + bishengir 知识，完成全链路理解。
+> 对接之前学习的 MLIR + AscendNPU-IR 知识，完成全链路理解。
 
 ---
 
@@ -34,12 +34,12 @@ Triton @jit kernel (Python)
 │  ascend_interpreter.py       │  ← 运行时解释层
 │  ● 接收 LLVM IR / TIR        │
 │  ● 映射到 ascendnpu-ir API  │
-│  ● 调用 bishengir 转换       │
+│  ● 调用 AscendNPU-IR 转换       │
 └──────────┬───────────────────┘
            │
            ▼
 ┌──────────────────────────────┐
-│  ascendnpu-ir (bishengir)    │  ← ASCEND 专用层
+│  ascendnpu-ir (AscendNPU-IR)    │  ← ASCEND 专用层
 │  ● Linalg → HFusion → HIVM  │
 │  ● CANN 运行时               │
 └──────────┬───────────────────┘
@@ -101,7 +101,7 @@ class AscendInterpreter:
             if isinstance(arg, torch.Tensor):
                 self.npu_device.copy_to_npu(arg)
 
-        # 2. 调用 bishengir / CANN 执行 kernel
+        # 2. 调用 AscendNPU-IR / CANN 执行 kernel
         #    这里对接 ascendnpu-ir 的运行时
         self.cann_api.launch_kernel(
             kernel_name=kernel.name,
@@ -126,11 +126,11 @@ Triton C++ MLIR 管线（编译到 LLVM 时）：
   3. tt.store  → llvm.store                 (内存存储)
   4. tt.dot    → llvm.matrix_intrinisc      (矩阵乘)
 
-Triton → Ascend 管线（通过 bishengir 时）：
+Triton → Ascend 管线（通过 AscendNPU-IR 时）：
 
   1. Triton IR → TIR (Triton IR)             ← 前端
   2. TIR → AIR (Ascend NPU IR)               ← ascendnpu-ir
-  3. AIR → HIVM 指令                          ← bishengir
+  3. AIR → HIVM 指令                          ← AscendNPU-IR
   4. HIVM → CANN 可执行代码                    ← 华为 SDK
 ```
 
@@ -138,7 +138,7 @@ Triton → Ascend 管线（通过 bishengir 时）：
 
 ## 三、Ascend 专有对接层
 
-### 3.1 bishengir 的作用
+### 3.1 AscendNPU-IR 的作用
 
 ```
         Triton IR (tt dialect)
@@ -148,7 +148,7 @@ Triton → Ascend 管线（通过 bishengir 时）：
     │    triton-ascend     │  ← Python 端
     │  ascend_interpreter  │     运行时 + 参数管理
     └──────────┬───────────┘
-               │ 调用 bishengir API
+               │ 调用 AscendNPU-IR API
                ▼
     ┌──────────────────────┐
     │    ascendnpu-ir      │  ← C++ MLIR 层
@@ -235,7 +235,7 @@ module {
 
 ## 五、完整技术对照
 
-| 层面 | Triton | bishengir (ascendnpu-ir) | 共同基础 |
+| 层面 | Triton | AscendNPU-IR (ascendnpu-ir) | 共同基础 |
 |------|--------|------------------------|---------|
 | **Dialect 定义** | `TritonOps.td` (1416行) | `HFusionStructuredOps.td` | **TableGen** |
 | **类型系统** | `!tt.ptr`, `!tt.tensor` | `memref`, `tensor` | MLIR 类型框架 |
@@ -266,7 +266,7 @@ triton-ascend/lib/
 ├── Conversion/TritonGPUToLLVM/       ★ LLVM 降级
 └── Target/LLVMIR/                    ★ LLVM IR 生成
 
-# bishengir 端 (ascendnpu-ir)
+# AscendNPU-IR 端 (ascendnpu-ir)
 ascendnpu-ir/bishengir/
 ├── include/bishengir/Dialect/        ★ HFusion/HIVM dialect
 ├── lib/Conversion/                   ★ 转换 Pass

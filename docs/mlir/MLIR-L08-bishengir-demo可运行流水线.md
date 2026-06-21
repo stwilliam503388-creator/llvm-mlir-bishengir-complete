@@ -1,12 +1,12 @@
 ---
 created: 2026-06-21
-tags: [bishengir, demo, mlir, ascend]
-aliases: [bishengir demo, bishengir 可运行 demo]
+tags: [AscendNPU-IR, demo, mlir, ascend]
+aliases: [AscendNPU-IR demo, AscendNPU-IR 可运行 demo]
 ---
 
 # bishengir-demo：可运行的 MLIR 降级流水线
 
-> 用标准 `mlir-opt` 模拟 bishengir 三阶段降级（Linalg → HFusion → HIVM）。
+> 用标准 `mlir-opt` 模拟 AscendNPU-IR 三阶段降级（Linalg → HFusion → HIVM）。
 > 所有用例在当前 Mac 上可直接运行。
 
 ---
@@ -41,17 +41,17 @@ matmul 膨胀 72x 的原因：三个嵌套循环被展开为 `scf.for` + `affine
 
 ---
 
-## bishengir 对应
+## AscendNPU-IR 对应
 
 ```mlir
-// bishengir 输入 (test-cases/vecadd_128.mlir):
+// AscendNPU-IR 输入 (test-cases/vecadd_128.mlir):
 module {
   func.func @vecadd(%A, %B, %C) {
-    linalg.generic { arith.addf }     ← 同 bishengir linalg-to-hfusion.mlir
+    linalg.generic { arith.addf }     ← 同 AscendNPU-IR linalg-to-hfusion.mlir
   }
 }
 
-// bishengir 输出 (模拟，实际需 bishengir-opt):
+// AscendNPU-IR 输出 (模拟，实际需 bishengir-opt):
 // Pass1:  linalg.generic → hfusion.elemwise_binary {fun = add}
 // Pass2:  hfusion.elemwise_binary → hivm.load + hivm.vadd + hivm.store
 

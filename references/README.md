@@ -16,7 +16,7 @@
 ```
 AscendNPU-IR (华为官方)
     └── fork → ascendnpu-ir (Nous Research 维护)
-                  └── bishengir (另一个名称, 同一代码库)
+                  └── AscendNPU-IR (另一个名称, 同一代码库)
 ```
 
 本项目分析的是 `ascendnpu-ir`（Nous Research fork），它基于华为官方 `AscendNPU-IR` 扩展了自定义 Pass 和 dialect 定义。
