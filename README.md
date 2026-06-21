@@ -148,7 +148,7 @@
 148|### 项目结构
 149|
 150|```
-151|llvm-mlir-bishengir-complete/
+151|ascend-npu-compiler-learning/
 152|├── README.md                         ← 本文件（项目总览）
 153|├── SUMMARY.md                        ← 完整输出总结文档
 154|├── LICENSE                           ← MIT 许可证
