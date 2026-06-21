@@ -52,6 +52,21 @@ def main() {
 | 编译 | LLVM 源码树内 | `g++ -std=c++17` |
 | 依赖 | 全 LLVM 库 | 零 |
 
+
+
+## AscendNPU-IR 关系
+
+本 Toy 解析器与 AscendNPU-IR **没有直接代码依赖**，但作为本学习项目的**前置练习**存在：
+
+| 概念 | Toy Mini | AscendNPU-IR |
+|------|----------|-------------|
+| AST 定义 | `struct BinaryExpr` (手写) | `.td` 文件 (TableGen) |
+| 解析器 | 递归下降 (手写 14 种 token) | mlir-opt 内置 |
+| IR 输出 | 自定义文本格式 | MLIR 标准格式 |
+| Pass 系统 | 无 | `OpRewritePattern` + `ConversionTarget` |
+
+**学习路径**: 先理解 Toy Mini 的 AST 和解析器，再看 AscendNPU-IR 的 dialect 定义和 Pass，会更容易理解 MLIR 的 TableGen 和 lowering 机制。
+
 ## 输出示例
 
 ```
