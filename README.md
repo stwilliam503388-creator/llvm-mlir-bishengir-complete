@@ -201,12 +201,29 @@ LLVM IR            MLIR Dialect        bishengir-demo
   ✅ 完整降级到 LLVM IR 通过
 
 矩阵乘法 (matmul_4x4x4.mlir):
-  Linalg: 1 行  →  Affine: 18 行  →  LLVM: 72 行  (72×)
-  ⚠️ 三重循环展开导致 72× 膨胀
+  Linalg: 1 行  →  Affine: 18 行  →  LLVM: 74 行  (74×)
+  ✅ 基础降级通过
+  ⚠️ 三重循环完全展开，提供 4 种优化方案对比
 
 融合操作 (fused_128.mlir):
   Linalg: 15 行  →  Affine: 20 行  →  LLVM: 59 行  (3.9×)
   ✅ add + mul 连续操作，展示融合理念
+```
+
+#### matmul 的 74× 膨胀与优化
+
+| Variant | 策略 | LLVM 行数 | vs 基准 | 对应 bishengir |
+|---------|------|-----------|---------|---------------|
+| **V0** | 无优化 (基准) | 74 行 | - | — |
+| **V1** | 循环分块 (tile=2x2x1) | 76 行 | +2 行 | — |
+| **V2** | 向量化 (tile+vectorize) | 77 行 | +3 行 | `-convert-hfusion-to-hivm` 生成向量指令 |
+| **V3** | **硬件映射 (模拟 mmul)** | **5 行** | **-69 行 (-93%)** | `hfusion.cube_matmul → hivm.mmul` |
+
+V3 的 5 行 vs 74 行的差距，正是 bishengir 实际采用的方案——**保持高级语义不展开，直接映射到硬件 Cube 单元**。
+
+```bash
+# 运行对比
+cd projects/bishengir-demo && bash variants/compare.sh
 ```
 
 ### 4.2 toy-mini — 从零写 Toy 语言解析器
