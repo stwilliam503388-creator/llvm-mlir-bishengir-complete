@@ -135,7 +135,19 @@ LLVM IR            MLIR Dialect          ascendnpu-ir-demo / AscendNPU-IR
 └── 零基础入门 (4 篇)       — 面向 AI 工程师的编译器概念速成
 
 层次 2: 可运行工程 (4 个项目)
-├── ascendnpu-ir-demo ★        — 28 个 MLIR 用例 + 4 种优化方案对比（模拟 AscendNPU-IR 降级）
+├── ascendnpu-ir-demo ★        — 28 MLIR 用例 + 28 Triton 对应代码 + 4 优化方案
+│   ├── test-cases/mlir/       31 个 MLIR 用例（三级难度）
+│   │   ├── 01_basic/          ⭐ 入门（10 个）
+│   │   ├── 02_intermediate/   ⭐⭐ 进阶（11 个）
+│   │   └── 03_advanced/       ⭐⭐⭐ 复杂（10 个）
+│   ├── test-cases/triton/     28 个 Triton 对应代码（三级难度）
+│   │   ├── 01_basic/          ⭐ 入门（8 个）
+│   │   ├── 02_intermediate/   ⭐⭐ 进阶（11 个）
+│   │   ├── 03_advanced/       ⭐⭐⭐ 复杂（9 个）
+│   │   ├── MAPPING.md         MLIR ↔ Triton 双向映射
+│   │   └── README.md
+│   ├── variants/              4 种优化方案对比脚本
+│   └── LIMITATIONS.md         Homebrew LLVM 环境限制
 ├── toy-mini                 — 纯 C++17 Toy 解析器，编译通过
 ├── standalone-mlir          — CMake + Makefile + TableGen 自建 dialect
 └── ascendnpu-ir-op-counter     — 分析 + 转换 Pass 参考代码
