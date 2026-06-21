@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![LLVM](https://img.shields.io/badge/LLVM-22.1.6-blue)](https://llvm.org)
 [![macOS](https://img.shields.io/badge/macOS-26.5.1-ff69b4)](https://www.apple.com/macos)
-[![Apple Silicon](https://img.shields.io/badge/Apple_Silicon-M5-green)]()
+[![Apple Silicon](https://img.shields.io/badge/Apple_Silicon-M5-green)()
 
 ---
 
@@ -22,6 +22,11 @@ Triton Python kernel  →  Triton IR (TT Dialect)  →  bishengir (Ascend NPU)
 编译器涉及的技术栈从 **LLVM IR 基础** 到 **MLIR dialect 定义** 再到 **Ascend 专用 IR (HFusion / HIVM)**，跨度大、难点多。现有教程要么偏学术（LLVM 源码），要么偏应用（只讲 Triton 使用），缺乏一条从零到 bishengir 的动手路径。
 
 本项目填补了这个空白。
+
+> 💡 **零基础？完全没问题。**
+> 本项目在 `docs/primer/` 提供了面向 AI 工程师的编译器入门（约 30 分钟）。
+> 用类比 + 实例 + 你熟悉的 Python/Triton 场景，帮你建立从 AST → IR → Pass → Lowering 的基本直觉。
+> **不需要任何编译器经验，从 `docs/primer/00-编译器是什么.md` 开始。**
 
 ### 覆盖范围
 
@@ -50,29 +55,32 @@ LLVM IR            MLIR Dialect        bishengir-demo
 - 需要开发 **自定义 MLIR dialect** 的编译器开发者
 - 阅读 **Triton 源码** 时遇到 MLIR 瓶颈的学习者
 - 熟悉 PyTorch/Triton 使用，但想深入底层的工作者
+- **零基础也没问题，从 `docs/primer/` 开始**
 
 ### 前置知识
 
 | 要求 | 说明 |
 |------|------|
 | ✅ C++ 基础 | 能读 C++17 代码 |
-| ✅ 编译器直觉 | 了解 AST、IR 概念 |
-| 🟡 LLVM 经验 | 没有也没关系，笔记从零开始 |
+| ✅ Python 基础 | 能读 Python 代码 |
+| 🟡 编译器经验 | **不需要。从 `docs/primer/` 开始（约 30 分钟）** |
+| 🟡 编译器直觉 | **不需要。Primer 会用类比帮你建立直觉** |
 | ❌ Ascend NPU | 不需要硬件，所有验证在 CPU 上完成 |
 
 ---
 
 ## 二、项目总览
 
-### 56 个文件，覆盖 4 个层次
+### 60+ 文件，覆盖 4 个层次
 
 ```
-层次 1: 文档 (15 篇笔记, ~76KB)
+层次 1: 文档 (19 篇笔记, ~90KB)
 ├── LLVM IR 基础 (7 篇)     — 从 SSA 到 Pass 开发
-└── MLIR 体系 (8 篇)        — 从 dialect 概念到 Triton 对接
+├── MLIR 体系 (8 篇)        — 从 dialect 概念到 Triton 对接
+└── 零基础入门 (4 篇)       — 面向 AI 工程师的编译器概念速成
 
 层次 2: 可运行工程 (4 个项目)
-├── bishengir-demo ★        — 3 个 MLIR 用例，mlir-opt 验证通过
+├── bishengir-demo ★        — 3 个 MLIR 用例 + 4 种优化方案对比
 ├── toy-mini                 — 纯 C++17 Toy 解析器，编译通过
 ├── standalone-mlir          — CMake + Makefile + TableGen 自建 dialect
 └── bishengir-op-counter     — 分析 + 转换 Pass 参考代码
@@ -88,6 +96,35 @@ LLVM IR            MLIR Dialect        bishengir-demo
 └── triton-ascend            — Triton 前端对接
 ```
 
+### 项目结构
+
+```
+llvm-mlir-bishengir-complete/
+├── README.md                         ← 本文件（项目总览）
+├── SUMMARY.md                        ← 完整输出总结文档
+├── LICENSE                           ← MIT 许可证
+├── setup.sh                          ← 依赖检查脚本
+│
+├── docs/                             ← 知识库（19 篇笔记）
+│   ├── llvm/                         ← LLVM 速通（7 篇）
+│   ├── mlir/                         ← MLIR 体系（8 篇）
+│   └── primer/                       ★ 零基础入门（4 篇，约 30 分钟）
+│       ├── README.md                 — 阅读顺序
+│       ├── 00-编译器是什么.md         — 编译器三步工作法
+│       ├── 01-AST与IR.md             — 语法树、SSA、三地址码
+│       ├── 02-Pass与Lowering.md      — 分析/转换 Pass、dialect、降级
+│       └── 03-从Triton到Ascend.md    — 全路径串联到本项目
+│
+├── projects/                         ← 工程项目（4 个）
+│   ├── bishengir-demo/               ★ 可运行降级流水线
+│   ├── toy-mini/                     ★ 从零写 Toy 解析器
+│   ├── standalone-mlir/              ★ 从零构建 MLIR dialect
+│   └── bishengir-op-counter/         ★ 自定义 Pass 参考代码
+│
+└── references/                       ← 外部源码索引
+    └── README.md                     — triton-ascend 核心文件位置
+```
+
 ### 已验证
 
 | 验证项 | 结果 | 说明 |
@@ -98,10 +135,25 @@ LLVM IR            MLIR Dialect        bishengir-demo
 | CMake + MLIR 集成 | ✅ 配置成功 | 跳过 AddMLIR 冲突 |
 | bishengir 源码分析 | ✅ 完成 | 3 个 Conversion Pass 逐行解读 |
 | Triton MLIR 体系 | ✅ 完成 | TT / TritonGPU 双 Dialect 分析 |
+| matmul 优化方案对比 | ✅ 4 种方案 | 从 74 行到 5 行 |
 
 ---
 
 ## 三、学习路径
+
+> 🆕 **没有编译器基础？先读 `docs/primer/`（约 30 分钟），再回来学下面的。**
+
+### Stage -1: 编译器零基础入门（可选，约 30 分钟）
+
+目标：建立从 AST → IR → Pass → Lowering 的基本直觉。
+路径：`docs/primer/00.md` → `01.md` → `02.md` → `03.md`
+
+| 步骤 | 文档 | 概念 | 对应工程 |
+|------|------|------|---------|
+| -1.1 | `00-编译器是什么` | 编译器三步工作法、为什么需要 IR | — |
+| -1.2 | `01-AST与IR` | 语法树、三地址码、SSA | toy-mini, standalone-mlir |
+| -1.3 | `02-Pass与Lowering` | 分析/转换 Pass、dialect、降级 | bishengir-demo, bishengir-op-counter |
+| -1.4 | `03-从Triton到Ascend` | 全路径串联 | 所有项目 |
 
 ### Stage 0: LLVM IR 基础（约 3 天）
 
@@ -150,7 +202,7 @@ LLVM IR            MLIR Dialect        bishengir-demo
 | 步骤 | 项目 | 行动 | 验证 |
 |------|------|------|------|
 | 2.1 | bishengir-demo | 运行 3 个用例，观察降级过程 | `mlir-opt` 输出 |
-| 2.2 | bishengir-demo | 修改参数重新生成，理解 IR 膨胀 | 对比 stage0→stage3 |
+| 2.2 | bishengir-demo | 运行 variants/compare.sh，对比 4 种优化方案 | 观察 74 行 → 5 行的变化 |
 | 2.3 | toy-mini | 编译运行，修改语法扩展 | `./toymini` 输出 |
 | 2.4 | standalone-mlir | 编译，跑自定义 Pass | `--count-ops` |
 | 2.5 | bishengir-op-counter | 阅读源码，理解模式 | 对照 Toy Tutorial |
@@ -223,7 +275,7 @@ V3 的 5 行 vs 74 行的差距，正是 bishengir 实际采用的方案——**
 
 ```bash
 # 运行对比
-cd projects/bishengir-demo && bash variants/compare.sh
+bash projects/bishengir-demo/variants/compare.sh
 ```
 
 ### 4.2 toy-mini — 从零写 Toy 语言解析器
@@ -237,12 +289,13 @@ cd projects/bishengir-demo && bash variants/compare.sh
 
 **支持语法示例**:
 ```toy
-def matmul(M, N, K, A, B, C) {
-  var sum = 0.0;
-  for k = 0..K {
-    sum = sum + A[M][k] * B[k][N];
-  }
-  C[M][N] = sum;
+# 函数定义 + 数组字面量 + 二元运算 + 转置 + 打印
+def main() {
+  var A = [[1, 2, 3, 4], [5, 6, 7, 8]];
+  var B = transpose(A);
+  var C = B + A;
+  var D = C * 2.0;
+  print(D);
   return;
 }
 ```
@@ -286,18 +339,11 @@ export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 mlir-opt --convert-linalg-to-affine-loops test-cases/vecadd_128.mlir
 
 # 完整降级到 LLVM IR
-mlir-opt \
-  --convert-linalg-to-affine-loops \
-  --lower-affine \
-  --convert-scf-to-cf \
-  --convert-func-to-llvm \
-  test-cases/vecadd_128.mlir
+mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm test-cases/vecadd_128.mlir
 
 # 批量运行
 bash run-demo.sh
 ```
-
-**预期输出**: 每行 `%sum = arith.addf ...` 在 affine 阶段变成 `%sum = affine.load + arith.addf + affine.store`；到 LLVM 阶段变成 `%val = llvm.load + %sum = llvm.add + llvm.store`。
 
 ### 5.3 跑 Toy Mini（3 分钟）
 
@@ -307,8 +353,6 @@ g++ -std=c++17 -o toymini toymini.cpp
 ./toymini
 ```
 
-**预期输出**: AST 树状结构和 MLIR 风格 IR 文本。
-
 ### 5.4 编译 standalone-mlir（10 分钟）
 
 ```bash
@@ -316,12 +360,7 @@ cd projects/standalone-mlir
 export MLIR_DIR="/opt/homebrew/opt/llvm/lib/cmake/mlir"
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
-
-# 查看 MLIR 输入
 ./build/standalone-opt test/example.mlir
-
-# 跑自定义 Pass
-./build/standalone-opt test/example.mlir --count-ops
 ```
 
 ### 5.5 快速调试技巧
@@ -332,9 +371,6 @@ mlir-opt --print-ir-after=<pass-name> input.mlir
 
 # 只跑某个 pass
 mlir-opt --pass-pipeline="builtin.module(func.func(count-ops))" input.mlir
-
-# 查看可用 pass
-mlir-opt --help | grep standalone
 ```
 
 ---
@@ -390,6 +426,10 @@ export MLIR_DIR="/opt/homebrew/opt/llvm/lib/cmake/mlir"
 
 | 笔记 | 对应项目 | 核心知识点 |
 |------|---------|-----------|
+| `primer/00` | — | 编译器三步工作法 |
+| `primer/01` | toy-mini, standalone-mlir | AST、SSA |
+| `primer/02` | bishengir-demo, bishengir-op-counter | Pass、Lowering、dialect |
+| `primer/03` | 全部 | 全路径串联 |
 | `MLIR-L00` | bishengir-demo | bishengir 三段降级全景 |
 | `MLIR-L01` | toy-mini | TableGen dialect 定义 |
 | `MLIR-L02` | bishengir-op-counter | Pattern Rewriting 模式 |
@@ -413,5 +453,3 @@ MIT License. 详见 [LICENSE](LICENSE)。
 - [LLVM 官方文档](https://llvm.org/docs/)
 - [MLIR Toy Tutorial](https://mlir.llvm.org/docs/Tutorials/Toy/)
 - [Triton 官网](https://triton-lang.org/)
-- [bishengir (ascendnpu-ir)](https://github.com/nousresearch/ascendnpu-ir) — 注：需内部访问
-- [Triton 源码 (triton-ascend)](https://github.com/openai/triton) — Ascend 分支
