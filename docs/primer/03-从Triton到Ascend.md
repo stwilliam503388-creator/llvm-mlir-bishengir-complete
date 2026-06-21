@@ -1,5 +1,7 @@
 # 004：从 Triton 到 Ascend（贯穿全项目的完整路径）
 
+> 预估时间：10 分钟 | 前置：[02-Pass与Lowering](./02-Pass与Lowering.md)
+
 > 阅读时间：5 分钟 | 前置知识：Primer 00, 01, 02
 
 ---
@@ -136,3 +138,16 @@ Step 4: 动手实践
    - 理解 Triton 报错中的 MLIR IR 信息
    - 为 AscendNPU-IR 编写自定义转换 Pass
    - 理解 ascendnpu-ir 源码中每个 Conversion Pass 的作用
+
+---
+
+## 下一步：进入 LLVM 学习
+
+Primer 到此结束。你已经知道了编译器是什么、Pass 怎么工作、以及 Ascend 编译器的大致结构。
+
+接下来进入动手阶段：
+
+→ **[Phase 2: LLVM 学习](../llvm/00-环境搭建.md)** — 配环境 → 学 IR → 写 Pass
+
+> 💡 想看真实的 Ascend MLIR 编译器代码？
+> → [AscendNPU-IR](https://github.com/Ascend/AscendNPU-IR) — 华为官方开源项目（750+ 源文件）

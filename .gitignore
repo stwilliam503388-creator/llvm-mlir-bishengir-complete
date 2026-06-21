@@ -1,0 +1,19 @@
+# 构建产物
+build/
+*.o
+*.dylib
+*.so
+*.out
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc

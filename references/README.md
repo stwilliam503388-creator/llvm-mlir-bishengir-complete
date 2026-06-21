@@ -1,51 +1,25 @@
-# references/ — 参考源码索引
+# 参考资源
 
-本目录指向/说明外部仓库中与本项目相关的源码位置。
+本目录收集与编译器学习相关的外部参考资料。
 
----
+## 官方文档
 
-## AscendNPU-IR（官方）
-
-| 项目 | 链接 | 说明 |
+| 资源 | 链接 | 说明 |
 |------|------|------|
-| **代码仓** | https://github.com/Ascend/AscendNPU-IR | 华为官方 Ascend NPU MLIR 编译器 |
-| **文档** | https://ascendnpu-ir.gitcode.com/zh_cn/index.html | 中文文档（GitCode 镜像）|
+| LLVM 官方文档 | https://llvm.org/docs/ | LLVM 全部文档，含 Pass 编写指南 |
+| MLIR 官方文档 | https://mlir.llvm.org/docs/ | MLIR Dialect、Pass、Pattern 文档 |
+| LLVM Language Reference | https://llvm.org/docs/LangRef.html | LLVM IR 完整语法手册（进阶用） |
+| Huawei Ascend 社区 | https://www.hiascend.com/ | Ascend NPU 硬件和 CANN 软件栈 |
 
-**本项目的 ascendnpu-ir 与此的关系**：
+## 推荐阅读
 
-```
-AscendNPU-IR (华为官方)
-    └── fork → ascendnpu-ir (Nous Research 维护)
-                  └── AscendNPU-IR (另一个名称, 同一代码库)
-```
+| 书籍/课程 | 说明 |
+|-----------|------|
+| *Engineering a Compiler* (Cooper & Torczon) | 编译器工程经典教材 |
+| *Getting Started with LLVM Core Libraries* | LLVM 入门实战 |
+| CMU 15-745: Optimizing Compilers | 编译器优化课程（进阶） |
 
-本项目分析的是 `ascendnpu-ir`（Nous Research fork），它基于华为官方 `AscendNPU-IR` 扩展了自定义 Pass 和 dialect 定义。
+## 本项目参考
 
-**核心目录**：
-
-| 路径 | 说明 |
-|------|------|
-| `bishengir/include/bishengir/Dialect/` | Dialect 定义（hfusion/hivm）|
-| `bishengir/lib/Conversion/` | 转换 Pass：LinalgToHFusion / ArithToHFusion / HFusionToHIVM |
-| `bishengir/tools/bishengir-opt/` | 主入口（类似 mlir-opt）|
-
-**对应笔记**: `docs/mlir/L00-速通与AscendNPU-IR实战.md`, `L08-ascendnpu-ir-demo可运行流水线.md`
-
----
-
-## triton-ascend
-
-**位置**: `~/Documents/GitHub-Projects/triton-ascend/`
-
-**核心文件**:
-
-| 路径 | 说明 |
-|------|------|
-| `python/triton/compiler/compiler.py` | 编译入口 |
-| `python/triton/runtime/ascend_interpreter.py` | Ascend 运行时 |
-| `include/triton/Dialect/Triton/IR/TritonOps.td` | TT dialect 定义 |
-| `include/triton/Dialect/TritonGPU/IR/TritonGPUOps.td` | TritonGPU dialect |
-| `lib/Conversion/TritonToTritonGPU/` | 转换 Pass |
-| `lib/Conversion/TritonGPUToLLVM/` | LLVM 降级 |
-
-**对应笔记**: `docs/mlir/L06-TritonMLIR体系分析.md`, `L07-triton-ascend后端深度分析.md`
+- [LLVM 环境搭建](../docs/llvm/00-环境搭建.md) — 本项目的 LLVM 安装指南
+- [术语表](../docs/glossary.md) — 中英对照术语速查
