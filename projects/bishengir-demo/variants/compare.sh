@@ -1,5 +1,12 @@
 #!/bin/bash
 # compare.sh — 运行所有优化 variant 并输出对比表
+#
+# 对应 AscendNPU-IR:
+#   本脚本的 V0-V3 对比对应 bishengir 的 3 种降级路径:
+#   V0: bishengir-opt --convert-linalg-to-hfusion          (无优化)
+#   V2: bishengir-opt --convert-hfusion-to-hivm             (向量化)
+#   V3: hfusion.cube_matmul → hivm.mmul                     (硬件映射)
+#   对应源码: bishengir/lib/Conversion/ 下三个 Pass 目录
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

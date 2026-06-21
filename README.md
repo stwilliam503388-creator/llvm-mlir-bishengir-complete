@@ -162,7 +162,12 @@ llvm-mlir-bishengir-complete/
 │       ├── 00-编译器是什么.md         — 编译器三步工作法
 │       ├── 01-AST与IR.md             — 语法树、SSA、三地址码
 │       ├── 02-Pass与Lowering.md      — 分析/转换 Pass、dialect、降级
-│       └── 03-从Triton到Ascend.md    — 全路径串联到本项目
+│   │   └── 03-从Triton到Ascend.md    — 全路径串联到本项目
+│   │
+│   └── ascendnpu-ir/                 ★ AscendNPU-IR 对接（11 篇）
+│       ├── translations/             — 9 篇中文翻译文档（Pass + Dialect）
+│       ├── analysis/                 — 2 篇深度分析笔记
+│       └── README.md                 — 阅读顺序
 │
 ├── projects/                         ← 工程项目（4 个）
 │   ├── bishengir-demo/               ★ 可运行降级流水线
@@ -170,8 +175,12 @@ llvm-mlir-bishengir-complete/
 │   ├── standalone-mlir/              ★ 从零构建 MLIR dialect
 │   └── bishengir-op-counter/         ★ 自定义 Pass 参考代码
 │
-└── references/                       ← 外部源码索引
-    └── README.md                     — triton-ascend 核心文件位置
+├── references/                       ← 外部源码索引
+│   ├── README.md                     — triton-ascend + AscendNPU-IR 核心文件位置
+│   └── ascendnpu-ir-mapping.md      ★ 源码级追踪对照（本项目的每个文件 → ascendnpu-ir）
+│
+└── scripts/                          ★ 实用工具
+    └── trace-to-ascendnpu.sh         — 在 ascendnpu-ir 源码中搜索关键词
 ```
 
 ### 已验证

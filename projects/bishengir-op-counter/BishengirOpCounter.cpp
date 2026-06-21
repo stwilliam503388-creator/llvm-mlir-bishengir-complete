@@ -1,10 +1,23 @@
 // ==- BishengirOpCounter.cpp - 统计 bishengir module 中 ops 类型分布 -==//
 //
-// 自定义 MLIR 分析 Pass，学习目的。
-// 基于 Toy Tutorial Ch3 的 ShapeInferencePass 模式 + bishengir 实际代码风格。
+// 分析 Pass: 遍历 module 内所有操作，按 dialect + op 名统计计数.
 //
-// 功能：
-//   遍历 module 内所有操作，按 dialect 和 op 类型分组统计，
+// 对应 AscendNPU-IR:
+//   模式参考: bishengir/lib/Conversion/LinalgToHFusion/LinalgToHFusion.cpp
+//   同类 Pass: bishengir/lib/Conversion/ArithToHFusion/
+//   测试参考: bishengir/test/Conversion/LinalgToHFusion/linalg-to-hfusion.mlir
+//
+// 如果要将此 Pass 注册到 bishengir-opt:
+//   1. 复制到 bishengir/lib/Conversion/BishengirOpCounter/ 目录
+//   2. 在 CMakeLists.txt 添加:
+//      add_mlir_conversion_library(BishengirOpCounter BishengirOpCounter.cpp)
+//   3. 在 include/bishengir/InitAllPasses.h 添加:
+//      void registerBishengirOpCounterPass();
+//   4. 在 tools/bishengir-opt/bishengir-opt.cpp 添加注册:
+//      registerBishengirOpCounterPass();
+//
+// 学习目的。
+// 基于 Toy Tutorial Ch3 的 ShapeInferencePass 模式 + bishengir 实际代码风格。
 //   输出类似：  hfusion.elemwise_binary: 3   linalg.generic: 1   func.func: 2
 //
 // 注册方式：

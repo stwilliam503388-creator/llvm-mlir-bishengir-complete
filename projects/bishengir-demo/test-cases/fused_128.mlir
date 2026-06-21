@@ -1,5 +1,14 @@
 // ==- fused_128.mlir - 融合操作（bishengir demo）-==//
-// C = A + B; D = C * A → 可融合为一轮 kernel
+//
+// 对应 AscendNPU-IR 源码:
+//   本用例在官方测试中没有直接对应，演示 bishengir 的融合概念。
+//   bishengir 中的融合等价:
+//     linalg-fuse-elementwise-ops (若支持)
+//     将连续两个 linalg.generic 合并为一个 hfusion.elemwise_binary
+//
+// C = A + B; D = C * A  →  融合后: D[i] = (A[i] + B[i]) * A[i]
+// 融合减少一次内存读写，是 bishengir 的核心优化能力之一.
+//===
 
 module {
   func.func @fused(%A: memref<128xf32>, %B: memref<128xf32>, %D: memref<128xf32>) {

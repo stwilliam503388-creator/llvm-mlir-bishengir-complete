@@ -1,14 +1,14 @@
 // ==- vecadd_128.mlir - 向量加法（bishengir demo）-==//
-// bishengir 流水线对照:
-//   linalg.generic { arith.addf }
-//   → -convert-linalg-to-hfusion  → hfusion.elemwise_binary {add}
-//   → -convert-hfusion-to-hivm   → hivm.load + hivm.vadd + hivm.store
 //
-// 等价标准 MLIR 流水线（在当前环境可运行）:
-//   --convert-linalg-to-affine-loops  → affine.for + arith.addf
-//   --lower-affine                    → scf.for
-//   --convert-scf-to-cf               → cf.br
-//   --convert-func-to-llvm            → llvm.func + llvm.load/store
+// 对应 AscendNPU-IR 源码:
+//   输入格式: bishengir/test/Conversion/LinalgToHFusion/linalg-to-hfusion.mlir
+//   Pass 实现: bishengir/lib/Conversion/LinalgToHFusion/LinalgToHFusion.cpp
+//   等价 bishengir-opt 命令:
+//     bishengir-opt --convert-linalg-to-hfusion --convert-hfusion-to-hivm
+//   预期 bishengir 输出: hfusion.elemwise_binary {fun = add}
+//
+// 本文件用标准 MLIR (mlir-opt) 模拟上述降级过程.
+// 区别: 标准路径输出 affine.for + arith.addf, bishengir 输出 hivm.vadd.
 //===
 
 module {
