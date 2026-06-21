@@ -1,63 +1,93 @@
 # LLVM → MLIR → bishengir: Ascend NPU 编译器全链路学习
 
-> 从 LLVM IR 入门到 MLIR Dialect 开发，最终对接 bishengir (Ascend NPU) 的完整学习路径与工程合集
+> 从 LLVM IR 入门到 MLIR Dialect 开发，最终对接 AscendNPU-IR (bishengir) 的完整学习路径与工程合集
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![LLVM](https://img.shields.io/badge/LLVM-22.1.6-blue)](https://llvm.org)
-[![macOS](https://img.shields.io/badge/macOS-26.5.1-ff69b4)](https://www.apple.com/macos)
-[![Apple Silicon](https://img.shields.io/badge/Apple_Silicon-M5-green)()
+[![macOS](https://img.shields.io/badge/macOS-26.5.1-ff69b4)(https://www.apple.com/macos)
+[![AscendNPU-IR](https://img.shields.io/badge/AscendNPU--IR-官方-blueviolet)](https://github.com/Ascend/AscendNPU-IR)
 
 ---
 
 ## 一、项目背景
 
-### 为什么有这个项目
+### 1.1 为什么需要这个项目
 
-随着 AI 芯片（Ascend NPU）的普及，了解编译器技术栈成为 AI 工程师的核心能力。本项目源于一条具体的学习主线：
+AI 芯片正在经历从通用计算（CPU/GPU）到专用计算（NPU/TPU）的转变。以华为昇腾（Ascend）为代表的 NPU 在推理场景中表现突出，但它们的软件栈复杂度远高于 CUDA。
 
-```
-Triton Python kernel  →  Triton IR (TT Dialect)  →  bishengir (Ascend NPU)
-```
+编译器是这座软件栈的**核心骨架**。以一条 Triton 代码到 Ascend NPU 执行为例：
 
-编译器涉及的技术栈从 **LLVM IR 基础** 到 **MLIR dialect 定义** 再到 **Ascend 专用 IR (HFusion / HIVM)**，跨度大、难点多。现有教程要么偏学术（LLVM 源码），要么偏应用（只讲 Triton 使用），缺乏一条从零到 bishengir 的动手路径。
-
-本项目填补了这个空白。
-
-> 💡 **零基础？完全没问题。**
-> 本项目在 `docs/primer/` 提供了面向 AI 工程师的编译器入门（约 30 分钟）。
-> 用类比 + 实例 + 你熟悉的 Python/Triton 场景，帮你建立从 AST → IR → Pass → Lowering 的基本直觉。
-> **不需要任何编译器经验，从 `docs/primer/00-编译器是什么.md` 开始。**
-
-### 覆盖范围
-
-```
-基础知识 ←───────── 核心概念 ←────────── 工程实践
-─────────           ─────────           ──────────
-LLVM IR            MLIR Dialect        bishengir-demo
-  SSA 形式            dialect 定义        可运行降级流水线
-  类型系统/GEP        Operation/Region    Linalg→affine→LLVM
-  控制流/Phi          Pattern Rewriting   bishengir 三阶段对照
-  Pass 开发           Dialect Conversion  向量加法 / 矩阵乘法 / 融合
-                    Pass 管理器          自定义 MLIR Pass
-                    TableGen ODS         OpCounter / PeelTranspose
-                    mlir-opt 工具链       Toy Mini 解析器
-                                         纯 C++17 零依赖
-                                         Standalone MLIR 项目
-                                         从零构建 dialect
-                                         CMake + TableGen
-                                         Triton → Ascend 对接
-                                         triton-ascend 后端源码分析
+```text
+Triton Python kernel  (你写的代码)
+        │
+        ▼
+Triton IR (TT Dialect)       ← MLIR 中间表示
+        │
+        ▼
+AscendNPU-IR (bishengir)     ← Ascend 编译器
+  Linalg → HFusion → HIVM
+        │
+        ▼
+CANN Runtime                 ← 华为 SDK
+        │
+        ▼
+Ascend NPU 执行
 ```
 
-### 适用读者
+每一步都涉及编译器知识：**IR（中间表示）**、**dialect（方言）**、**Pass（转换）**、**Lowering（降级）**。现有教程要么偏学术（LLVM 源码分析），要么偏应用（只讲 Triton 使用），缺乏一条从零到 AscendNPU-IR 的动手路径。
 
-- 想理解 **MLIR/JAX/Ascend 编译栈** 的 AI 工程师
+本项目填补这个空白。
+
+### 1.2 AscendNPU-IR 是什么
+
+**AscendNPU-IR** 是华为开源的 Ascend NPU MLIR 编译器项目：
+
+| 项目 | 链接 | 说明 |
+|------|------|------|
+| **官方代码仓** | https://github.com/Ascend/AscendNPU-IR | 华为官方维护 |
+| **中文文档** | https://ascendnpu-ir.gitcode.com/zh_cn/index.html | GitCode 镜像，含完整 API 参考 |
+
+它本质上是基于 MLIR 框架构建的一套**多层 IR 降级流水线**：
+
+```text
+输入:  Linalg / Arith / Func 等标准 MLIR dialect
+         │
+         ▼
+  Pass1: -convert-linalg-to-hfusion
+         Linalg dialect → HFusion dialect（融合算子抽象）
+         │
+         ▼
+  Pass2: -convert-arith-to-hfusion
+         Arith dialect → HFusion dialect
+         │
+         ▼
+  Pass3: -convert-hfusion-to-hivm
+         HFusion dialect → HIVM dialect（NPU 指令抽象）
+         │
+         ▼
+  HIVM → CANN Runtime → Ascend NPU 执行
+```
+
+**本项目研究的 `ascendnpu-ir`** 是 AscendNPU-IR 的一个活跃 fork，由 Nous Research 维护，在社区中也被称为 **bishengir**。它在官方基础上扩展了更多 dialect 和转换 Pass。
+
+### 1.3 本项目的价值
+
+| 维度 | 说明 |
+|------|------|
+| **知识层次** | 从 LLVM IR 基础 → MLIR dialect 概念 → AscendNPU-IR 实战，三级递进 |
+| **动手验证** | 所有知识都有对应工程：4 个项目，全部可在 macOS 上运行 |
+| **开源生态** | 对标华为 AscendNPU-IR 官方项目，代码直接可读 |
+| **零基础可入** | 附带 4 篇 primer 入门文档，面向 AI 工程师，无需编译器经验 |
+
+### 1.4 适用读者
+
+- 想理解 **Ascend NPU 编译栈** 的 AI 工程师
+- 使用 Triton 做模型推理，想深入底层的学习者
 - 需要开发 **自定义 MLIR dialect** 的编译器开发者
-- 阅读 **Triton 源码** 时遇到 MLIR 瓶颈的学习者
-- 熟悉 PyTorch/Triton 使用，但想深入底层的工作者
+- 阅读 AscendNPU-IR / triton-ascend 源码时遇到 MLIR 瓶颈的学习者
 - **零基础也没问题，从 `docs/primer/` 开始**
 
-### 前置知识
+### 1.5 前置知识
 
 | 要求 | 说明 |
 |------|------|
@@ -70,6 +100,25 @@ LLVM IR            MLIR Dialect        bishengir-demo
 ---
 
 ## 二、项目总览
+
+### 覆盖范围
+
+```
+基础知识 ←───────── 核心概念 ←────────────── 工程实践
+─────────           ─────────             ──────────────
+LLVM IR            MLIR Dialect          bishengir-demo / AscendNPU-IR
+  SSA 形式            dialect 定义          可运行降级流水线
+  类型系统/GEP        Operation/Region      Linalg→affine→LLVM
+  控制流/Phi          Pattern Rewriting     三阶段对照分析
+  Pass 开发           Dialect Conversion    向量加法 / 矩阵乘法 / 融合优化
+                    Pass 管理器           + 官方文档对接分析
+                    TableGen ODS          自定义 MLIR Pass
+                    mlir-opt 工具链        OpCounter / PeelTranspose
+                                          Toy Mini 解析器（纯 C++17 零依赖）
+                                          Standalone MLIR 项目（CMake + TableGen）
+                                          Triton → AscendNPU-IR 全链路对接
+                                          triton-ascend + 官方文档结合分析
+```
 
 ### 60+ 文件，覆盖 4 个层次
 
@@ -388,18 +437,22 @@ mlir-opt --pass-pipeline="builtin.module(func.func(count-ops))" input.mlir
 
 ### 对应关系
 
-```text
+```
 Triton Python kernel
   ↓ Frontend
 Triton IR (tt.load/tt.dot/tt.store)
   ↓ [本项目的分析对象]
-ascendnpu-ir (bishengir)
+AscendNPU-IR (华为官方开源)
+  ├── bishengir (Nous Research fork)
   ├── LinalgToHFusion   →  Linalg ops  →  HFusion ops
   ├── ArithToHFusion    →  Arith ops    →  HFusion ops
   └── HFusionToHIVM     →  HFusion ops  →  HIVM ops (NPU)
       ↓
 CANN Runtime (华为 SDK, 硬件执行)
 ```
+
+**相关文档**: https://ascendnpu-ir.gitcode.com/zh_cn/index.html
+**项目地址**: https://github.com/Ascend/AscendNPU-IR
 
 ---
 
@@ -450,6 +503,26 @@ MIT License. 详见 [LICENSE](LICENSE)。
 
 ## 十、相关资源
 
-- [LLVM 官方文档](https://llvm.org/docs/)
-- [MLIR Toy Tutorial](https://mlir.llvm.org/docs/Tutorials/Toy/)
-- [Triton 官网](https://triton-lang.org/)
+### AscendNPU-IR 官方
+
+| 资源 | 链接 | 说明 |
+|------|------|------|
+| **代码仓** | https://github.com/Ascend/AscendNPU-IR | 华为官方 Ascend NPU MLIR 编译器 |
+| **中文文档** | https://ascendnpu-ir.gitcode.com/zh_cn/index.html | GitCode 镜像，含完整 API 参考 |
+| **本文分析的 fork** | [ascendnpu-ir](https://github.com/nousresearch/ascendnpu-ir) | Nous Research 维护的活跃 fork（即 bishengir）|
+
+### 学习资源
+
+| 资源 | 链接 | 在本项目中的对应 |
+|------|------|----------------|
+| LLVM 官方文档 | https://llvm.org/docs/ | `docs/llvm/` |
+| MLIR Toy Tutorial | https://mlir.llvm.org/docs/Tutorials/Toy/ | `docs/mlir/L01-L02` |
+| Triton 官网 | https://triton-lang.org/ | `docs/mlir/L06-L07` |
+
+### 参考源码
+
+| 项目 | 位置 | 在本项目中的对应 |
+|------|------|----------------|
+| AscendNPU-IR 源码 | `~/hermes-workspace/ascendnpu-ir/` | `projects/bishengir-demo/` |
+| triton-ascend 源码 | `~/Documents/GitHub-Projects/triton-ascend/` | `docs/mlir/L06-L07` |
+| LLVM Toy Tutorial 源码 | `~/hermes-workspace/toy-tutorial/src/` | `projects/toy-mini/` |
