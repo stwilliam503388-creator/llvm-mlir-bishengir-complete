@@ -1,5 +1,7 @@
 # Ascend NPU Compiler Learning
 
+# 昇腾 NPU 编译器学习
+
 > 从 LLVM IR 入门到 MLIR Dialect 开发，最终对接 AscendNPU-IR 的完整学习路径与工程合集
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -133,10 +135,10 @@ LLVM IR            MLIR Dialect          ascendnpu-ir-demo / AscendNPU-IR
 └── 零基础入门 (4 篇)       — 面向 AI 工程师的编译器概念速成
 
 层次 2: 可运行工程 (4 个项目)
-├── ascendnpu-ir-demo ★        — 3 个 MLIR 用例 + 4 种优化方案对比
-├── toy-mini                 — 纯 C++17 Toy 解析器，编译通过
-├── standalone-mlir          — CMake + Makefile + TableGen 自建 dialect
-└── ascendnpu-ir-op-counter     — 分析 + 转换 Pass 参考代码
+├── ascendnpu-ir-demo ★        — 3 个 MLIR 用例 + 4 种优化方案对比（模拟 AscendNPU-IR 降级）
+├── toy-mini                 — 纯 C++17 Toy 解析器，零依赖编译通过
+├── standalone-mlir          — CMake + Makefile + TableGen 自建 dialect（独立项目）
+└── ascendnpu-ir-op-counter     — 分析 + 转换 Pass 参考代码（对照 AscendNPU-IR）
 
 层次 3: 设施
 ├── setup.sh                 — 依赖检查
@@ -174,10 +176,10 @@ ascend-npu-compiler-learning/
 │       └── README.md                 — 阅读顺序
 │
 ├── projects/                         ← 工程项目（4 个）
-│   ├── ascendnpu-ir-demo/               ★ 可运行降级流水线
-│   ├── toy-mini/                     ★ 从零写 Toy 解析器
-│   ├── standalone-mlir/              ★ 从零构建 MLIR dialect
-│   └── ascendnpu-ir-op-counter/         ★ 自定义 Pass 参考代码
+│   ├── ascendnpu-ir-demo/               ★ 可运行降级流水线（模拟 AscendNPU-IR 三阶段降级）
+│   ├── toy-mini/                     ★ 从零写 Toy 解析器（纯 C++17 零依赖）
+│   ├── standalone-mlir/              ★ 从零构建 MLIR dialect（CMake + TableGen）
+│   └── ascendnpu-ir-op-counter/         ★ 自定义 Pass 参考代码（分析 + 转换 Pass）
 │
 ├── references/                       ← 外部源码索引
 │   ├── README.md                     — triton-ascend + AscendNPU-IR 核心文件位置
