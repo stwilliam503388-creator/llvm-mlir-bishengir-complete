@@ -6,7 +6,7 @@
 **参考链接**:
 - 官方代码仓: https://github.com/Ascend/AscendNPU-IR
 - 中文文档: https://ascendnpu-ir.gitcode.com/zh_cn/index.html
-- 本项目分析的 fork: `~/hermes-workspace/ascendnpu-ir/` (bishengir)
+- 本项目分析的 fork: `~/hermes-workspace/ascendnpu-ir/`（即 AscendNPU-IR 核心编译器代码，源码目录名为 `bishengir/`）
 
 ---
 

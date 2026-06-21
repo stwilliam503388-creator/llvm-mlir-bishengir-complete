@@ -456,7 +456,7 @@ Triton Python kernel
 Triton IR (tt.load/tt.dot/tt.store)
   ↓ [本项目的分析对象]
 AscendNPU-IR (华为官方开源)
-  ├── AscendNPU-IR (Nous Research fork)
+  ├── ascendnpu-ir (Nous Research fork)
   ├── LinalgToHFusion   →  Linalg ops  →  HFusion ops
   ├── ArithToHFusion    →  Arith ops    →  HFusion ops
   └── HFusionToHIVM     →  HFusion ops  →  HIVM ops (NPU)

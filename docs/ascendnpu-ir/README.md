@@ -32,7 +32,7 @@ docs/ascendnpu-ir/
 
 | 这些文档 | 对应本项目笔记 |
 |---------|--------------|
-| 翻译文档 | `docs/mlir/L00-速通与bishengir实战.md` |
+| 翻译文档 | `docs/mlir/L00-速通与AscendNPU-IR实战.md` |
 | 代码仓库解读 | `docs/mlir/L06-TritonMLIR体系分析.md`, `L07-triton-ascend后端分析.md` |
 | 文档总结 | `docs/mlir/L00.md` + `references/ascendnpu-ir-mapping.md` |
 

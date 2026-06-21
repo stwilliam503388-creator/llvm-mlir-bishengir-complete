@@ -29,7 +29,7 @@ AscendNPU-IR (华为官方)
 | `bishengir/lib/Conversion/` | 转换 Pass：LinalgToHFusion / ArithToHFusion / HFusionToHIVM |
 | `bishengir/tools/bishengir-opt/` | 主入口（类似 mlir-opt）|
 
-**对应笔记**: `docs/mlir/L00-速通与bishengir实战.md`, `L08-bishengir-demo可运行流水线.md`
+**对应笔记**: `docs/mlir/L00-速通与AscendNPU-IR实战.md`, `L08-AscendNPU-IR-demo可运行流水线.md`
 
 ---
 
