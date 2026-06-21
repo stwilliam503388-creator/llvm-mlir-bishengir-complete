@@ -21,7 +21,7 @@ echo ""
 BASE=$(mlir-opt \
   --convert-linalg-to-affine-loops \
   --lower-affine --convert-scf-to-cf --convert-func-to-llvm \
-  "$SCRIPT_DIR/../test-cases/matmul_4x4x4.mlir" 2>&1 | wc -l)
+  "$SCRIPT_DIR/../test-cases/advanced/01_matmul.mlir" 2>&1 | wc -l)
 
 echo "输入文件: matmul_4x4x4.mlir (linalg.matmul, 1 行)"
 echo ""

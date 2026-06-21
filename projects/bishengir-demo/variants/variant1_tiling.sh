@@ -11,7 +11,7 @@
 # 效果: 代码量增加（多了 tile 循环），但运行性能提升
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-MATMUL="$SCRIPT_DIR/../test-cases/matmul_4x4x4.mlir"
+MATMUL="$SCRIPT_DIR/../test-cases/advanced/01_matmul.mlir"
 RESULT_DIR="$SCRIPT_DIR/results"
 mkdir -p "$RESULT_DIR"
 

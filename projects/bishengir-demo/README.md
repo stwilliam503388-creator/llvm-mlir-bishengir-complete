@@ -10,6 +10,15 @@
 > ⭐⭐ = 进阶（需要 LLVM IR 基础）
 > ⭐⭐⭐ = 复杂（需要 MLIR dialect / lowering 概念）
 
+### 目录结构
+
+```
+test-cases/
+├── basic/          ← ⭐ 入门 8 个
+├── intermediate/   ← ⭐⭐ 进阶 11 个
+└── advanced/       ← ⭐⭐⭐ 复杂 9 个
+```
+
 | 难度 | 数量 | 涉及概念 | 适合谁 |
 |------|------|---------|--------|
 | ⭐ 入门 | 8 | `linalg.generic` + parallel | 读完 Primer 即可 |

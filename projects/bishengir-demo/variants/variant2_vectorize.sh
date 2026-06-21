@@ -10,7 +10,7 @@
 # 原理: 用 SIMD 指令一次处理 2 个元素，减少指令数
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-MATMUL="$SCRIPT_DIR/../test-cases/matmul_4x4x4.mlir"
+MATMUL="$SCRIPT_DIR/../test-cases/advanced/01_matmul.mlir"
 RESULT_DIR="$SCRIPT_DIR/results"
 mkdir -p "$RESULT_DIR"
 

@@ -182,16 +182,18 @@ Step 5: 自定义 Pass ── 对照本项目的 bishengir-op-counter
 
 | 本项目的文件 | 对应 AscendNPU-IR 源码 | 关系 |
 |------------|----------------------|------|
-| `test-cases/vecadd_128.mlir` | `test/Conversion/LinalgToHFusion/linalg-to-hfusion.mlir` | 同类型输入，本 demo 用标准 MLIR |
-| `test-cases/matmul_4x4x4.mlir` | `test/Conversion/LinalgToHFusion/matmul-to-hfusion.mlir` | 同类型输入 |
-| `test-cases/relu_4x4.mlir` | `test/Conversion/ArithToHFusion/` 同类 | 通过 arith.cmpf + select 模拟 |
-| `test-cases/softmax_4.mlir` | `test/Conversion/` 无直接对应 | math.exp 是通用 MLIR op |
-| `test-cases/tanh_4.mlir` | `test/Conversion/` 无直接对应 | math.tanh 是通用 MLIR op |
-| `test-cases/reduce_sum_4x4.mlir` | `test/Conversion/LinalgToHFusion/reduce-to-hfusion.mlir` | reduction iterator |
-| `test-cases/reduce_max_4x4.mlir` | 同上 | arith.cmpf 替代 arith.addf |
-| `test-cases/broadcast_4x4.mlir` | `test/Conversion/` 无直接对应 | affine_map<()> 广播语义 |
-| `test-cases/depthwise_conv_4x4.mlir` | `test/Conversion/` 需查找 | depthwise conv named op |
-| `test-cases/fused_128.mlir` | 无直接对应 | 演示融合概念 |
+| `test-cases/basic/01_vecadd.mlir` | `test/Conversion/LinalgToHFusion/linalg-to-hfusion.mlir` | 同类型输入 |
+| `test-cases/advanced/01_matmul.mlir` | `test/Conversion/LinalgToHFusion/matmul-to-hfusion.mlir` | 同类型输入 |
+| `test-cases/basic/02_relu.mlir` | `test/Conversion/` 同类 | 通过 arith.cmpf + select |
+| `test-cases/basic/04_softmax_exp.mlir` | `test/Conversion/` 无直接对应 | math.exp 通用 op |
+| `test-cases/basic/03_tanh.mlir` | `test/Conversion/` 无直接对应 | math.tanh 通用 op |
+| `test-cases/intermediate/07_reduce_sum.mlir` | `test/Conversion/LinalgToHFusion/reduce-to-hfusion.mlir` | reduction |
+| `test-cases/intermediate/08_reduce_max.mlir` | 同上 | 用 arith.cmpf 替代 addf |
+| `test-cases/intermediate/05_broadcast.mlir` | `test/Conversion/` 无 | affine_map<()> |
+| `test-cases/advanced/03_depthwise_conv.mlir` | `test/Conversion/` 需查找 | depthwise named op |
+| `test-cases/basic/08_fused.mlir` | 无直接对应 | 融合概念演示 |
+| `test-cases/advanced/04_conv2d.mlir` | `test/Conversion/` 需查找 | 用 generic 替代 |
+| `test-cases/advanced/05_max_pool.mlir` | `test/Conversion/` (需 bishengir) | affine.for 手动 |
 | `variants/variant0_baseline.sh` | `bishengir-opt --convert-linalg-to-hfusion` | 等价命令行 |
 | `variants/variant3_hw_mapping.sh` | `lib/Conversion/HFusionToHIVM/HFusionToHIVM.cpp` | 模式对照 |
 
