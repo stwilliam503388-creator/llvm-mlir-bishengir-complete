@@ -54,6 +54,20 @@
 | `gemm_relu_4x4.mlir` | 矩阵乘 + ReLU | 融合 Linear+激活 | **77** |
 | `depthwise_conv_4x4.mlir` | 深度卷积 | MobileNet | **113** |
 
+### 卷积与填充（2 个）
+
+| 文件 | 操作 | 用途 | LLVM 行数 |
+|------|------|------|-----------|
+| `conv2d_4x4.mlir` | 二维卷积 4x4 (valid) | 标准卷积层 | 85 |
+| `fill_4x4.mlir` | 张量填充 | 初始化缓冲区 | 39 |
+
+### 批归一化（2 个，需串联使用）
+
+| 文件 | 步骤 | 用途 | LLVM 行数 |
+|------|------|------|-----------|
+| `batch_norm_4x4_part1.mlir` | reduce: Σx[i] → mean | 计算均值 | 48 |
+| `batch_norm_4x4_part2.mlir` | normalize: γ·(x-μ)/√(σ²+ε)+β | 归一化 | 87 |
+
 ### 其他（3 个）
 
 | 文件 | 操作 | 用途 | LLVM 行数 |
@@ -113,7 +127,13 @@ bishengir 路径 (≈V3):
 
 **关键**: 高级操作**保持高级语义**（不展开到标量），直接映射到硬件指令。
 
-### 运行对比
+### 环境限制
+
+详见 `LIMITATIONS.md`。
+
+**一句话总结**: Homebrew LLVM 22 未编译 Linalg named ops（conv/pooling/fill 等 named 版本），
+但全部可通过 `linalg.generic` 替代（pooling 除外——需 bishengir 自编译版本）。
+bishengir-opt 自编译时包含这些 named op，功能不受影响。
 
 ```bash
 bash variants/compare.sh
