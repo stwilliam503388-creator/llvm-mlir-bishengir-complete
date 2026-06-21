@@ -8,7 +8,7 @@
 8|#   对应源码: bishengir/lib/Conversion/LinalgToHFusion/LinalgToHFusion.cpp
 9|set -e
 10|SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-11|MATMUL="$SCRIPT_DIR/../test-cases/03_advanced/01_matmul.mlir"
+11|MATMUL="$SCRIPT_DIR/../test-cases/mlir/03_advanced/01_matmul.mlir"
 12|RESULT_DIR="$SCRIPT_DIR/results"
 13|mkdir -p "$RESULT_DIR"
 14|

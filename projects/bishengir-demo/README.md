@@ -16,9 +16,9 @@
 14|
 15|```
 16|test-cases/
-17|├── 01_basic/          ← ⭐ 入门 8 个
-18|├── 02_intermediate/   ← ⭐⭐ 进阶 11 个
-19|└── 03_advanced/       ← ⭐⭐⭐ 复杂 9 个
+17|├── mlir/01_basic/    ← ⭐ 入门 8 个
+18|├── mlir/02_intermediate/ ← ⭐⭐ 进阶 11 个
+19|└── mlir/03_advanced/     ← ⭐⭐⭐ 复杂 9 个
 20|```
 21|
 22|| 难度 | 数量 | 涉及概念 | 适合谁 |
@@ -357,7 +357,7 @@
 355|
 356|```bash
 357|# 单个文件
-358|mlir-opt --convert-linalg-to-affine-loops test-cases/01_basic/01_vecadd.mlir | FileCheck test-cases/01_basic/01_vecadd.mlir
+358|mlir-opt --convert-linalg-to-affine-loops test-cases/mlir/01_basic/01_vecadd.mlir | FileCheck test-cases/mlir/01_basic/01_vecadd.mlir
 359|```
 360|
 361|### 测试标注说明

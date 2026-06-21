@@ -1,15 +1,11 @@
-// ==- fused_128.mlir - 融合操作（bishengir demo）-==//
+// Fused (原始版) — 算子融合演示 (对应 triton/01_basic/08_fused.py) ⭐
+// 公式: C = A + B; D = C * A, 128 元素
+// 一句话: 两步连续操作演示算子融合概念, bishengir 原始测试用例
+// 专业角色: Kernel Fusion 概念演示, 与 08_fused.mlir 功能相同但采用原始命名
+// 用在哪: 编译器优化概念演示
+// 降级: 连续两次 linalg.generic
+// bishengir: HFusion 算子融合概念演示
 //
-// 对应 AscendNPU-IR 源码:
-//   本用例在官方测试中没有直接对应，演示 bishengir 的融合概念。
-//   bishengir 中的融合等价:
-//     linalg-fuse-elementwise-ops (若支持)
-//     将连续两个 linalg.generic 合并为一个 hfusion.elemwise_binary
-//
-// C = A + B; D = C * A  →  融合后: D[i] = (A[i] + B[i]) * A[i]
-// 融合减少一次内存读写，是 bishengir 的核心优化能力之一.
-//===
-
 module {
   func.func @fused(%A: memref<128xf32>, %B: memref<128xf32>, %D: memref<128xf32>) {
     %C = memref.alloc() : memref<128xf32>
