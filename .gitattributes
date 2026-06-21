@@ -1,0 +1,13 @@
+* text=auto
+*.md text
+*.cpp text
+*.h text
+*.td text
+*.py text
+*.sh text
+*.mlir text
+*.cmake text
+*.txt text
+CMakeLists.txt text
+Makefile text
+.gitignore text
