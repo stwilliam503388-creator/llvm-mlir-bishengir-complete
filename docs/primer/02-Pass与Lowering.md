@@ -53,7 +53,7 @@ Step 5: 删除 %1 = add i32 %a, 0 这条指令
 
 ### 在项目中找到它
 
-打开 `projects/bishengir-op-counter/BishengirOpCounter.cpp`：
+打开 `projects/ascendnpu-ir-op-counter/BishengirOpCounter.cpp`：
 
 ```cpp
 // 这是一个分析 Pass：统计每种 op 出现了多少次
@@ -65,7 +65,7 @@ void runOnOperation() override {
 }
 ```
 
-打开 `projects/bishengir-op-counter/BishengirPeelTranspose.cpp`：
+打开 `projects/ascendnpu-ir-op-counter/BishengirPeelTranspose.cpp`：
 
 ```cpp
 // 这是一个转换 Pass：把冗余 transpose 消除掉
@@ -92,7 +92,7 @@ LogicalResult matchAndRewrite(TransposeOp op, ...) {
 输出 优化后的 IR
 ```
 
-这就是编译器的"优化管线"。bishengir 的管线就是：
+这就是编译器的"优化管线"。AscendNPU-IR 的管线就是：
 
 ```
 Linalg IR → HFusion → HIVM → NPU
@@ -150,10 +150,10 @@ linalg.matmul ins(%A, %B) outs(%C)
 
 ### 在项目中找到它
 
-运行 `projects/bishengir-demo/variants/variant0_baseline.sh`：
+运行 `projects/ascendnpu-ir-demo/variants/variant0_baseline.sh`：
 
 ```bash
-bash projects/bishengir-demo/variants/compare.sh
+bash projects/ascendnpu-ir-demo/variants/compare.sh
 ```
 
 你会看到 `matmul_4x4x4.mlir` 从 1 行变成 74 行的完整过程：
@@ -230,5 +230,5 @@ def TransposeOp : Standalone_Op<"transpose"> { ... }
 3. **MLIR 为什么要用多个 dialect（方言）？**
    - 答：每层只做自己擅长的事——Linalg 层做矩阵优化，Affine 层做循环优化，互不干扰
 
-4. **bishengir-demo 中 matmul 从 1 行变成 74 行，这是个问题吗？**
-   - 答：不是问题，是 Lowering 的正常过程。bishengir 之所以能保持 1 行（hivm.mmul），是因为它有硬件支持——不需要展开到标量
+4. **ascendnpu-ir-demo 中 matmul 从 1 行变成 74 行，这是个问题吗？**
+   - 答：不是问题，是 Lowering 的正常过程。AscendNPU-IR 之所以能保持 1 行（hivm.mmul），是因为它有硬件支持——不需要展开到标量

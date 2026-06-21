@@ -1,6 +1,6 @@
-# bishengir-demo 自动化测试说明
+# ascendnpu-ir-demo 自动化测试说明
 
-本文档详细介绍 bishengir-demo 项目的自动化测试体系，包括测试框架、用例组织、运行方式及验证原理。
+本文档详细介绍 ascendnpu-ir-demo 项目的自动化测试体系，包括测试框架、用例组织、运行方式及验证原理。
 
 ---
 
@@ -86,10 +86,10 @@ module {
 | 4. Stage3 降级 | → LLVM Dialect（仅支持的用例） | `--convert-func-to-llvm` |
 | 5. 输出验证 | CHECK 模式出现在输出中 | FileCheck 风格匹配 |
 
-### 与 bishengir 的对照关系
+### 与 AscendNPU-IR 的对照关系
 
 ```
-bishengir 流水线:                   标准 MLIR 等效流水线:
+AscendNPU-IR 流水线:                   标准 MLIR 等效流水线:
 ─────────────────────────           ─────────────────────────
 -convert-linalg-to-hfusion    ↔    --convert-linalg-to-affine-loops
 -convert-arith-to-hfusion     ↔    --lower-affine
@@ -129,7 +129,7 @@ bash run-tests.sh
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
-║  bishengir-demo: 自动化测试                                ║
+║  ascendnpu-ir-demo: 自动化测试                                ║
 ╚══════════════════════════════════════════════════════════════╝
 
 ═══ 01_basic ═══
@@ -149,7 +149,7 @@ bash run-tests.sh
 ## 如何添加新测试用例
 
 1. 在对应难度目录下创建 `.mlir` 文件（如 `test-cases/01_basic/09_new_op.mlir`）
-2. 文件头部添加注释说明（功能、公式、对应 bishengir 算子）
+2. 文件头部添加注释说明（功能、公式、对应 AscendNPU-IR 算子）
 3. 添加 `// RUN:` 标注指定降级命令
 4. 添加 `// CHECK:` 标注指定期望输出模式
 5. 运行 `bash run-tests.sh new_op` 验证
@@ -189,4 +189,4 @@ module {
 1. **自包含** — 测试指令嵌入 `.mlir` 文件，单文件即可理解和复现
 2. **渐进分级** — 从简单逐元素算子到复杂卷积/归一化，方便学习
 3. **环境自适应** — 有/无 `mlir-opt` 都能运行，不硬性依赖 LLVM 安装
-4. **映射清晰** — 每个用例标注了对应的 bishengir 自定义 Pass 语义，便于理解定制编译器与标准 MLIR 的关系
+4. **映射清晰** — 每个用例标注了对应的 AscendNPU-IR 自定义 Pass 语义，便于理解定制编译器与标准 MLIR 的关系

@@ -43,7 +43,7 @@
 43|需 NVIDIA GPU + CUDA (Triton 无法在 Apple Silicon 上运行):
 44|
 45|```bash
-46|cd projects/bishengir-demo/
+46|cd projects/ascendnpu-ir-demo/
 47|python3 test-cases/triton/20_matmul.py   # 矩阵乘
 48|python3 test-cases/triton/01_vecadd.py    # 向量加
 49|python3 test-cases/triton/10_silu.py      # SiLU

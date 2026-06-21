@@ -31,9 +31,9 @@
 | AST | `projects/toy-mini/toymini.cpp` → `struct NumberExpr` |
 | IR | `projects/standalone-mlir/test/example.mlir` |
 | SSA | `projects/standalone-mlir/test/example.mlir` → `%0, %1, %2` |
-| 分析 Pass | `projects/bishengir-op-counter/BishengirOpCounter.cpp` |
-| 转换 Pass | `projects/bishengir-op-counter/BishengirPeelTranspose.cpp` |
-| Lowering | `projects/bishengir-demo/variants/compare.sh` |
+| 分析 Pass | `projects/ascendnpu-ir-op-counter/BishengirOpCounter.cpp` |
+| 转换 Pass | `projects/ascendnpu-ir-op-counter/BishengirPeelTranspose.cpp` |
+| Lowering | `projects/ascendnpu-ir-demo/variants/compare.sh` |
 | Dialect | `projects/standalone-mlir/include/standalone/StandaloneOps.td` |
 
 ## 读完 Primer 之后

@@ -1,11 +1,11 @@
-# bishengir-op-counter — 自定义 MLIR Pass 参考代码
+# ascendnpu-ir-op-counter — 自定义 MLIR Pass 参考代码
 
 针对 bishengir (ascendnpu-ir) dialect 编写的两个自定义 Pass，演示 MLIR 的两种核心模式。
 
 ## 结构
 
 ```
-bishengir-op-counter/
+ascendnpu-ir-op-counter/
 ├── BishengirOpCounter.cpp       — 分析 Pass
 └── BishengirPeelTranspose.cpp   — 转换 Pass
 ```

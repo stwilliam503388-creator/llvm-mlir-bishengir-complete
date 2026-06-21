@@ -8,7 +8,7 @@
 
 ## 一、任务总览
 
-本次连续多轮对话覆盖 LLVM → MLIR → bishengir (Ascend NPU) 全链路学习，最终交付可运行的降级 Demo。
+本次连续多轮对话覆盖 LLVM → MLIR → AscendNPU-IR (Ascend NPU) 全链路学习，最终交付可运行的降级 Demo。
 
 ### 执行阶段
 
@@ -17,11 +17,11 @@
 | **0. LLVM 基础** | llvm-ir-tutorial 中文教程速通 | 7 篇 Obsidian 笔记 |
 | **1. MLIR 概念** | dialect/operation/pass/pattern 体系 | 2 篇基础笔记 + mlir-opt 实操 |
 | **2. Toy Tutorial** | 官方 Toy 教程 7 章源码逐行解读 | 2 篇笔记 + 三项目对照表 |
-| **3. 自定义 Pass** | 针对 bishengir 写分析/转换 Pass | 2 个 C++ 源码文件 |
+| **3. 自定义 Pass** | 针对 AscendNPU-IR 写分析/转换 Pass | 2 个 C++ 源码文件 |
 | **4. Standalone 项目** | 从零构建 CMake + Makefile 项目 | CMakeLists + .td + 入口文件 |
 | **5. Toy Mini 手写** | 纯 C++17 零依赖解析器 | 1412 行，编译通过 |
 | **6. Triton 体系** | triton-ascend 源码分析 | 2 篇笔记 + 全链路对照 |
-| **7. ⭐ bishengir-demo** | 可运行 mlir-opt 降级流水线 | 3 用例 + 生成器 + 运行脚本 |
+| **7. ⭐ ascendnpu-ir-demo** | 可运行 mlir-opt 降级流水线 | 3 用例 + 生成器 + 运行脚本 |
 
 ---
 
@@ -43,23 +43,23 @@
 
 | 文件 | 核心内容 | 工程关联 |
 |------|---------|---------|
-| **L00-速通与bishengir实战** | dialect/operation/region 概念 + 三阶段降级对照 | bishengir-demo |
+| **L00-速通与AscendNPU-IR实战** | dialect/operation/region 概念 + 三阶段降级对照 | ascendnpu-ir-demo |
 | **L01-ToyTutorial Ch1-2** | Toy 语法 + TableGen + MLIRGen | toy-mini |
-| **L02-ToyTutorial Ch3-6** | Pattern Rewriting + ConversionTarget | bishengir-op-counter |
-| **L03-自定义Pass实战** | OpCounter (walk) + PeelTranspose (OpRewritePattern) | bishengir-op-counter |
+| **L02-ToyTutorial Ch3-6** | Pattern Rewriting + ConversionTarget | ascendnpu-ir-op-counter |
+| **L03-自定义Pass实战** | OpCounter (walk) + PeelTranspose (OpRewritePattern) | ascendnpu-ir-op-counter |
 | **L04-Standalone实战** | cmake 4.3 兼容性 + Makefile 方案 + LLVM 22 适配 | standalone-mlir |
 | **L05-ToyMini手写** | Lexer/Parser/AST/IR 四组件全实现 | toy-mini |
 | **L06-TritonMLIR体系** | TT dialect (1416 ops) + TritonGPU + 三项目对照 | — |
 | **L07-triton-ascend后端** | ascend_interpreter.py + CANN + Python/C++ 对接层 | — |
-| **L08-bishengir-demo** | 3 用例全部 mlir-opt 验证通过 | bishengir-demo |
+| **L08-ascendnpu-ir-demo** | 3 用例全部 mlir-opt 验证通过 | ascendnpu-ir-demo |
 
 ---
 
 ## 三、工程交付（4 个项目）
 
-### 1. ⭐ bishengir-demo — 可运行降级流水线
+### 1. ⭐ ascendnpu-ir-demo — 可运行降级流水线
 
-**位置**: `projects/bishengir-demo/`
+**位置**: `projects/ascendnpu-ir-demo/`
 
 #### 验证结果
 
@@ -69,19 +69,19 @@
 | matmul_4x4x4 | 1 行 | 18 行 | 72 行 | **72×** | 三重循环展开 |
 | fused_128 | 15 行 | 20 行 | 59 行 | 3.9× | add + mul 连续 |
 
-#### bishengir 对应
+#### AscendNPU-IR 对应
 
 ```
-bishengir:        Linalg → HFusion.elemwise_binary → HIVM.load/vadd/store
+AscendNPU-IR:        Linalg → HFusion.elemwise_binary → HIVM.load/vadd/store
 标准 MLIR (本):   Linalg → affine.for + arith.addf → llvm.load/add/store
 ```
 
 #### 文件清单
 
 ```
-bishengir-demo/
+ascendnpu-ir-demo/
 ├── README.md                    — 使用说明
-├── bishengir-demo.py            — Python 生成器（可扩展用例）
+├── ascendnpu-ir-demo.py            — Python 生成器（可扩展用例）
 ├── run-demo.sh                  — 批量运行脚本
 └── test-cases/
     ├── vecadd_128.mlir           — 向量加法 ✅
@@ -137,9 +137,9 @@ def name(params) { var x = [[1,2],[3,4]]; print(x + y); return z; }
 
 ---
 
-### 4. bishengir-op-counter — 自定义 Pass 源码
+### 4. ascendnpu-ir-op-counter — 自定义 Pass 源码
 
-**位置**: `projects/bishengir-op-counter/`
+**位置**: `projects/ascendnpu-ir-op-counter/`
 
 | 文件 | 类型 | 对应 Toy Tutorial | 功能 |
 |------|------|-------------------|------|
@@ -150,9 +150,9 @@ def name(params) { var x = [[1,2],[3,4]]; print(x + y); return z; }
 
 ## 四、关键技术对照
 
-### bishengir 三阶段 vs 本 Demo
+### AscendNPU-IR 三阶段 vs 本 Demo
 
-| 阶段 | bishengir | 本 Demo (标准 MLIR) | 共同概念 |
+| 阶段 | AscendNPU-IR | 本 Demo (标准 MLIR) | 共同概念 |
 |------|-----------|--------------------|---------|
 | 1 | `-convert-linalg-to-hfusion` | `--convert-linalg-to-affine-loops` | `linalg.generic` → 更低级 IR |
 | 2 | `-convert-arith-to-hfusion` | `--lower-affine` | 处理算术操作 |
@@ -160,7 +160,7 @@ def name(params) { var x = [[1,2],[3,4]]; print(x + y); return z; }
 
 ### 三项目对照
 
-| 维度 | Toy Tutorial | bishengir (ascendnpu-ir) | Triton (triton-ascend) |
+| 维度 | Toy Tutorial | AscendNPU-IR (ascendnpu-ir) | Triton (triton-ascend) |
 |------|-------------|------------------------|----------------------|
 | **编程模型** | Toy 语言 | MLIR (Linalg dialect) | **Triton Python kernel** |
 | **高级 IR** | `toy.constant/add/mul` | `linalg.generic` | `tt.load/dot/store` |
@@ -209,10 +209,10 @@ docs/mlir/ (8 篇, ~76KB)
 
 ```
 projects/
-├── bishengir-demo/       (6 files)
+├── ascendnpu-ir-demo/       (6 files)
 ├── toy-mini/             (1 file)
 ├── standalone-mlir/      (7 files)
-└── bishengir-op-counter/ (2 files)
+└── ascendnpu-ir-op-counter/ (2 files)
 ```
 
 ### 配置 (3 个)
@@ -220,5 +220,5 @@ projects/
 ```
 projects/standalone-mlir/CMakeLists.txt
 projects/standalone-mlir/Makefile
-projects/bishengir-demo/run-demo.sh
+projects/ascendnpu-ir-demo/run-demo.sh
 ```

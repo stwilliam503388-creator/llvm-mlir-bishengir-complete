@@ -9,7 +9,7 @@ aliases: [Toy Tutorial 速通, MLIR Toy Tutorial]
 
 # MLIR Toy Tutorial 速通
 
-> 基于 LLVM 22.1.6 官方 Toy Tutorial 源码 + bishengir 对照学习。
+> 基于 LLVM 22.1.6 官方 Toy Tutorial 源码 + AscendNPU-IR 对照学习。
 > 源码位置：`~/hermes-workspace/toy-tutorial/src/`
 
 ---
@@ -48,9 +48,9 @@ def main() {
 | **打印** | `print(expr)` | 内置函数 |
 | **返回** | `return expr;` | 函数返回值 |
 
-### vs bishengir（ascendnpu-ir）对照
+### vs AscendNPU-IR（ascendnpu-ir）对照
 
-| 概念 | Toy | bishengir |
+| 概念 | Toy | AscendNPU-IR |
 |------|-----|-----------|
 | **语言前端** | Toy 语言 | Linalg dialect |
 | **输入文件** | `.toy` | `.mlir` |
@@ -365,9 +365,9 @@ mlir::Value MLIRGenImpl::mlirGen(LiteralExprAST &lit) {
 
 ---
 
-## 四、与 bishengir 对照
+## 四、与 AscendNPU-IR 对照
 
-| 概念 | Toy Tutorial | bishengir (ascendnpu-ir) |
+| 概念 | Toy Tutorial | AscendNPU-IR (ascendnpu-ir) |
 |------|-------------|--------------------------|
 | **自定义 dialect** | `toy` dialect | `hfusion` + `hivm` + 6 个其他 dialect |
 | **TableGen 定义 ops** | `Ops.td` | `HFusionStructuredOps.td`, `HIVMVectorOps.td` |
@@ -377,4 +377,4 @@ mlir::Value MLIRGenImpl::mlirGen(LiteralExprAST &lit) {
 | **转换** | Ch5 开始 lower 到标准 dialect | HFusion → HIVM |
 | **最终目标** | LLVM IR → CPU | HIVM IR → Ascend NPU |
 
-Toy Tutorial 学完，bishengir 的 dialect 定义和 pass 体系**本质是一回事**，只是 ops 不一样、dialect 名字不同。
+Toy Tutorial 学完，AscendNPU-IR 的 dialect 定义和 pass 体系**本质是一回事**，只是 ops 不一样、dialect 名字不同。

@@ -1,11 +1,17 @@
-# LLVM → MLIR → bishengir: Ascend NPU 编译器全链路学习
+# Ascend NPU Compiler Learning
 
-> 从 LLVM IR 入门到 MLIR Dialect 开发，最终对接 AscendNPU-IR (bishengir) 的完整学习路径与工程合集
+# 昇腾 NPU 编译器学习
+
+> 从 LLVM IR 入门到 MLIR Dialect 开发，最终对接 AscendNPU-IR 的完整学习路径与工程合集
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![LLVM](https://img.shields.io/badge/LLVM-22.1.6-blue)](https://llvm.org)
 [![macOS](https://img.shields.io/badge/macOS-26.5.1-ff69b4)(https://www.apple.com/macos)
 [![AscendNPU-IR](https://img.shields.io/badge/AscendNPU--IR-官方-blueviolet)](https://github.com/Ascend/AscendNPU-IR)
+
+---
+
+> **术语说明**：本项目中 "AscendNPU-IR" 与代码仓中出现的 "BishengIR"（毕昇 IR）指同一编译器项目。AscendNPU-IR 是华为官方仓库名称，BishengIR 是其内部编译器核心组件的代号，也是源码中实际的命名空间（`bishengir-opt`、`bishengir/` 目录）。本文档统一使用 **AscendNPU-IR** 指代。
 
 ---
 
@@ -24,7 +30,7 @@ Triton Python kernel  (你写的代码)
 Triton IR (TT Dialect)       ← MLIR 中间表示
         │
         ▼
-AscendNPU-IR (bishengir)     ← Ascend 编译器
+AscendNPU-IR     ← Ascend 编译器
   Linalg → HFusion → HIVM
         │
         ▼
@@ -68,7 +74,7 @@ Ascend NPU 执行
   HIVM → CANN Runtime → Ascend NPU 执行
 ```
 
-**本项目研究的 `ascendnpu-ir`** 是 AscendNPU-IR 的一个活跃 fork，由 Nous Research 维护，在社区中也被称为 **bishengir**。它在官方基础上扩展了更多 dialect 和转换 Pass。
+**本项目研究的 `ascendnpu-ir`** 是 AscendNPU-IR 的一个活跃 fork，由 Nous Research 维护，在社区中也被称为 BishengIR。它在官方基础上扩展了更多 dialect 和转换 Pass。
 
 ### 1.3 本项目的价值
 
@@ -106,7 +112,7 @@ Ascend NPU 执行
 ```
 基础知识 ←───────── 核心概念 ←────────────── 工程实践
 ─────────           ─────────             ──────────────
-LLVM IR            MLIR Dialect          bishengir-demo / AscendNPU-IR
+LLVM IR            MLIR Dialect          ascendnpu-ir-demo / AscendNPU-IR
   SSA 形式            dialect 定义          可运行降级流水线
   类型系统/GEP        Operation/Region      Linalg→affine→LLVM
   控制流/Phi          Pattern Rewriting     三阶段对照分析
@@ -129,10 +135,10 @@ LLVM IR            MLIR Dialect          bishengir-demo / AscendNPU-IR
 └── 零基础入门 (4 篇)       — 面向 AI 工程师的编译器概念速成
 
 层次 2: 可运行工程 (4 个项目)
-├── bishengir-demo ★        — 3 个 MLIR 用例 + 4 种优化方案对比
+├── ascendnpu-ir-demo ★        — 28 个 MLIR 用例 + 4 种优化方案对比（模拟 AscendNPU-IR 降级）
 ├── toy-mini                 — 纯 C++17 Toy 解析器，编译通过
 ├── standalone-mlir          — CMake + Makefile + TableGen 自建 dialect
-└── bishengir-op-counter     — 分析 + 转换 Pass 参考代码
+└── ascendnpu-ir-op-counter     — 分析 + 转换 Pass 参考代码
 
 层次 3: 设施
 ├── setup.sh                 — 依赖检查
@@ -141,14 +147,14 @@ LLVM IR            MLIR Dialect          bishengir-demo / AscendNPU-IR
 └── references/              — 外部源码索引
 
 层次 4: 外部源码（不在本仓库）
-├── ascendnpu-ir (bishengir) — Ascend NPU MLIR 转换 Pass
+├── ascendnpu-ir (AscendNPU-IR) — Ascend NPU MLIR 转换 Pass
 └── triton-ascend            — Triton 前端对接
 ```
 
 ### 项目结构
 
 ```
-llvm-mlir-bishengir-complete/
+ascend-npu-compiler-learning/
 ├── README.md                         ← 本文件（项目总览）
 ├── SUMMARY.md                        ← 完整输出总结文档
 ├── LICENSE                           ← MIT 许可证
@@ -171,10 +177,10 @@ llvm-mlir-bishengir-complete/
 │       └── README.md                 — 阅读顺序
 │
 ├── projects/                         ← 工程项目（4 个）
-│   ├── bishengir-demo/               ★ 可运行降级流水线
+│   ├── ascendnpu-ir-demo/               ★ 可运行降级流水线（模拟 AscendNPU-IR 三阶段降级）
 │   ├── toy-mini/                     ★ 从零写 Toy 解析器
 │   ├── standalone-mlir/              ★ 从零构建 MLIR dialect
-│   └── bishengir-op-counter/         ★ 自定义 Pass 参考代码
+│   └── ascendnpu-ir-op-counter/         ★ 自定义 Pass 参考代码（分析 + 转换 Pass）
 │
 ├── references/                       ← 外部源码索引
 │   ├── README.md                     — triton-ascend + AscendNPU-IR 核心文件位置
@@ -192,7 +198,7 @@ llvm-mlir-bishengir-complete/
 | `g++ -std=c++17` 编译 | ✅ 0 errors | toymini.cpp (1,412 行) |
 | `mlir-tblgen` TableGen | ✅ 语法通过 | StandaloneOps.td (6 ops) |
 | CMake + MLIR 集成 | ✅ 配置成功 | 跳过 AddMLIR 冲突 |
-| bishengir 源码分析 | ✅ 完成 | 3 个 Conversion Pass 逐行解读 |
+| AscendNPU-IR 源码分析 | ✅ 完成 | 3 个 Conversion Pass 逐行解读 |
 | Triton MLIR 体系 | ✅ 完成 | TT / TritonGPU 双 Dialect 分析 |
 | matmul 优化方案对比 | ✅ 4 种方案 | 从 74 行到 5 行 |
 
@@ -211,7 +217,7 @@ llvm-mlir-bishengir-complete/
 |------|------|------|---------|
 | -1.1 | `00-编译器是什么` | 编译器三步工作法、为什么需要 IR | — |
 | -1.2 | `01-AST与IR` | 语法树、三地址码、SSA | toy-mini, standalone-mlir |
-| -1.3 | `02-Pass与Lowering` | 分析/转换 Pass、dialect、降级 | bishengir-demo, bishengir-op-counter |
+| -1.3 | `02-Pass与Lowering` | 分析/转换 Pass、dialect、降级 | ascendnpu-ir-demo, ascendnpu-ir-op-counter |
 | -1.4 | `03-从Triton到Ascend` | 全路径串联 | 所有项目 |
 
 ### Stage 0: LLVM IR 基础（约 3 天）
@@ -241,15 +247,15 @@ llvm-mlir-bishengir-complete/
 
 ```
 笔记路径: docs/mlir/L00 ~ L04
-验证方式: 运行 bishengir-demo + 读懂 standalone-mlir
+验证方式: 运行 ascendnpu-ir-demo + 读懂 standalone-mlir
 ```
 
 | 步骤 | 笔记 | 知识点 | 对应项目 |
 |------|------|--------|---------|
-| 1.1 | L00 速通与 bishengir | dialect/region/operation 概念 | → bishengir-demo |
+| 1.1 | L00 速通与 AscendNPU-IR | dialect/region/operation 概念 | → ascendnpu-ir-demo |
 | 1.2 | L01 Toy Ch1-2 | TableGen 语法、Ops.td 结构 | → toy-mini |
-| 1.3 | L02 Toy Ch3-6 | Pattern Rewriting、ConversionTarget | → bishengir-op-counter |
-| 1.4 | L03 自定义 Pass | walk / OpRewritePattern 两种模式 | → bishengir-op-counter |
+| 1.3 | L02 Toy Ch3-6 | Pattern Rewriting、ConversionTarget | → ascendnpu-ir-op-counter |
+| 1.4 | L03 自定义 Pass | walk / OpRewritePattern 两种模式 | → ascendnpu-ir-op-counter |
 | 1.5 | L04 Standalone 实战 | CMake + Makefile + LLVM 22 适配 | → standalone-mlir |
 
 **关键突破**: 理解 MLIR 的 **多层 IR 概念**——为什么需要多个 dialect，如何用 Pass 做 dialect 转换。
@@ -260,17 +266,17 @@ llvm-mlir-bishengir-complete/
 
 | 步骤 | 项目 | 行动 | 验证 |
 |------|------|------|------|
-| 2.1 | bishengir-demo | 运行 3 个用例，观察降级过程 | `mlir-opt` 输出 |
-| 2.2 | bishengir-demo | 运行 variants/compare.sh，对比 4 种优化方案 | 观察 74 行 → 5 行的变化 |
+| 2.1 | ascendnpu-ir-demo | 运行测试用例，观察降级过程 | `mlir-opt` 输出 |
+| 2.2 | ascendnpu-ir-demo | 运行 variants/compare.sh，对比 4 种优化方案 | 观察 74 行 → 5 行的变化 |
 | 2.3 | toy-mini | 编译运行，修改语法扩展 | `./toymini` 输出 |
 | 2.4 | standalone-mlir | 编译，跑自定义 Pass | `--count-ops` |
-| 2.5 | bishengir-op-counter | 阅读源码，理解模式 | 对照 Toy Tutorial |
+| 2.5 | ascendnpu-ir-op-counter | 阅读源码，理解模式 | 对照 Toy Tutorial |
 
 **关键突破**: 能用 `mlir-opt` 验证自己的 dialect 理解。
 
 ### Stage 3: 体系对照（约 2 天）
 
-目标：将学到的知识对标到真实项目（bishengir / Triton）。
+目标：将学到的知识对标到真实项目（AscendNPU-IR / Triton）。
 
 ```
 笔记路径: docs/mlir/L05 ~ L07
@@ -281,21 +287,21 @@ llvm-mlir-bishengir-complete/
 | 3.1 | L05 Toy Mini 手写 | 对照 Toy Tutorial Ch1-2 | 三项目对照表 |
 | 3.2 | L06 Triton MLIR 体系 | triton-ascend 源码 | TT / TritonGPU Dialect 分析 |
 | 3.3 | L07 triton-ascend 后端 | ascend_interpreter.py | Python ↔ C++ 对接层 |
-| 3.4 | L08 bishengir-demo | 三个用例全跑通 | 可运行验证 |
+| 3.4 | L08 ascendnpu-ir-demo | 三个用例全跑通 | 可运行验证 |
 
-**关键突破**: 理解 Triton + bishengir 如何组成完整的 Ascend 编译链路。
+**关键突破**: 理解 Triton + AscendNPU-IR 如何组成完整的 Ascend 编译链路。
 
 ---
 
 ## 四、工程项目详情
 
-### 4.1 ⭐ bishengir-demo — 可运行降级流水线
+### 4.1 ⭐ ascendnpu-ir-demo — 可运行降级流水线
 
-用标准 `mlir-opt` 模拟 bishengir 三阶段降级过程。
+用标准 `mlir-opt` 模拟 AscendNPU-IR 三阶段降级过程。
 
-#### bishengir 对应
+#### AscendNPU-IR 对应
 
-| 阶段 | bishengir (实际) | 本 demo (标准 MLIR) | 共同概念 |
+| 阶段 | AscendNPU-IR (实际) | 本 demo (标准 MLIR) | 共同概念 |
 |------|------------------|--------------------|---------|
 | 输入 | `linalg.generic` | `linalg.generic` | Linalg dialect |
 | Pass1 | `-convert-linalg-to-hfusion` | `--convert-linalg-to-affine-loops` | 高级→中级 IR |
@@ -323,18 +329,18 @@ llvm-mlir-bishengir-complete/
 
 #### matmul 的 74× 膨胀与优化
 
-| Variant | 策略 | LLVM 行数 | vs 基准 | 对应 bishengir |
+| Variant | 策略 | LLVM 行数 | vs 基准 | 对应 AscendNPU-IR |
 |---------|------|-----------|---------|---------------|
 | **V0** | 无优化 (基准) | 74 行 | - | — |
 | **V1** | 循环分块 (tile=2x2x1) | 76 行 | +2 行 | — |
 | **V2** | 向量化 (tile+vectorize) | 77 行 | +3 行 | `-convert-hfusion-to-hivm` 生成向量指令 |
 | **V3** | **硬件映射 (模拟 mmul)** | **5 行** | **-69 行 (-93%)** | `hfusion.cube_matmul → hivm.mmul` |
 
-V3 的 5 行 vs 74 行的差距，正是 bishengir 实际采用的方案——**保持高级语义不展开，直接映射到硬件 Cube 单元**。
+V3 的 5 行 vs 74 行的差距，正是 AscendNPU-IR 实际采用的方案——**保持高级语义不展开，直接映射到硬件 Cube 单元**。
 
 ```bash
 # 运行对比
-bash projects/bishengir-demo/variants/compare.sh
+bash projects/ascendnpu-ir-demo/variants/compare.sh
 ```
 
 ### 4.2 toy-mini — 从零写 Toy 语言解析器
@@ -366,7 +372,7 @@ def main() {
 **2 种构建**: CMake + Makefile 双方案
 **1 个入口**: `standalone-opt` (类似 `bishengir-opt`)
 
-### 4.4 bishengir-op-counter — 自定义 Pass 参考代码
+### 4.4 ascendnpu-ir-op-counter — 自定义 Pass 参考代码
 
 | 文件 | 类型 | 模式 | 对应 Toy Tutorial |
 |------|------|------|-------------------|
@@ -388,10 +394,10 @@ brew install llvm cmake
 xcode-select --install
 ```
 
-### 5.2 跑 bishengir-demo（5 分钟）
+### 5.2 跑 ascendnpu-ir-demo（5 分钟）
 
 ```bash
-cd projects/bishengir-demo
+cd projects/ascendnpu-ir-demo
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 
 # 单个用例
@@ -436,7 +442,7 @@ mlir-opt --pass-pipeline="builtin.module(func.func(count-ops))" input.mlir
 
 ## 六、三项目技术对照
 
-| 维度 | LLVM IR | MLIR | bishengir |
+| 维度 | LLVM IR | MLIR | AscendNPU-IR |
 |------|---------|------|-----------|
 | **设计哲学** | 单一 IR | 多层 IR (dialect) | 专用 dialect 链 |
 | **类型系统** | `iN`, `ptr`, `struct` | `tensor<T>`, `memref<T>` | `hfusion.tensor<T>` |
@@ -453,7 +459,7 @@ Triton Python kernel
 Triton IR (tt.load/tt.dot/tt.store)
   ↓ [本项目的分析对象]
 AscendNPU-IR (华为官方开源)
-  ├── bishengir (Nous Research fork)
+  ├── ascendnpu-ir (Nous Research fork)
   ├── LinalgToHFusion   →  Linalg ops  →  HFusion ops
   ├── ArithToHFusion    →  Arith ops    →  HFusion ops
   └── HFusionToHIVM     →  HFusion ops  →  HIVM ops (NPU)
@@ -491,17 +497,17 @@ export MLIR_DIR="/opt/homebrew/opt/llvm/lib/cmake/mlir"
 |------|---------|-----------|
 | `primer/00` | — | 编译器三步工作法 |
 | `primer/01` | toy-mini, standalone-mlir | AST、SSA |
-| `primer/02` | bishengir-demo, bishengir-op-counter | Pass、Lowering、dialect |
+| `primer/02` | ascendnpu-ir-demo, ascendnpu-ir-op-counter | Pass、Lowering、dialect |
 | `primer/03` | 全部 | 全路径串联 |
-| `MLIR-L00` | bishengir-demo | bishengir 三段降级全景 |
+| `MLIR-L00` | ascendnpu-ir-demo | AscendNPU-IR 三段降级全景 |
 | `MLIR-L01` | toy-mini | TableGen dialect 定义 |
-| `MLIR-L02` | bishengir-op-counter | Pattern Rewriting 模式 |
-| `MLIR-L03` | bishengir-op-counter | Pass 架构：分析 vs 转换 |
+| `MLIR-L02` | ascendnpu-ir-op-counter | Pattern Rewriting 模式 |
+| `MLIR-L03` | ascendnpu-ir-op-counter | Pass 架构：分析 vs 转换 |
 | `MLIR-L04` | standalone-mlir | CMake + Makefile + LLVM22 适配 |
 | `MLIR-L05` | toy-mini | 解析器四组件架构 |
 | `MLIR-L06` | — | Triton TT/TritonGPU 双 Dialect |
 | `MLIR-L07` | — | triton-ascend 后端对接 |
-| `MLIR-L08` | bishengir-demo | 3 用例 mlir-opt 验证 |
+| `MLIR-L08` | ascendnpu-ir-demo | 3 用例 mlir-opt 验证 |
 
 ---
 
@@ -519,7 +525,7 @@ MIT License. 详见 [LICENSE](LICENSE)。
 |------|------|------|
 | **代码仓** | https://github.com/Ascend/AscendNPU-IR | 华为官方 Ascend NPU MLIR 编译器 |
 | **中文文档** | https://ascendnpu-ir.gitcode.com/zh_cn/index.html | GitCode 镜像，含完整 API 参考 |
-| **本文分析的 fork** | [ascendnpu-ir](https://github.com/nousresearch/ascendnpu-ir) | Nous Research 维护的活跃 fork（即 bishengir）|
+| **本文分析的 fork** | [ascendnpu-ir](https://github.com/nousresearch/ascendnpu-ir) | Nous Research 维护的活跃 fork（即 BishengIR）|
 
 ### 学习资源
 
@@ -533,6 +539,6 @@ MIT License. 详见 [LICENSE](LICENSE)。
 
 | 项目 | 位置 | 在本项目中的对应 |
 |------|------|----------------|
-| AscendNPU-IR 源码 | `~/hermes-workspace/ascendnpu-ir/` | `projects/bishengir-demo/` |
+| AscendNPU-IR 源码 | `~/hermes-workspace/ascendnpu-ir/` | `projects/ascendnpu-ir-demo/` |
 | triton-ascend 源码 | `~/Documents/GitHub-Projects/triton-ascend/` | `docs/mlir/L06-L07` |
 | LLVM Toy Tutorial 源码 | `~/hermes-workspace/toy-tutorial/src/` | `projects/toy-mini/` |

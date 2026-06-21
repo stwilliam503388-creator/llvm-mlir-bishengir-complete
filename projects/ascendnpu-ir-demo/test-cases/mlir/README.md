@@ -67,7 +67,7 @@ mlir-opt --convert-linalg-to-affine-loops --lower-affine \
   mlir/03_advanced/01_matmul.mlir
 
 # 多路对比
-bash projects/bishengir-demo/variants/compare.sh
+bash projects/ascendnpu-ir-demo/variants/compare.sh
 ```
 
 ## 与 Triton 对应

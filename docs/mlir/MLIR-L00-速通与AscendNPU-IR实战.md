@@ -1,13 +1,13 @@
 ---
 created: 2026-06-21
-tags: [mlir, llvm, compiler, bishengir, learning]
+tags: [mlir, llvm, compiler, ascendnpu-ir, learning]
 aliases: [MLIR 入门, MLIR 速通]
 ---
 
-# MLIR 速通与 bishengir 实战
+# MLIR 速通与 AscendNPU-IR 实战
 
 > LLVM 速通的续篇，从 LLVM IR 进入 MLIR 世界。
-> 基于 bishengir（ascendnpu-ir）的 dialect 和 Pass 源码，**用实际代码讲概念**。
+> 基于 AscendNPU-IR（ascendnpu-ir）的 dialect 和 Pass 源码，**用实际代码讲概念**。
 
 ---
 
@@ -80,7 +80,7 @@ Dialect 是一组相关的操作、类型和属性的**命名空间集合**。
 arith.addf     ← arith dialect（算术操作）
 scf.for        ← scf dialect（结构化控制流）
 linalg.matmul  ← linalg dialect（线性代数）
-hivm.vadd      ← hivm dialect（HIVM 向量指令，bishengir 定义）
+hivm.vadd      ← hivm dialect（HIVM 向量指令，AscendNPU-IR 定义）
 ```
 
 **标准 dialect（随 MLIR 发布）：**
@@ -98,13 +98,13 @@ hivm.vadd      ← hivm dialect（HIVM 向量指令，bishengir 定义）
 | `func` | 函数定义和调用 | C 函数 |
 | `affine` | 仿射循环、仿射内存访问 | 多面体模型 |
 
-**bishengir 自定义 dialect：**
+**AscendNPU-IR 自定义 dialect：**
 
 | Dialect | 命名空间 | 用途 |
 |---------|---------|------|
 | `HFusion` | `hfusion.*` | 华为融合算子层（fused element-wise ops） |
 | `HIVM` | `hivm.*` | 华为 IR for Vector & Matrix（NPU 指令层） |
-| 其他 6 个 | — | 其他 bishengir dialect（总数 8 个） |
+| 其他 6 个 | — | 其他 AscendNPU-IR dialect（总数 8 个） |
 
 ### 2.3 Region 与 Block
 
@@ -219,7 +219,7 @@ struct MyRewritePattern : public OpRewritePattern<arith::AddFOp> {
 };
 ```
 
-### 3.4 Dialect Conversion 框架（bishengir 用的就是这个）
+### 3.4 Dialect Conversion 框架（AscendNPU-IR 用的就是这个）
 
 这是 MLIR 最强大的机制——用于**跨 dialect 的完整转换**：
 
@@ -235,7 +235,7 @@ ToHFusion()      ToHFusion()      ToHIVM()
   3. TypeConverter（类型转换）—— memref → tensor 等
 ```
 
-**bishengir 的 ConvertLinalgToHFusion 示例：**
+**AscendNPU-IR 的 ConvertLinalgToHFusion 示例：**
 
 ```cpp
 // 文件: bishengir/lib/Conversion/LinalgToHFusion/LinalgToHFusion.cpp
@@ -260,7 +260,7 @@ void ConvertLinalgToHFusion::runOnOperation() {
 
 ---
 
-## 四、bishengir 三阶段降级实战（代码解读）
+## 四、AscendNPU-IR 三阶段降级实战（代码解读）
 
 ### 4.1 阶段一：Linalg → HFusion
 
@@ -373,7 +373,7 @@ vecadd_input.mlir
 
 ## 五、实操：用 Homebrew mlir-opt 体验 MLIR
 
-bishengir 需要 Ascend NPU SDK 才能完全编译，但标准 MLIR 的 `linalg` → `affine` → `scf` → `llvm` 流水线在你的 Mac 上可以直接跑。
+AscendNPU-IR 需要 Ascend NPU SDK 才能完全编译，但标准 MLIR 的 `linalg` → `affine` → `scf` → `llvm` 流水线在你的 Mac 上可以直接跑。
 
 ### 5.1 设置环境
 
@@ -385,7 +385,7 @@ export PATH="$LLVM_DIR/bin:$PATH"
 ### 5.2 写一个 VecAdd 的 MLIR 输入
 
 ```mlir
-// vecadd.mlir — 与 bishengir linalg-to-hfusion.mlir 完全相同的结构
+// vecadd.mlir — 与 AscendNPU-IR linalg-to-hfusion.mlir 完全相同的结构
 module {
   func.func @vecadd(%A: memref<1024xf16>, %B: memref<1024xf16>, %C: memref<1024xf16>) {
     linalg.generic {
@@ -417,7 +417,7 @@ mlir-opt \
 **输出效果：**
 
 ```
-// 最终 LLVM IR — 与上面 bishengir 流水线做概念对比
+// 最终 LLVM IR — 与上面 AscendNPU-IR 流水线做概念对比
 llvm.func @vecadd(%A: !llvm.ptr, %B: !llvm.ptr, %C: !llvm.ptr) {
   // 无显式 load/store — 由 memref 隐式处理
   // 无显式 vadd 指令 — 由通用 CPU 算术指令表示
@@ -425,9 +425,9 @@ llvm.func @vecadd(%A: !llvm.ptr, %B: !llvm.ptr, %C: !llvm.ptr) {
 }
 ```
 
-**对比 bishengir 流水线：**
+**对比 AscendNPU-IR 流水线：**
 
-| 阶段 | MLIR 标准流水线 | bishengir 流水线 |
+| 阶段 | MLIR 标准流水线 | AscendNPU-IR 流水线 |
 |------|----------------|-----------------|
 | 高级 | `linalg.generic` | `linalg.generic` |
 | 中级 | `affine.for` / `scf.for` | `hfusion.elemwise_binary` |
@@ -437,7 +437,7 @@ llvm.func @vecadd(%A: !llvm.ptr, %B: !llvm.ptr, %C: !llvm.ptr) {
 
 ---
 
-## 六、TableGen 定义解读（bishengir 的 dialect 定义）
+## 六、TableGen 定义解读（AscendNPU-IR 的 dialect 定义）
 
 ### 6.1 `HFusionStructuredOps.td`
 
@@ -541,7 +541,7 @@ def HIVM_StoreOp : HIVM_Op<"store"> {
 | `Metadata` | `Attribute` / `DictionaryAttr` | 类似，MLIR 更结构化 |
 | LLVM Pass | MLIR Dialect Conversion | MLIR 的跨 dialect 转换是独特能力 |
 
-### bishengir 三阶段关键操作对照
+### AscendNPU-IR 三阶段关键操作对照
 
 | 操作 | Dialect | 层级 | 含义 |
 |------|---------|------|------|
@@ -559,7 +559,7 @@ def HIVM_StoreOp : HIVM_Op<"store"> {
 | 方向 | 内容 | 可行性 |
 |------|------|--------|
 | **bishengir-opt 编译** | 初始化 LLVM 子模块，全量编译 | ⚠️ 耗时 1-2h，需要 ~30GB 磁盘，可后台跑 |
-| **写自定义 MLIR Pass** | 针对 bishengir dialect 写简单的 pattern match Pass | ✅ 无需编译，写代码分析即可 |
+| **写自定义 MLIR Pass** | 针对 AscendNPU-IR dialect 写简单的 pattern match Pass | ✅ 无需编译，写代码分析即可 |
 | **MLIR Toy Tutorial** | 官方教程：定义自己的 dialect + lower 到 LLVM IR | ✅ 可编译运行（用 Homebrew MLIR）|
 | **VecAdd 完整驱动** | 写一个 main.cpp 加载 .mlir 文件跑 Pass pipeline | ✅ 需要 Homebrew MLIR 链接 |
 | **Ascend 实机测试** | 在有 Ascend NPU 的机器上编译运行 | ❌ 目前无 NPU 硬件 |
@@ -602,8 +602,8 @@ ascendnpu-ir/
 | **Dialect Conversion** | 方言转换 | 把源 dialect 操作整体转换到目标 dialect 的框架 |
 | **TableGen** | 表格生成器 | LLVM 的声明式代码生成工具（给 .td 文件用的）|
 | **Linalg** | 线性代数 | MLIR 的标准线性代数 dialect |
-| **HFusion** | 华为融合层 | bishengir 的中间 dialect，做算子融合 |
-| **HIVM** | 华为向量机 | bishengir 的低级 dialect，NPU 指令级 |
+| **HFusion** | 华为融合层 | AscendNPU-IR 的中间 dialect，做算子融合 |
+| **HIVM** | 华为向量机 | AscendNPU-IR 的低级 dialect，NPU 指令级 |
 | **memref** | 内存引用 | 带布局信息的缓冲区引用（可以指显存地址）|
 | **tensor** | 张量 | 多维数组值（在计算域中，与硬件无关）|
 | **CANN** | 昇腾计算框架 | Huawei 的 NPU SDK（包含了 blas/加速库）|

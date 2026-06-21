@@ -7,7 +7,7 @@ aliases: [Triton MLIR 体系, Triton 编译栈]
 # Triton MLIR 体系分析
 
 > 基于 `triton-ascend` 源码分析 Triton 如何用 MLIR 编译到 Ascend NPU。
-> 对照 bishengir 和 Toy Tutorial，完整理解多级 IR 编译器栈。
+> 对照 AscendNPU-IR 和 Toy Tutorial，完整理解多级 IR 编译器栈。
 
 ---
 
@@ -120,7 +120,7 @@ Triton 源码
         ▼
 ┌───────────────────────┐
 │  ascendnpu-ir         │  ← MLIR 层
-│  (bishengir)          │
+│  (AscendNPU-IR)          │
 │  ● TIR → AIR          │
 │  ● AIR → HIVM         │
 └───────┬───────────────┘
@@ -160,7 +160,7 @@ triton-ascend/
 
 ## 四、三项目对照总结
 
-| 层面 | Toy Tutorial | bishengir (ascendnpu-ir) | Triton (triton-ascend) |
+| 层面 | Toy Tutorial | AscendNPU-IR (ascendnpu-ir) | Triton (triton-ascend) |
 |------|-------------|------------------------|----------------------|
 | **编程模型** | Toy 语言 | MLIR (Linalg dialect) | **Triton Python kernel** |
 | **高级 IR** | `toy.constant/add/mul` | `linalg.generic` | `tt.load/dot/store` |
@@ -170,21 +170,21 @@ triton-ascend/
 | **Dialect 数** | 1 (toy) | 8 (hfusion, hivm 等) | 2 (TT + TritonGPU) |
 | **Pass 注册方式** | `PassRegistration` | `InitAllPasses.h` | `registerTritonPasses()` |
 
-### Triton 与 bishengir 的 MLIR 使用对比
+### Triton 与 AscendNPU-IR 的 MLIR 使用对比
 
 ```
 Triton:
   Triton Python → tt dialect → TritonGPU → LLVM/AIR
                      ↑ 通用MLIR      ↑ GPU优化     ↑ 后端
 
-bishengir:
+AscendNPU-IR:
   MLIR (linalg) → hfusion → hivm → CANN
                      ↑ 算子融合   ↑ NPU指令    ↑ 华为SDK
 ```
 
 **关键差异**：
 - Triton 先保证**通用性**（CPU/GPU 都能跑），再通过 TritonGPU 做硬件优化
-- bishengir 直接针对**昇腾 NPU** 设计，dialect 更贴近硬件
+- AscendNPU-IR 直接针对**昇腾 NPU** 设计，dialect 更贴近硬件
 - 两者共享相同的 MLIR 基础设施（TableGen、Pattern Rewriting、Dialect Conversion）
 
 ---
@@ -209,10 +209,10 @@ def compile(kernel_fn):
     return backend.compile(ir, target="ascend")
 ```
 
-**对应 bishengir 的 Pass 流水线**：
+**对应 AscendNPU-IR 的 Pass 流水线**：
 
 ```bash
-# bishengir 等价操作
+# AscendNPU-IR 等价操作
 bishengir-opt \
   -convert-linalg-to-hfusion \    # ≅ ConvertTritonToTritonGPU
   -convert-arith-to-hfusion \
@@ -237,7 +237,7 @@ triton-ascend/lib/Dialect/TritonGPU/IR/
 triton-ascend/lib/Conversion/TritonToTritonGPU/
 triton-ascend/lib/Conversion/TritonGPUToLLVM/
 
-# bishengir (ascendnpu-ir)
+# AscendNPU-IR (ascendnpu-ir)
 ascendnpu-ir/bishengir/include/bishengir/Dialect/
 ascendnpu-ir/bishengir/lib/Conversion/
 
