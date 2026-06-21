@@ -421,3 +421,15 @@
 387|hivm.load/vadd/store            llvm.load + llvm.add + llvm.store
 388|```
 389|
+---
+
+## Triton 对应代码
+
+每个 MLIR 测试用例对应一个 Triton Python kernel，位于 `test-cases/triton/` 目录下。
+
+| 操作 | 命令 |
+|------|------|
+| 查看映射 | `cat test-cases/triton/MAPPING.md` |
+| 跑 Triton (需 NVIDIA GPU) | `python3 test-cases/triton/01_basic/01_vecadd.py` |
+
+详见 `test-cases/triton/README.md`。

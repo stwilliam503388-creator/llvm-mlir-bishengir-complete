@@ -1,10 +1,12 @@
 ---
 type: plan
-status: draft
+status: executed
 project: llvm-mlir-bishengir-complete
 created: 2026-06-21
 target: AscendNPU-IR 对接方案
 ---
+
+> ✅ **此计划已执行完毕**。结果见 `test-cases/mlir/`、`docs/primer/`、`references/ascendnpu-ir-mapping.md`、`docs/ascendnpu-ir/` 等。
 
 # AscendNPU-IR 对接方案
 

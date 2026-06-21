@@ -126,7 +126,7 @@ LLVM IR            MLIR Dialect          ascendnpu-ir-demo / AscendNPU-IR
                                           triton-ascend + 官方文档结合分析
 ```
 
-### 60+ 文件，覆盖 4 个层次
+### 80+ 文件，覆盖 4 个层次
 
 ```
 层次 1: 文档 (19 篇笔记, ~90KB)
