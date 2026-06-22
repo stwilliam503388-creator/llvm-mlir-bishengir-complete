@@ -1,248 +1,93 @@
-# 003：Pass 与 Lowering（IR 是怎么变成机器码的）
+# 02：Pass 和 Lowering（IR 是怎么变成机器码的）
 
-> 预估时间：15 分钟 | 前置：[01-AST与IR](./01-AST与IR.md)
-
-> 阅读时间：8 分钟 | 前置知识：Primer 00, 01
-
----
-
-## 3.1 Pass — IR 的"改造器"
-
-假设你有一段 IR：
-
-```llvm
-%1 = add i32 %a, 0    ; a + 0
-%2 = add i32 %1, %b   ; (a+0) + b
-```
-
-明眼人一看就知道 `%1 = add i32 %a, 0` 是多余的——加零等于没加。
-编译器怎么做这种优化的？靠 **Pass**。
-
-**Pass（遍 / 趟）** 的定义很简单：
-**一个 Pass = 遍历一次 IR + 做一次修改。**
-
-### 两种 Pass
-
-```
-分析 Pass (Analysis Pass):
-  只看不改。
-  遍历 IR，收集信息（用了多少变量、哪些变量没被使用），然后报告。
-  类比：质检员到车间数一数今天产了多少件产品。
-
-转换 Pass (Transform Pass):
-  边看边改。
-  遍历 IR，发现可以优化的地方，直接改掉。
-  类比：质检员发现产品有毛刺，顺手打磨掉。
-```
-
-### 一个具体的例子
-
-还是 `%1 = add i32 %a, 0`。转换 Pass 的处理流程：
-
-```
-Step 1: 遍历到 %1 = add i32 %a, 0
-Step 2: 检查右操作数是否是 0
-Step 3: 发现是 0，触发"加零消去"规则
-Step 4: 把用到 %1 的地方全部替换成 %a
-Step 5: 删除 %1 = add i32 %a, 0 这条指令
-
-结果:
-  优化前:  %1 = add i32 %a, 0; %2 = add i32 %1, %b
-  优化后:  %2 = add i32 %a, %b     ← 少了一条指令
-```
-
-这个优化叫"常量折叠"——你会多次遇到。
-
-### 在项目中找到它
-
-打开 `projects/ascendnpu-ir-op-counter/BishengirOpCounter.cpp`：
-
-```cpp
-// 这是一个分析 Pass：统计每种 op 出现了多少次
-void runOnOperation() override {
-    getOperation()->walk([&](Operation *op) {
-        counters[op->getName().getStringRef()]++;
-    });
-    // 输出: func.func: 1, linalg.generic: 1, arith.addf: 1, ...
-}
-```
-
-打开 `projects/ascendnpu-ir-op-counter/BishengirPeelTranspose.cpp`：
-
-```cpp
-// 这是一个转换 Pass：把冗余 transpose 消除掉
-// 检测 add(transpose(A), transpose(B)) → transpose(add(A,B))
-LogicalResult matchAndRewrite(TransposeOp op, ...) {
-    if (matchRedundantTranspose(op.getOperand()))
-        return replaceOpWithNewOp<...>(...);
-    return failure();
-}
-```
-
-**理解这个区别很重要**：分析 Pass 是"只读"的，转换 Pass 是"写"的。
-
-### Pass 管线
-
-一个 Pass 通常只做一件事。要做多个优化，就把多个 Pass 串起来：
-
-```
-输入 IR
-   ↓ Pass1: 常量折叠     %a + 0 → %a
-   ↓ Pass2: 死代码消除   删除没用到的变量
-   ↓ Pass3: 循环展开     小循环展开成直线代码
-   ↓ Pass4: 向量化       标量 → 向量指令
-输出 优化后的 IR
-```
-
-这就是编译器的"优化管线"。AscendNPU-IR 的管线就是：
-
-```
-Linalg IR → HFusion → HIVM → NPU
-    3个 Pass，串联执行
-```
+> 阅读时间：6 分钟 | 前置知识：Primer 00, 01
+> 遇到不认识的术语 → 查 `docs/reference/技术术语速查手册.md`
 
 ---
 
-## 3.2 Lowering — 从高级到低级
+## 3.1 IR 不是一步到位的
 
-Pass 能做优化，但编译器最终要解决另一个问题：**IR 太高层了，机器不认识。**
-
-例如 `linalg.matmul` 在代码里只有一行：
-
-```mlir
-linalg.matmul ins(%A, %B) outs(%C)
-```
-
-但 CPU/NPU 不认识"矩阵乘法"这个概念——它只认识 load、add、mul、store。
-所以需要把高级 IR **降低**成低级 IR。这个过程叫 **Lowering（降级）**。
-
-### Lowering 的类比
-
-```
-"做一桌满汉全席"        ← linalg.matmul (1 行，高层语义)
-       ↓
-"先买菜 → 再洗菜 →      ← affine.for × 3 (18 行，中层)
- 再切菜 → 再炒菜"
-       ↓
-"胡萝卜切 3mm 丁 →      ← LLVM IR (74 行，低层)
- 热油至 180°C →         每条指令对应一个 CPU 操作
- 翻炒 30 秒 → ..."
-```
-
-**为什么不能一步到位？**
-
-因为中间层可以做**中间层优化**。
+从你写的代码到最终机器码，IR 要经过**多次转换**：
 
 ```text
-例子: 先加再乘 → 可以融合
-  C = A + B      ← 第一个 loop
-  D = C * A      ← 第二个 loop
-  如果降到 affine 再融合: 合并成一个 loop
-  C[i] = A[i] + B[i]; D[i] = C[i] * A[i]
-  → 内存少读一次，快 2 倍
+你写的:      C = A + B
+
+linalg IR:   linalg.generic { arith.addf }     ← 高级（像"炒菜"）
+    ↓
+affine IR:   affine.for 循环                    ← 中级（像"热锅→倒油→炒"）
+    ↓
+scf/cf IR:  scf.for / cf.br                    ← 中低级（循环展开成判断和跳转）
+    ↓
+LLVM IR:    %1 = load; %2 = add; store          ← 低级（接近机器指令）
 ```
 
-这就是 MLIR 为什么要有多个 dialect（方言）：
-- 在 Linalg 层做**算子融合**（矩阵 + 激活函数合并）
-- 在 Affine 层做**循环优化**（分块、展开）
-- 在 SCF 层做**控制流优化**（条件分支合并）
-- 在 LLVM 层做**指令选择**（选最快的 CPU 指令）
-
-**每层只做自己擅长的事。**
-
-### 在项目中找到它
-
-运行 `projects/ascendnpu-ir-demo/variants/variant0_baseline.sh`：
-
-```bash
-bash projects/ascendnpu-ir-demo/variants/compare.sh
-```
-
-你会看到 `matmul_4x4x4.mlir` 从 1 行变成 74 行的完整过程：
-
-| 阶段 | IR 表示 | 行数 | 说明 |
-|------|---------|------|------|
-| 输入 | `linalg.matmul` | 1 行 | 高层语义：矩阵乘法 |
-| 降级到 Affine | `affine.for × 3` | 18 行 | 展开成三重循环 |
-| 降级到 LLVM | `llvm.load/add/mul/store` | 74 行 | 每条指令对应一个 CPU 操作 |
-
-这就是编译器"从抽象到具体"的全过程。
+每一层 IR 都比上一层更"啰嗦"、更接近硬件。这个过程叫 **Lowering（降级）**。
 
 ---
 
-## 3.3 Dialect — MLIR 为什么需要多个 IR
+## 3.2 Lowering——从高层语义到底层指令
 
-传统编译器只有一个 IR（比如 LLVM 的 IR）。
-MLIR 的创新在于：**可以有多个 IR——每个叫一个 Dialect（方言）。**
-
-| Dialect（方言） | 它描述的"方言词汇" | 好比 |
-|----------------|-------------------|------|
-| `toy` | add/mul/transpose/print | Toy 语言术语 |
-| `linalg` | matmul/conv/generic | 线性代数术语 |
-| `affine` | for/if/load/store | 循环和数组术语 |
-| `scf` | for/while/if/yield | 结构化控制流术语 |
-| `llvm` | add/load/call | CPU 指令术语 |
-| **`hfusion`** | elemwise_binary/cube_matmul | **Ascend NPU 算子术语** |
-| **`hivm`** | vadd/mload/mmul | **Ascend NPU 指令术语** |
-
-### 为什么要有多个方言？
-
-因为**一个问题拆成几层，每层独立解决，比一层硬扛简单得多**。
+**Lowering** = 把"高级但难执行"的 IR 变成"低级但易执行"的 IR。
 
 ```
-传统方案 (1 个 IR):
-  矩阵乘 + 循环优化 + 代码生成 = 全部在一个 IR 里做
-  → IR 变得巨大，加一个新功能要改整个框架
-
-MLIR 方案 (N 个 IR):
-  Linalg 层: 只操心矩阵乘语义
-  Affine 层: 只操心循环优化
-  LLVM 层: 只操心指令生成
-  → 每层独立，加新硬件只需加新 dialect
+linalg.generic "把 A 和 B 加起来"     ← 一句话说清楚，但 CPU 不知道怎么执行
+    ↓ lowering
+affine.for + arith.addf               ← 一步步说清楚：先读 A[0]，加 B[0]，存到 C[0]...
+    ↓ lowering
+load + add + store                     ← 最啰嗦，但 CPU 可以直接执行
 ```
 
-**类比：团队的协作方式**
+就像做菜：
+- **高层**（linalg）："炒个番茄炒蛋" —— 一句话，意思清楚，但没告诉你怎么做
+- **中层**（affine）："打蛋 → 切番茄 → 热锅 → 倒油 → 炒蛋 → 盛出 → 炒番茄 → 混合"
+- **低层**（LLVM）：每一步精确到秒和温度
 
-- 传统 1 个 IR = 一个人独立翻译整本书（质量依赖这个人水平）
-- MLIR 多个 dialect = 三个人接力翻译（英→日→中），每段只翻自己最擅长的
+**多层 IR 的好处**：每层可以做该层特有的优化。比如 linalg 层可以做"把两个操作融合成一个"（高层优化），affine 层可以做"循环展开"（中层优化）。
 
-### 在项目中找到它
-
-`standalone-mlir` 项目定义了一个自定义 dialect：
-
-```tablegen
-// StandaloneOps.td — 定义 standalone 方言的 6 个操作
-def AddOp : Standalone_Op<"add"> { ... }
-def MulOp : Standalone_Op<"mul"> { ... }
-def TransposeOp : Standalone_Op<"transpose"> { ... }
-```
-
-这就是一个最小的 dialect。`standalone-opt` 可以解析和打印这个 dialect 的 IR。
+> 💡 **Dialect（方言）**是 MLIR 里"不同层的 IR"。每个 dialect 有自己特有的操作——linalg 有 `linalg.matmul`（矩阵乘），affine 有 `affine.for`（循环），arith 有 `arith.addf`（加法）。
+> 在本项目中：`linalg` → `affine` → `scf` → `llvm` 就是一条完整的 lowering 链。
+> 你现在只需要知道"有很多层"就够了。具体 dialect 的定义是进阶内容。
 
 ---
 
-## 3.4 快速自测
+## 3.3 Pass——IR 的"改造器"
 
-1. **分析 Pass 和转换 Pass 的区别是什么？**
-   - 答：分析 Pass 只看不改（统计 op 数量），转换 Pass 边看边改（消去冗余 transpose）
+**Pass（遍）** = 遍历一次 IR，做一次修改或检查。
 
-2. **Lowering 为什么不能一步到位？**
-   - 答：中间层可以做中间层优化（比如循环融合），一步到位会丢失优化机会
+有两种 Pass：
 
-3. **MLIR 为什么要用多个 dialect（方言）？**
-   - 答：每层只做自己擅长的事——Linalg 层做矩阵优化，Affine 层做循环优化，互不干扰
+| 类型 | 做什么 | 类比 | 本项目的例子 |
+|------|--------|------|------------|
+| **分析 Pass** | 只看不改，统计信息 | 质检员数产品数量 | `BishengirOpCounter.cpp` |
+| **转换 Pass** | 边看边改，做优化 | 质检员顺手修毛刺 | `BishengirPeelTranspose.cpp` |
 
-4. **ascendnpu-ir-demo 中 matmul 从 1 行变成 74 行，这是个问题吗？**
-   - 答：不是问题，是 Lowering 的正常过程。AscendNPU-IR 之所以能保持 1 行（hivm.mmul），是因为它有硬件支持——不需要展开到标量
+一条 lowering 流水线就是**一连串 Pass**：
+
+```text
+mlir-opt --pass1 --pass2 --pass3 input.mlir
+           ↓       ↓       ↓
+        转换 A → 转换 B → 转换 C → 最终 IR
+```
 
 ---
 
-## 动手试试？
+## 3.4 回到 bishengir
 
-光看概念不够，来写个真的 Pass 吧：
+bishengir（AscendNPU-IR）的 lowering 流水线：
 
-→ **[HelloPass — 你的第一个 LLVM Pass](../../projects/hello-pass/)**
+```text
+Triton IR      →     linalg IR      →    hfusion IR     →     hivm IR
+                        ↓                   ↓                    ↓
+                   LinalgToHFusion     ArithToHFusion     HFusionToHIVM
+                   (本项目的基准)       (融合优化)          (NPU 指令生成)
+```
 
-30 行代码，一键运行，打印每个函数的名字和结构。看完这章 + 跑通 HelloPass，你就算真正入门了。
+这就是为什么本项目研究 `linalg → affine → llvm` 这条标准路径——因为 bishengir 的入口就是 linalg IR。理解了这条路径，你就理解了 bishengir 的一半。
 
-> 📖 遇到不认识的术语？→ [术语表](../glossary.md)
+> ✅ **检查自己**：
+> 1. Lowering 是什么？
+>    → 从高级 IR 到低级 IR 的转换过程，每一步都更啰嗦但更容易执行。
+> 2. 为什么不用一层 IR 搞定？
+>    → 不同层可以针对性地做不同优化（高层做融合，中层做循环优化）。
+> 3. 分析 Pass 和转换 Pass 的区别？
+>    → 分析只看不改，转换边看边改。
