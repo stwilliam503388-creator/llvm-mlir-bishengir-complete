@@ -1,8 +1,6 @@
 # 003：Pass 与 Lowering（IR 是怎么变成机器码的）
 
-> 预估时间：15 分钟 | 前置：[01-AST与IR](./01-AST与IR.md)
-
-> 阅读时间：8 分钟 | 前置知识：Primer 00, 01
+> 阅读时间：15 分钟 | 前置知识：[00-编译器是什么](./00-编译器是什么.md)、[01-AST与IR](./01-AST与IR.md)
 
 ---
 
@@ -51,7 +49,7 @@ Step 5: 删除 %1 = add i32 %a, 0 这条指令
   优化后:  %2 = add i32 %a, %b     ← 少了一条指令
 ```
 
-这个优化叫"常量折叠"——你会多次遇到。
+这个优化叫**代数简化（Algebraic Simplification）**——识别恒等运算（如 `x + 0 = x`）并消除冗余指令。它和"常量折叠"不同：常量折叠是在编译期直接计算常量表达式的值（如 `3 + 5 → 8`），而代数简化是利用数学恒等式简化表达式。你在后续的 Pass 中会多次遇到这两种优化。
 
 ### 在项目中找到它
 
@@ -87,7 +85,7 @@ LogicalResult matchAndRewrite(TransposeOp op, ...) {
 
 ```
 输入 IR
-   ↓ Pass1: 常量折叠     %a + 0 → %a
+   ↓ Pass1: 代数简化     %a + 0 → %a
    ↓ Pass2: 死代码消除   删除没用到的变量
    ↓ Pass3: 循环展开     小循环展开成直线代码
    ↓ Pass4: 向量化       标量 → 向量指令
@@ -244,5 +242,10 @@ def TransposeOp : Standalone_Op<"transpose"> { ... }
 → **[HelloPass — 你的第一个 LLVM Pass](../../projects/hello-pass/)**
 
 30 行代码，一键运行，打印每个函数的名字和结构。看完这章 + 跑通 HelloPass，你就算真正入门了。
+
+---
+
+> **上一章**：[01 - AST 与 IR](./01-AST与IR.md)
+> **下一章**：[03 - 从 Triton 到 Ascend](./03-从Triton到Ascend.md) — 贯穿全项目的完整路径
 
 > 📖 遇到不认识的术语？→ [术语表](../glossary.md)
