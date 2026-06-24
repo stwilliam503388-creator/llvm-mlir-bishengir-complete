@@ -55,7 +55,6 @@ module {
 | `%s` | 当前测试文件路径 |
 | `%S` | 当前测试文件所在目录 |
 | `// CHECK:` | FileCheck 风格的期望输出 |
-| `// CHECK-RUN1:` | `run-tests.sh` 针对第 1 条 RUN 命令的轻量检查 |
 
 ## 运行模式
 

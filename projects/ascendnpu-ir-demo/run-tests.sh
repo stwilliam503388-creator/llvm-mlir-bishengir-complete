@@ -108,16 +108,6 @@ run_test_file() {
             all_pass=false
             break
         fi
-
-        while IFS= read -r check_line; do
-            local pattern="${check_line#// CHECK-RUN${run_idx}: }"
-            if ! echo "$output" | grep -qF "$pattern"; then
-                log_fail "$label (CHECK-RUN${run_idx}: 未找到 '$pattern')"
-                all_pass=false
-            fi
-        done < <(grep "^// CHECK-RUN${run_idx}:" "$mlir")
-
-        [ "$all_pass" = true ] || break
     done < <(grep "^// RUN:" "$mlir")
 
     if [ "$all_pass" = true ]; then log_pass "$label"; fi

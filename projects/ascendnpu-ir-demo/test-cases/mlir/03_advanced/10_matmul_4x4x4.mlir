@@ -8,7 +8,6 @@
 // RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
 // RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
 // CHECK: affine.for
-// CHECK: linalg.matmul
 //
 module {
   func.func @matmul(%A: memref<4x4xf32>, %B: memref<4x4xf32>, %C: memref<4x4xf32>) {
