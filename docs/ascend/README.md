@@ -23,7 +23,11 @@
 
 | 项目 | 说明 |
 |------|------|
-| **[ascend-samples](../../projects/ascend-samples/)** | 从 AscendNPU-IR 131 个测试中精选 5 个关键用例 |
+| **[ascend-samples](../../projects/ascend-samples/)** | 5 个精选用例：从 linalg.generic 到 llvm.func 的完整 Lowering |
+| **[mlir-hello](../../projects/mlir-hello/)** | 前置：MLIR 版 HelloPass（Phase 3 必须跑通） |
+
+每个用例含 input.mlir + expected.mlir + README 逐行解读。
+用例 5 含 `trace.sh` 一键追踪完整 Lowering 路径。
 
 ## 与 Phase 3 的衔接
 
