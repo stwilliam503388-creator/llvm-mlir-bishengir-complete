@@ -1,6 +1,7 @@
 #!/bin/bash
 # run-demo.sh — 用标准 mlir-opt 模拟 AscendNPU-IR 三阶段降级
 
+# Do not use `set -e`: unsupported lowering stages are logged and the demo continues.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -30,10 +31,6 @@ run_stage() {
     local out="$2"
     shift 2
     if "$MLIR_OPT" "$@" > "$out" 2>&1; then
-        if [ ! -f "$out" ]; then
-            echo "    ⚠ $label: 命令成功但未生成输出文件 $out"
-            return 1
-        fi
         echo "    ✓ $label: $out ($(wc -l < "$out")行, $(wc -c < "$out")字节)"
         return 0
     fi

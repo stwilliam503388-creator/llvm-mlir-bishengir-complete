@@ -6,7 +6,8 @@
 #   bash run-tests.sh --verbose    # 显示详细输出
 #   bash run-tests.sh <pattern>    # 只运行匹配的用例
 
-set -o pipefail
+# Do not use `set -e`: individual test failures are counted and reported.
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CASES_DIR="$SCRIPT_DIR/test-cases/mlir"
@@ -80,6 +81,7 @@ run_test_file() {
     TOTAL=$((TOTAL + 1))
     echo "── $label ──"
 
+    # grep -c returns 1 when no lines match; keep that as count=0 instead of aborting.
     has_run=$(grep -c "^// RUN:" "$mlir" 2>/dev/null || echo 0)
     if [ "$has_run" -eq 0 ]; then
         log_skip "$label (无 RUN 标注)"
