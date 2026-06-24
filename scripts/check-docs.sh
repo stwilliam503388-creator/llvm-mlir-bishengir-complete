@@ -2,6 +2,7 @@
 # check-docs.sh — lightweight repository consistency checks with no LLVM dependency.
 
 # Do not use `set -e`: this script aggregates all failures before exiting.
+# `-u` catches unset variables; `pipefail` propagates failures in pipelines.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)" || exit 1

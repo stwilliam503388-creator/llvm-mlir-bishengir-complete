@@ -2,6 +2,7 @@
 # run-demo.sh — 用标准 mlir-opt 模拟 AscendNPU-IR 三阶段降级
 
 # Do not use `set -e`: unsupported lowering stages are logged and the demo continues.
+# `-u` catches unset variables; `pipefail` propagates failures in pipelines.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

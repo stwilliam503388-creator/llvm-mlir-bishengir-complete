@@ -7,6 +7,7 @@
 #   bash run-tests.sh <pattern>    # 只运行匹配的用例
 
 # Do not use `set -e`: individual test failures are counted and reported.
+# `-u` catches unset variables; `pipefail` propagates failures in pipelines.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
