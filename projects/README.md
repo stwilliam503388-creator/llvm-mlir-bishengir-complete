@@ -1,37 +1,50 @@
 # 动手项目
 
-本目录包含与学习路线各阶段配套的动手实践项目。
+本目录包含与学习路线各阶段配套的实践项目。建议按“可直接运行 → 需要 LLVM/MLIR → 需要 AscendNPU-IR”的顺序学习。
 
-## 项目列表
+## 项目总览
 
-| 项目 | 难度 | 对应阶段 | 说明 | 状态 |
-|------|------|---------|------|------|
-| [hello-pass](./hello-pass/) | ⭐ | Phase 2 LLVM | 第一个 LLVM Pass：打印函数信息 | ✅ |
-| [mlir-hello](./mlir-hello/) | ⭐ | Phase 3 MLIR | MLIR 版 HelloPass，45 行独立程序 | ✅ |
-| [ascend-samples](./ascend-samples/) | ⭐⭐ | Phase 4 Ascend | 5 个 IR Lowering 精选用例 | ✅ |
-| [opt-pass](./opt-pass/) | ⭐⭐ | Phase 2 进阶 | 死代码消除 Pass，35 行 | ✅ |
+| 项目 | 难度 | 阶段 | 环境要求 | 说明 | 验证方式 |
+|---|---:|---|---|---|---|
+| [hello-pass](./hello-pass/) | ⭐ | LLVM 入门 | LLVM `opt` / CMake | 第一个 LLVM FunctionPass：打印函数信息 | `cd hello-pass && ./run.sh` |
+| [opt-pass](./opt-pass/) | ⭐⭐ | LLVM 进阶 | LLVM `opt` / CMake | 死代码消除 Pass，展示如何修改 IR | `cd opt-pass && ./run.sh` |
+| [mlir-hello](./mlir-hello/) | ⭐ | MLIR 入门 | MLIR 库 / clang++ | 45 行独立程序，遍历 `func.func` | `cd mlir-hello && ./run.sh` |
+| [toy-mini](./toy-mini/) | ⭐ | 编译器前端 | C++17 编译器 | 纯 C++17 Toy 解析器和 MLIR 风格文本输出 | `g++ -std=c++17 -o toymini toymini.cpp` |
+| [standalone-mlir](./standalone-mlir/) | ⭐⭐⭐ | MLIR 工程 | LLVM/MLIR + CMake 或 Make | 自定义 Dialect、TableGen、Pass、`standalone-opt` | `cmake --build build` 或 `make` |
+| [ascendnpu-ir-op-counter](./ascendnpu-ir-op-counter/) | ⭐⭐⭐ | Ascend Pass | AscendNPU-IR 源码环境 | 分析 Pass 和转换 Pass 参考代码 | 放入 AscendNPU-IR 工程中构建 |
+| [ascend-samples](./ascend-samples/) | ⭐⭐ | Ascend 对照 | 可选：自建 `bishengir-opt` | 5 个 Ascend Lowering 精选用例，含 input/expected 解读 | 阅读对照或运行 `bishengir-opt` |
+| [ascendnpu-ir-demo](./ascendnpu-ir-demo/) | ⭐⭐ | 综合 demo | 可选：`mlir-opt` | 31 个 MLIR 用例、28 个 Triton 对照、4 种 matmul 优化方案 | `cd ascendnpu-ir-demo && bash run-tests.sh` |
 
-## 快速开始
+## 推荐顺序
 
-```bash
-# LLVM Pass — 一键运行
-cd hello-pass && ./run.sh
-
-# MLIR Pass — 一键运行
-cd mlir-hello && ./run.sh
-
-# Ascend 用例 — 需先构建 AscendNPU-IR
-cd ascend-samples && cat 01-simple-add/README.md
+```text
+hello-pass → opt-pass → mlir-hello → toy-mini
+          → standalone-mlir → ascendnpu-ir-demo
+          → ascend-samples / ascendnpu-ir-op-counter
 ```
 
-## 编写指南
+## 分类说明
 
-- 提供最小、最直接的功能复现
-- 清晰直白的注释
-- 通过文件树展示清晰的项目结构
-- 必要的测试用例和预期输出
-- 提供一键运行的 `run.sh` 脚本
+### 可直接建立直觉
 
-## 与 LLVM 官方示例的区别
+- `hello-pass`：理解 Pass 是“遍历 IR 并做事”。
+- `opt-pass`：理解 Pass 可以修改 IR。
+- `toy-mini`：理解源码如何变成 AST，再输出 IR 风格文本。
 
-本项目将 LLVM 和 MLIR 的官方示例重新组织和改编为更易于初学者理解的版本，并根据需要补充背景知识。Ascend-samples 的用例来自 AscendNPU-IR 官方项目的 131 个测试，精选 5 个关键用例并附逐行解读。
+### 需要 LLVM/MLIR 环境
+
+- `mlir-hello`：从 LLVM Pass 迁移到 MLIR Pass。
+- `standalone-mlir`：理解 Dialect / ODS / TableGen / Pass 注册。
+- `ascendnpu-ir-demo`：用标准 MLIR pass 模拟 AscendNPU-IR lowering。
+
+### 需要或对照 AscendNPU-IR
+
+- `ascend-samples`：从真实 AscendNPU-IR 语义抽取的阅读用例。
+- `ascendnpu-ir-op-counter`：面向 AscendNPU-IR 工程的 Pass 参考实现。
+
+## 新增项目约定
+
+- 提供最小、直接的功能复现。
+- 保留 `README.md`，说明目标、环境、运行方式和预期输出。
+- 能一键运行的项目优先提供 `run.sh`。
+- 复杂环境依赖必须说明“无依赖可阅读什么，有依赖可运行什么”。

@@ -2,481 +2,111 @@
 
 # 昇腾 NPU 编译器学习
 
-> 从 LLVM IR 入门到 MLIR Dialect 开发，最终对接 AscendNPU-IR 的完整学习路径与工程合集
+> 从零基础编译器概念，到 LLVM Pass、MLIR Dialect，再到 AscendNPU-IR / Triton 对接的教程与动手项目合集。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![LLVM](https://img.shields.io/badge/LLVM-22.1.6-blue)](https://llvm.org)
-[![macOS](https://img.shields.io/badge/macOS-26.5.1-ff69b4)](https://www.apple.com/macos)
-[![AscendNPU-IR](https://img.shields.io/badge/AscendNPU--IR-官方-blueviolet)](https://github.com/Ascend/AscendNPU-IR)
+[![LLVM](https://img.shields.io/badge/LLVM%2FMLIR-18%2B%20recommended-blue)](https://llvm.org)
+[![AscendNPU-IR](https://img.shields.io/badge/AscendNPU--IR-reference-blueviolet)](https://github.com/Ascend/AscendNPU-IR)
 
 ---
 
-> **术语说明**：本项目中 "AscendNPU-IR" 与代码仓中出现的 "BishengIR"（毕昇 IR）指同一编译器项目。AscendNPU-IR 是华为官方仓库名称，BishengIR 是其内部编译器核心组件的代号，也是源码中实际的命名空间（`bishengir-opt`、`bishengir/` 目录）。本文档统一使用 **AscendNPU-IR** 指代。
+## 项目定位
 
----
-
-## 一、项目背景
-
-### 1.1 为什么需要这个项目
-
-AI 芯片正在经历从通用计算（CPU/GPU）到专用计算（NPU/TPU）的转变。以华为昇腾（Ascend）为代表的 NPU 在推理场景中表现突出，但它们的软件栈复杂度远高于 CUDA。
-
-编译器是这座软件栈的**核心骨架**。以一条 Triton 代码到 Ascend NPU 执行为例：
+本仓库是一个 **AI 编译器学习教程项目**，面向想理解 Triton、MLIR、Ascend NPU 编译栈的学习者。项目用中文文档和小型工程串起以下主线：
 
 ```text
-Triton Python kernel  (你写的代码)
-        │
-        ▼
-Triton IR (TT Dialect)       ← MLIR 中间表示
-        │
-        ▼
-AscendNPU-IR     ← Ascend 编译器
-  Linalg → HFusion → HIVM
-        │
-        ▼
-CANN Runtime                 ← 华为 SDK
-        │
-        ▼
-Ascend NPU 执行
+为什么学 → Primer 零基础 → LLVM IR / Pass → MLIR Dialect / Lowering
+        → AscendNPU-IR / Triton 对照 → 可运行 demo 与测试用例
 ```
 
-每一步都涉及编译器知识：**IR（中间表示）**、**dialect（方言）**、**Pass（转换）**、**Lowering（降级）**。现有教程要么偏学术（LLVM 源码分析），要么偏应用（只讲 Triton 使用），缺乏一条从零到 AscendNPU-IR 的动手路径。
+> 术语说明：本仓库中出现的 **AscendNPU-IR** 与 **BishengIR** 指向同一类 Ascend NPU MLIR 编译器项目语境。AscendNPU-IR 是官方仓库名称，BishengIR 是相关源码中常见的命名空间和工具名前缀。
 
-本项目填补这个空白。
+## 推荐学习路线
 
-### 1.2 AscendNPU-IR 是什么
+| 阶段 | 目标 | 必读入口 | 动手项目 | 验证方式 |
+|---|---|---|---|---|
+| 0. 为什么学 | 理解学习价值和使用场景 | [docs/why-ascend.md](docs/why-ascend.md) | — | 能说明 AI 编译器后端能解决什么问题 |
+| 1. 快速开始 | 2 小时建立完整路线感 | [docs/quickstart.md](docs/quickstart.md) | [projects/hello-pass](projects/hello-pass/) | `bash setup.sh`、`./run.sh` |
+| 2. Primer | 零基础理解 AST / IR / Pass / Lowering | [docs/primer/](docs/primer/) | [projects/ascendnpu-ir-demo](projects/ascendnpu-ir-demo/) | 能看懂一个 `linalg.generic` 用例 |
+| 3. LLVM | 能读 LLVM IR，能写简单 Pass | [docs/llvm/](docs/llvm/) | [hello-pass](projects/hello-pass/)、[opt-pass](projects/opt-pass/) | 项目 `run.sh` |
+| 4. MLIR | 理解 Dialect、Operation、Pattern、Lowering | [docs/mlir/](docs/mlir/) | [mlir-hello](projects/mlir-hello/)、[standalone-mlir](projects/standalone-mlir/) | `mlir-hello/run.sh`、TableGen/CMake 验证 |
+| 5. AscendNPU-IR | 对照真实 Ascend 编译器后端 | [docs/ascend/](docs/ascend/)、[docs/ascendnpu-ir/](docs/ascendnpu-ir/) | [ascend-samples](projects/ascend-samples/)、[ascendnpu-ir-op-counter](projects/ascendnpu-ir-op-counter/) | 阅读 input/expected，或使用自建 `bishengir-opt` |
+| 6. 综合 demo | 观察 Linalg 到底层 IR 的降级膨胀与优化 | [projects/ascendnpu-ir-demo](projects/ascendnpu-ir-demo/) | 31 个 MLIR 用例 + 28 个 Triton 对照 | `bash run-tests.sh`、`bash run-demo.sh` |
 
-**AscendNPU-IR** 是华为开源的 Ascend NPU MLIR 编译器项目：
-
-| 项目 | 链接 | 说明 |
-|------|------|------|
-| **官方代码仓** | https://github.com/Ascend/AscendNPU-IR | 华为官方维护 |
-| **中文文档** | https://ascendnpu-ir.gitcode.com/zh_cn/index.html | GitCode 镜像，含完整 API 参考 |
-
-它本质上是基于 MLIR 框架构建的一套**多层 IR 降级流水线**：
+## 项目结构
 
 ```text
-输入:  Linalg / Arith / Func 等标准 MLIR dialect
-         │
-         ▼
-  Pass1: -convert-linalg-to-hfusion
-         Linalg dialect → HFusion dialect（融合算子抽象）
-         │
-         ▼
-  Pass2: -convert-arith-to-hfusion
-         Arith dialect → HFusion dialect
-         │
-         ▼
-  Pass3: -convert-hfusion-to-hivm
-         HFusion dialect → HIVM dialect（NPU 指令抽象）
-         │
-         ▼
-  HIVM → CANN Runtime → Ascend NPU 执行
-```
-
-**本项目研究的 `ascendnpu-ir`** 是 AscendNPU-IR 的一个活跃 fork，由 Nous Research 维护，在社区中也被称为 BishengIR。它在官方基础上扩展了更多 dialect 和转换 Pass。
-
-### 1.3 本项目的价值
-
-| 维度 | 说明 |
-|------|------|
-| **知识层次** | 从 LLVM IR 基础 → MLIR dialect 概念 → AscendNPU-IR 实战，三级递进 |
-| **动手验证** | 所有知识都有对应工程：4 个项目，全部可在 macOS 上运行 |
-| **开源生态** | 对标华为 AscendNPU-IR 官方项目，代码直接可读 |
-| **零基础可入** | 附带 4 篇 primer 入门文档，面向 AI 工程师，无需编译器经验 |
-
-### 1.4 适用读者
-
-- 想理解 **Ascend NPU 编译栈** 的 AI 工程师
-- 使用 Triton 做模型推理，想深入底层的学习者
-- 需要开发 **自定义 MLIR dialect** 的编译器开发者
-- 阅读 AscendNPU-IR / triton-ascend 源码时遇到 MLIR 瓶颈的学习者
-- **零基础也没问题，从 `docs/primer/` 开始**
-
-### 1.5 前置知识
-
-| 要求 | 说明 |
-|------|------|
-| ✅ C++ 基础 | 能读 C++17 代码 |
-| ✅ Python 基础 | 能读 Python 代码 |
-| 🟡 编译器经验 | **不需要。从 `docs/primer/` 开始（约 30 分钟）** |
-| 🟡 编译器直觉 | **不需要。Primer 会用类比帮你建立直觉** |
-| ❌ Ascend NPU | 不需要硬件，所有验证在 CPU 上完成 |
-
----
-
-## 二、项目总览
-
-### 覆盖范围
-
-```
-基础知识 ←───────── 核心概念 ←────────────── 工程实践
-─────────           ─────────             ──────────────
-LLVM IR            MLIR Dialect          ascendnpu-ir-demo / AscendNPU-IR
-  SSA 形式            dialect 定义          可运行降级流水线
-  类型系统/GEP        Operation/Region      Linalg→affine→LLVM
-  控制流/Phi          Pattern Rewriting     三阶段对照分析
-  Pass 开发           Dialect Conversion    向量加法 / 矩阵乘法 / 融合优化
-                    Pass 管理器           + 官方文档对接分析
-                    TableGen ODS          自定义 MLIR Pass
-                    mlir-opt 工具链        OpCounter / PeelTranspose
-                                          Toy Mini 解析器（纯 C++17 零依赖）
-                                          Standalone MLIR 项目（CMake + TableGen）
-                                          Triton → AscendNPU-IR 全链路对接
-                                          triton-ascend + 官方文档结合分析
-```
-
-### 80+ 文件，覆盖 4 个层次
-
-```
-层次 1: 文档 (19 篇笔记, ~90KB)
-├── LLVM IR 基础 (7 篇)     — 从 SSA 到 Pass 开发
-├── MLIR 体系 (8 篇)        — 从 dialect 概念到 Triton 对接
-└── 零基础入门 (4 篇)       — 面向 AI 工程师的编译器概念速成
-
-层次 2: 可运行工程 (4 个项目)
-├── ascendnpu-ir-demo ★        — 28 个 MLIR 用例 + 28 个 Triton 对应代码 + 4 种优化方案
-│   ├── test-cases/              ← 测试用例（三级难度：⭐/⭐⭐/⭐⭐⭐）
-│   │   ├── mlir/                31 个 MLIR 用例
-│   │   │   ├── 01_basic/        ⭐ 入门（10 个）
-│   │   │   ├── 02_intermediate/ ⭐⭐ 进阶（11 个）
-│   │   │   └── 03_advanced/     ⭐⭐⭐ 复杂（10 个）
-│   │   └── triton/              28 个 Triton 对应代码
-│   │       ├── 01_basic/        ⭐ 入门（8 个）
-│   │       ├── 02_intermediate/ ⭐⭐ 进阶（11 个）
-│   │       ├── 03_advanced/     ⭐⭐⭐ 复杂（9 个）
-│   │       ├── MAPPING.md       MLIR ↔ Triton 双向映射
-│   │       └── README.md
-│   ├── variants/                4 种优化方案对比脚本（baseline/tiling/vectorize/hw_mapping）
-│   └── LIMITATIONS.md           Homebrew LLVM 环境限制说明
-├── toy-mini                 — 纯 C++17 Toy 解析器，编译通过
-├── standalone-mlir          — CMake + Makefile + TableGen 自建 dialect
-└── ascendnpu-ir-op-counter     — 分析 + 转换 Pass 参考代码
-
-层次 3: 设施
-├── setup.sh                 — 依赖检查
-├── LICENSE                  — MIT 开源
-├── .gitattributes           — 换行符管理
-└── references/              — 外部源码索引
-
-层次 4: 外部源码（不在本仓库）
-├── ascendnpu-ir (AscendNPU-IR) — Ascend NPU MLIR 转换 Pass
-└── triton-ascend            — Triton 前端对接
-```
-
-### 项目结构
-
-```
 ascend-npu-compiler-learning/
-├── README.md                         ← 本文件（项目总览）
-├── SUMMARY.md                        ← 完整输出总结文档
-├── LICENSE                           ← MIT 许可证
-├── setup.sh                          ← 依赖检查脚本
-│
-├── docs/                             ← 知识库（19 篇笔记）
-│   ├── llvm/                         ← LLVM 速通（7 篇）
-│   ├── mlir/                         ← MLIR 体系（8 篇）
-│   └── primer/                       ★ 零基础入门（4 篇，约 30 分钟）
-│       ├── README.md                 — 阅读顺序
-│       ├── 00-编译器是什么.md         — 编译器三步工作法
-│       ├── 01-AST与IR.md             — 语法树、SSA、三地址码
-│       ├── 02-Pass与Lowering.md      — 分析/转换 Pass、dialect、降级
-│   │   └── 03-从Triton到Ascend.md    — 全路径串联到本项目
-│   │
-│   └── reference/                    ★ 术语速查手册（298 条术语, 按主题分组）
-│       └── 技术术语速查手册.md       — SSA/Dialect/Pass/Lowering/Linalg 等, 每条含一句话+类比
-│
-├── projects/                         ← 工程项目（4 个）
-│       └── README.md                 — 阅读顺序
-│
-├── projects/                         ← 工程项目（4 个）
-│   ├── ascendnpu-ir-demo/               ★ 可运行降级流水线（模拟 AscendNPU-IR 三阶段降级）
-│   ├── toy-mini/                     ★ 从零写 Toy 解析器
-│   ├── standalone-mlir/              ★ 从零构建 MLIR dialect
-│   └── ascendnpu-ir-op-counter/         ★ 自定义 Pass 参考代码（分析 + 转换 Pass）
-│
-├── references/                       ← 外部源码索引
-│   ├── README.md                     — triton-ascend + AscendNPU-IR 核心文件位置
-│   └── ascendnpu-ir-mapping.md      ★ 源码级追踪对照（本项目的每个文件 → ascendnpu-ir）
-│
-└── scripts/                          ★ 实用工具
-    └── trace-to-ascendnpu.sh         — 在 ascendnpu-ir 源码中搜索关键词
+├── README.md                    # 项目入口和权威学习路线
+├── SUMMARY.md                   # 历史交付和阶段总结
+├── setup.sh                     # 环境检查
+├── docs/                        # 教程文档
+│   ├── quickstart.md            # 2 小时快速入门
+│   ├── why-ascend.md            # 学习动机
+│   ├── primer/                  # 零基础入门
+│   ├── llvm/                    # LLVM IR / Pass
+│   ├── mlir/                    # MLIR / Dialect / Lowering
+│   ├── ascend/                  # Ascend 后端概念和构建调试
+│   ├── ascendnpu-ir/            # AscendNPU-IR 官方文档翻译/分析
+│   └── reference/               # 术语速查手册
+├── projects/                    # 动手项目
+│   ├── hello-pass/              # 第一个 LLVM Pass
+│   ├── opt-pass/                # 修改 IR 的 LLVM Pass
+│   ├── mlir-hello/              # 第一个 MLIR Pass
+│   ├── toy-mini/                # 纯 C++17 Toy 前端
+│   ├── standalone-mlir/         # 自定义 MLIR Dialect 工程模板
+│   ├── ascendnpu-ir-op-counter/ # AscendNPU-IR Pass 参考代码
+│   ├── ascend-samples/          # Ascend Lowering 精选用例
+│   └── ascendnpu-ir-demo/       # 综合 MLIR 降级 demo
+├── references/                  # 外部资料索引
+├── plans/                       # 历史计划和后续 backlog
+└── scripts/                     # 仓库检查和辅助脚本
 ```
 
-### 已验证
-
-| 验证项 | 结果 | 说明 |
-|--------|------|------|
-| `mlir-opt` 降级流水线 | ✅ 3/3 用例通过 | vecadd / matmul / fused |
-| `g++ -std=c++17` 编译 | ✅ 0 errors | toymini.cpp (1,412 行) |
-| `mlir-tblgen` TableGen | ✅ 语法通过 | StandaloneOps.td (6 ops) |
-| CMake + MLIR 集成 | ✅ 配置成功 | 跳过 AddMLIR 冲突 |
-| AscendNPU-IR 源码分析 | ✅ 完成 | 3 个 Conversion Pass 逐行解读 |
-| Triton MLIR 体系 | ✅ 完成 | TT / TritonGPU 双 Dialect 分析 |
-| matmul 优化方案对比 | ✅ 4 种方案 | 从 74 行到 5 行 |
-
----
-
-## 三、学习路径
-
-> 🆕 **没有编译器基础？先读 `docs/primer/`（约 30 分钟），再回来学下面的。**
-
-### Stage -1: 编译器零基础入门（可选，约 30 分钟）
-
-目标：建立从 AST → IR → Pass → Lowering 的基本直觉。
-路径：`docs/primer/00.md` → `01.md` → `02.md` → `03.md`
-
-| 步骤 | 文档 | 概念 | 对应工程 |
-|------|------|------|---------|
-| -1.1 | `00-编译器是什么` | 编译器三步工作法、为什么需要 IR | — |
-| -1.2 | `01-AST与IR` | 语法树、三地址码、SSA | toy-mini, standalone-mlir |
-| -1.3 | `02-Pass与Lowering` | 分析/转换 Pass、dialect、降级 | ascendnpu-ir-demo, ascendnpu-ir-op-counter |
-| -1.4 | `03-从Triton到Ascend` | 全路径串联 | 所有项目 |
-
-### Stage 0: LLVM IR 基础（约 3 天）
-
-目标：理解 LLVM 编译器的核心模型，为 MLIR 打下基础。
-
-```
-笔记路径: docs/llvm/
-验证方式: 读懂 .ll 文件 + 理解 Pass 结构
-```
-
-| 步骤 | 笔记 | 知识点 | 产出 |
-|------|------|--------|------|
-| 0.1 | L00 速通总览 | 三段式架构、学习路线图 | 整体认知 |
-| 0.2 | L01 架构与 HelloWorld | SSA 形式、Module/Func 结构 | 能读 `.ll` 文件 |
-| 0.3 | L02 类型系统与 GEP | `iN` 类型、类型转换、GEP 剥洋葱 | 理解地址计算 |
-| 0.4 | L03 控制流与 Phi | `br` 指令、φ 节点汇合规则 | 理解 CFG |
-| 0.5 | L04 内置函数与属性 | `llvm.memcpy`、`expect` 内建 | 了解优化基础 |
-| 0.6 | L05 Pass 开发 | New PM 架构、FunctionPass 骨架 | 能写 BBCounter |
-| 0.7 | L06 IR 速查表 | 常用指令、调试命令、FileCheck | 快速参考 |
-
-**关键突破**: 理解 SSA + φ 节点。这是 MLIR 的 Region 概念的基础。
-
-### Stage 1: MLIR 核心概念（约 5 天）
-
-目标：掌握 MLIR 的多层 IR 哲学，理解 dialect / operation / pass 三大概念。
-
-```
-笔记路径: docs/mlir/L00 ~ L04
-验证方式: 运行 ascendnpu-ir-demo + 读懂 standalone-mlir
-```
-
-| 步骤 | 笔记 | 知识点 | 对应项目 |
-|------|------|--------|---------|
-| 1.1 | L00 速通与 AscendNPU-IR | dialect/region/operation 概念 | → ascendnpu-ir-demo |
-| 1.2 | L01 Toy Ch1-2 | TableGen 语法、Ops.td 结构 | → toy-mini |
-| 1.3 | L02 Toy Ch3-6 | Pattern Rewriting、ConversionTarget | → ascendnpu-ir-op-counter |
-| 1.4 | L03 自定义 Pass | walk / OpRewritePattern 两种模式 | → ascendnpu-ir-op-counter |
-| 1.5 | L04 Standalone 实战 | CMake + Makefile + LLVM 22 适配 | → standalone-mlir |
-
-**关键突破**: 理解 MLIR 的 **多层 IR 概念**——为什么需要多个 dialect，如何用 Pass 做 dialect 转换。
-
-### Stage 2: 工程实战（约 3 天）
-
-目标：从读到写，产出可运行的 MLIR 工程。
-
-| 步骤 | 项目 | 行动 | 验证 |
-|------|------|------|------|
-| 2.1 | ascendnpu-ir-demo | 运行测试用例，观察降级过程 | `mlir-opt` 输出 |
-| 2.2 | ascendnpu-ir-demo | 运行 variants/compare.sh，对比 4 种优化方案 | 观察 74 行 → 5 行的变化 |
-| 2.3 | toy-mini | 编译运行，修改语法扩展 | `./toymini` 输出 |
-| 2.4 | standalone-mlir | 编译，跑自定义 Pass | `--count-ops` |
-| 2.5 | ascendnpu-ir-op-counter | 阅读源码，理解模式 | 对照 Toy Tutorial |
-
-**关键突破**: 能用 `mlir-opt` 验证自己的 dialect 理解。
-
-### Stage 3: 体系对照（约 2 天）
-
-目标：将学到的知识对标到真实项目（AscendNPU-IR / Triton）。
-
-```
-笔记路径: docs/mlir/L05 ~ L07
-```
-
-| 步骤 | 笔记 | 对标项目 | 产出 |
-|------|------|---------|------|
-| 3.1 | L05 Toy Mini 手写 | 对照 Toy Tutorial Ch1-2 | 三项目对照表 |
-| 3.2 | L06 Triton MLIR 体系 | triton-ascend 源码 | TT / TritonGPU Dialect 分析 |
-| 3.3 | L07 triton-ascend 后端 | ascend_interpreter.py | Python ↔ C++ 对接层 |
-| 3.4 | L08 ascendnpu-ir-demo | 三个用例全跑通 | 可运行验证 |
-
-**关键突破**: 理解 Triton + AscendNPU-IR 如何组成完整的 Ascend 编译链路。
-
----
-
-## 四、工程项目详情
-
-### 4.1 ⭐ ascendnpu-ir-demo — 可运行降级流水线
-
-用标准 `mlir-opt` 模拟 AscendNPU-IR 三阶段降级过程。
-
-#### AscendNPU-IR 对应
-
-| 阶段 | AscendNPU-IR (实际) | 本 demo (标准 MLIR) | 共同概念 |
-|------|------------------|--------------------|---------|
-| 输入 | `linalg.generic` | `linalg.generic` | Linalg dialect |
-| Pass1 | `-convert-linalg-to-hfusion` | `--convert-linalg-to-affine-loops` | 高级→中级 IR |
-| Pass2 | `-convert-arith-to-hfusion` | `--lower-affine` | 算术操作处理 |
-| Pass3 | `-convert-hfusion-to-hivm` | `--convert-scf-to-cf --convert-func-to-llvm` | 最终 IR |
-| 输出 | `hivm.load/vadd/store` | `llvm.load/add/store` | 目标相关指令 |
-
-#### 测试结果
-
-```
-向量加法 (vecadd_128.mlir):
-  Linalg: 3 行  →  Affine: 18 行  →  LLVM: 38 行  (12.7×)
-  ✅ mlir-opt --convert-linalg-to-affine-loops 通过
-  ✅ 完整降级到 LLVM IR 通过
-
-矩阵乘法 (matmul_4x4x4.mlir):
-  Linalg: 1 行  →  Affine: 18 行  →  LLVM: 74 行  (74×)
-  ✅ 基础降级通过
-  ⚠️ 三重循环完全展开，提供 4 种优化方案对比
-
-融合操作 (fused_128.mlir):
-  Linalg: 15 行  →  Affine: 20 行  →  LLVM: 59 行  (3.9×)
-  ✅ add + mul 连续操作，展示融合理念
-```
-
-#### matmul 的 74× 膨胀与优化
-
-| Variant | 策略 | LLVM 行数 | vs 基准 | 对应 AscendNPU-IR |
-|---------|------|-----------|---------|---------------|
-| **V0** | 无优化 (基准) | 74 行 | - | — |
-| **V1** | 循环分块 (tile=2x2x1) | 76 行 | +2 行 | — |
-| **V2** | 向量化 (tile+vectorize) | 77 行 | +3 行 | `-convert-hfusion-to-hivm` 生成向量指令 |
-| **V3** | **硬件映射 (模拟 mmul)** | **5 行** | **-69 行 (-93%)** | `hfusion.cube_matmul → hivm.mmul` |
-
-V3 的 5 行 vs 74 行的差距，正是 AscendNPU-IR 实际采用的方案——**保持高级语义不展开，直接映射到硬件 Cube 单元**。
+## 快速运行
 
 ```bash
-# 运行对比
-bash projects/ascendnpu-ir-demo/variants/compare.sh
-```
-
-### 4.2 toy-mini — 从零写 Toy 语言解析器
-
-| 特性 | 值 |
-|------|-----|
-| 语言 | C++17（纯标准库，零外部依赖）|
-| 行数 | 1,412 行 |
-| 编译 | `g++ -std=c++17 -o toymini toymini.cpp` |
-| 输入 | 含 Lexer(14 tokens) + Parser(递归下降) + AST(8 节点) + MLIR Gen |
-
-**支持语法示例**:
-```toy
-# 函数定义 + 数组字面量 + 二元运算 + 转置 + 打印
-def main() {
-  var A = [[1, 2, 3, 4], [5, 6, 7, 8]];
-  var B = transpose(A);
-  var C = B + A;
-  var D = C * 2.0;
-  print(D);
-  return;
-}
-```
-
-### 4.3 standalone-mlir — 从零构建 MLIR dialect
-
-**6 个 Op**: constant / add / mul / transpose / print / return
-**2 个 Pass**: `-count-ops` (分析) + `-elim-transpose` (转换)
-**2 种构建**: CMake + Makefile 双方案
-**1 个入口**: `standalone-opt` (类似 `bishengir-opt`)
-
-### 4.4 ascendnpu-ir-op-counter — 自定义 Pass 参考代码
-
-| 文件 | 类型 | 模式 | 对应 Toy Tutorial |
-|------|------|------|-------------------|
-| `BishengirOpCounter.cpp` | 分析 Pass | `op->walk()` | Ch3 ShapeInferencePass |
-| `BishengirPeelTranspose.cpp` | 转换 Pass | `OpRewritePattern` | Ch3 ToyCombine |
-
----
-
-## 五、快速入门
-
-### 5.1 环境准备
-
-```bash
-# 检查环境
+# 1. 环境检查
 bash setup.sh
 
-# 如果缺依赖
-brew install llvm cmake
-xcode-select --install
+# 2. 第一个 LLVM Pass
+cd projects/hello-pass
+./run.sh
+
+# 3. MLIR/AscendNPU-IR 综合 demo（无 mlir-opt 时会自动降级为标注检查）
+cd ../ascendnpu-ir-demo
+bash run-tests.sh
 ```
 
-### 5.2 跑 ascendnpu-ir-demo（5 分钟）
+如果本机没有 `mlir-opt`，`projects/ascendnpu-ir-demo/run-tests.sh` 仍会检查所有 `.mlir` 用例是否包含 `// RUN:` 标注，适合在轻量环境或 CI 中做基础验证。
+
+## 质量检查
 
 ```bash
-cd projects/ascendnpu-ir-demo
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-
-# 单个用例
-mlir-opt --convert-linalg-to-affine-loops test-cases/vecadd_128.mlir
-
-# 完整降级到 LLVM IR
-mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm test-cases/vecadd_128.mlir
-
-# 批量运行
-bash run-demo.sh
+# 检查 Markdown 本地链接、关键项目目录、MLIR RUN 标注和用例数量
+bash scripts/check-docs.sh
 ```
 
-### 5.3 跑 Toy Mini（3 分钟）
+该检查不依赖 LLVM/MLIR 工具链；真正执行 lowering 仍需要安装 `mlir-opt`。
 
-```bash
-cd projects/toy-mini
-g++ -std=c++17 -o toymini toymini.cpp
-./toymini
-```
+## 学完后你应该能做到
 
-### 5.4 编译 standalone-mlir（10 分钟）
+- 解释 AST、IR、SSA、Pass、Lowering、Dialect 的区别。
+- 读懂一个简单 LLVM IR / MLIR 文件。
+- 运行并修改一个 LLVM Pass 或 MLIR Pass。
+- 说明 Triton kernel 如何进入 MLIR 编译路径。
+- 画出 AscendNPU-IR 中 Linalg → HFusion / Husion → HIVM → LLVM/CANN 的大致链路。
+- 理解为什么 NPU 编译器需要保留 matmul / conv 等高级语义，而不是过早展开为标量循环。
 
-```bash
-cd projects/standalone-mlir
-export MLIR_DIR="/opt/homebrew/opt/llvm/lib/cmake/mlir"
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-### 3️⃣ 阶段三：MLIR 编译器基础设施（⏳ 计划中）
+## 常用入口
 
-> 🚧 **内容正在开发中**
->
-> 预计涵盖：
-> - MLIR 基本概念和 Dialect 系统
-> - 自定义 Dialect 和 Operation 定义
-> - Pattern 改写和 Dialect Conversion
-> - 从 MLIR 到 LLVM IR 的 Lowering
->
-> 如果你已学完前两阶段，可先看 [MLIR 官方教程](https://mlir.llvm.org/docs/Tutorials/) 预热。
+- 快速入门：[docs/quickstart.md](docs/quickstart.md)
+- 术语表：[docs/glossary.md](docs/glossary.md)
+- 技术术语速查手册：[docs/reference/技术术语速查手册.md](docs/reference/技术术语速查手册.md)
+- 动手项目索引：[projects/README.md](projects/README.md)
+- 综合 demo：[projects/ascendnpu-ir-demo/README.md](projects/ascendnpu-ir-demo/README.md)
+- 历史总结：[SUMMARY.md](SUMMARY.md)
 
-### 4️⃣ 阶段四：Ascend NPU 编译器后端（⏳ 计划中）
+## 许可证
 
-> 🚧 **内容正在开发中**
->
-> 预计涵盖：
-> - Ascend NPU 硬件架构概述
-> - CANN 软件栈和 TBE 算子开发
-> - 从 MLIR 到 Ascend 的 Lowering 全流程
-> - 性能调优和 Profiling
->
-> 如果你已学完前三个阶段，可先看 [华为 Ascend 社区](https://www.hiascend.com/) 了解生态。
-
----
-
-## 🚀 快速开始
-
-```bash
-# 1. 检查环境
-./setup.sh
-
-# 2. 开始学习
-# Phase 1: docs/primer/
-# Phase 2: projects/hello-pass/  (一键运行)
-# Phase 3: projects/mlir-hello/   (一键运行)
-# Phase 4: projects/ascend-samples/ (精选用例)
-```
-
-详见 [快速入门指南](./docs/quickstart.md)
-
-> 🤔 还不确定值不值得学？→ [为什么学 Ascend NPU 编译器？](./docs/why-ascend.md)
-
+本项目使用 [MIT License](LICENSE)。

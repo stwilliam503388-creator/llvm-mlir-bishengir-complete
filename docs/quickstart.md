@@ -1,52 +1,52 @@
 # 快速入门
 
-> 从零开始，一条路走到能写 LLVM Pass
-> 总预估时间：2 小时
->
-> 🤔 还不确定值不值得学？先花 5 分钟看 [为什么学 Ascend NPU 编译器？](./why-ascend.md)
+> 从零开始，用 2 小时建立 AI 编译器学习路线感。
+
+如果你还不确定为什么要学，先花 5 分钟看：[为什么学 Ascend NPU 编译器？](./why-ascend.md)。
 
 ---
 
 ## 路线图
 
-```
-① 环境检查 ──→ ② Primer 入门 ──→ ③ 写第一个 Pass
-   (5 min)        (45 min)           (60 min)
+```text
+① 环境检查 ──→ ② Primer 入门 ──→ ③ 第一个 LLVM Pass ──→ ④ 看一个 MLIR lowering demo
+   (5 min)        (35 min)           (40-60 min)              (20 min)
 ```
 
 ---
 
-## ① 环境检查（5 分钟）
+## ① 环境检查
 
 ```bash
 # 在项目根目录运行
-./setup.sh
+bash setup.sh
 ```
 
-看到 `✅ 所有核心依赖就绪` 即可进入下一步。
+看到 `✅ 所有核心依赖就绪` 即可直接运行 LLVM/MLIR 项目。若缺少 LLVM/MLIR，仍可先阅读文档，并运行不依赖工具链的检查：
 
-如果缺依赖 → [LLVM 环境搭建指南](./llvm/00-环境搭建.md)
-
----
-
-## ② Primer 入门（45 分钟）
-
-按顺序读，每篇 10-15 分钟：
-
-| # | 文档 | 重点 | 时间 |
-|---|------|------|------|
-| 1 | [编译器是什么](./primer/00-编译器是什么.md) | 编译器 vs 解释器 | 10 min |
-| 2 | [AST 与 IR](./primer/01-AST与IR.md) | 抽象语法树、中间表示 | 10 min |
-| 3 | [Pass 与 Lowering](./primer/02-Pass与Lowering.md) | 编译器怎么优化 IR | 15 min |
-| 4 | [从 Triton 到 Ascend](./primer/03-从Triton到Ascend.md) | AI 编译器的实际例子 | 10 min |
-
-> 读完 primer 就够了 — 不需要全部记住，知道概念叫什么、在哪查就行。
+```bash
+bash scripts/check-docs.sh
+```
 
 ---
 
-## ③ 写第一个 Pass（60 分钟）
+## ② Primer 入门
 
-这是最有成就感的一步：
+按顺序阅读 [docs/primer/](./primer/)：
+
+| # | 文档 | 重点 |
+|---|---|---|
+| 00 | [编译器是什么](./primer/00-编译器是什么.md) | 前端、优化、中后端 |
+| 01 | [AST 与 IR](./primer/01-AST与IR.md) | 抽象语法树、中间表示、SSA |
+| 02 | [Pass 与 Lowering](./primer/02-Pass与Lowering.md) | 编译器如何优化和降级 IR |
+| 03 | [动手看 MLIR 长什么样](./primer/03-动手看MLIR长什么样.md) | 用 `mlir-opt` 观察 IR 变化 |
+| 04 | [从 Triton 到 Ascend](./primer/04-从Triton到Ascend.md) | Triton → MLIR → AscendNPU-IR |
+
+读完不需要记住全部细节，只要知道概念叫什么、在哪查即可。
+
+---
+
+## ③ 跑第一个 LLVM Pass
 
 ```bash
 cd projects/hello-pass
@@ -54,9 +54,9 @@ chmod +x run.sh
 ./run.sh
 ```
 
-你应该看到：
+预期能看到类似输出：
 
-```
+```text
 Hello: add
   参数数量: 2
   基本块数量: 1
@@ -65,29 +65,43 @@ Hello: say_hello
   基本块数量: 1
 ```
 
-**恭喜！你刚刚运行了人生第一个 LLVM Pass。**
+然后继续读：
 
-然后跟着教程深入理解：
+- [LLVM IR 快速入门](./llvm/01-LLVM-IR快速入门.md)
+- [第一个 LLVM Pass](./llvm/02-第一个LLVM-Pass.md)
 
-| # | 文档 | 内容 |
-|---|------|------|
-| 1 | [LLVM IR 快速入门](./llvm/01-LLVM-IR快速入门.md) | 读懂 IR 长什么样 |
-| 2 | [第一个 LLVM Pass](./llvm/02-第一个LLVM-Pass.md) | 逐行解读 + 3 个挑战 |
+---
 
-完成 3 个挑战后，你就真正入门了编译器后端开发。
+## ④ 看一个 MLIR lowering demo
+
+```bash
+cd projects/ascendnpu-ir-demo
+bash run-tests.sh
+```
+
+- 有 `mlir-opt`：执行 `.mlir` 文件中的 `// RUN:` 命令。
+- 无 `mlir-opt`：自动切到标注检查模式，验证用例结构仍然完整。
+
+推荐从这个文件开始看：
+
+```text
+projects/ascendnpu-ir-demo/test-cases/mlir/01_basic/01_vecadd.mlir
+```
+
+它展示了最小的 Linalg 向量加法，以及如何类比到 AscendNPU-IR 的 HFusion/HIVM lowering。
 
 ---
 
 ## 之后学什么？
 
-| 阶段 | 内容 | 状态 |
-|------|------|------|
-| Phase 2 进阶 | 更复杂的 LLVM Pass、IR 变换 | ✅ 已完成 |
-| Phase 3 | [MLIR — 多层中间表示框架](./mlir/README.md) | ✅ 已完成 |
-| Phase 4 | [Ascend NPU 编译器后端实战](./ascend/README.md) | ✅ 已完成 |
-
----
+| 阶段 | 内容 | 入口 |
+|---|---|---|
+| LLVM 进阶 | IR 变换、Pass 模式、调试测试 | [docs/llvm/README.md](./llvm/README.md) |
+| MLIR | Dialect、Operation、Pattern、Lowering | [docs/mlir/README.md](./mlir/README.md) |
+| Ascend 后端 | NPU 硬件、hfusion/hivm、构建调试 | [docs/ascend/README.md](./ascend/README.md) |
+| 动手项目 | 所有示例项目索引 | [projects/README.md](../projects/README.md) |
 
 ## 遇到不认识的术语？
 
-→ [术语表](./glossary.md) — 中英对照，一句话解释
+- 简短中英对照：[术语表](./glossary.md)
+- 更详细解释：[技术术语速查手册](./reference/技术术语速查手册.md)
