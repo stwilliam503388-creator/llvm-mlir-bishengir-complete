@@ -80,8 +80,8 @@ run_test_file() {
     TOTAL=$((TOTAL + 1))
     echo "── $label ──"
 
-    has_run=$(grep -c "^// RUN:" "$mlir" 2>/dev/null || true)
-    if [ "${has_run:-0}" -eq 0 ]; then
+    has_run=$(grep -c "^// RUN:" "$mlir" 2>/dev/null || echo 0)
+    if [ "$has_run" -eq 0 ]; then
         log_skip "$label (无 RUN 标注)"
         return
     fi
@@ -118,10 +118,10 @@ run_test_file() {
             fi
         done < <(grep "^// CHECK-RUN${run_idx}:" "$mlir")
 
-        $all_pass || break
+        [ "$all_pass" = true ] || break
     done < <(grep "^// RUN:" "$mlir")
 
-    if $all_pass; then log_pass "$label"; fi
+    if [ "$all_pass" = true ]; then log_pass "$label"; fi
 }
 
 echo "╔══════════════════════════════════════════════════════════════╗"

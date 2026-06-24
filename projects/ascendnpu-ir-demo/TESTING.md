@@ -33,7 +33,7 @@ test-cases/mlir/
 | ⭐⭐ 进阶 | 11 | reduction iterator、组合模式、条件分支 | sigmoid、silu、gelu、reduce_sum、reduce_max、layer_norm |
 | ⭐⭐⭐ 复杂 | 10 | `linalg.matmul`、conv/pooling、多步 pipeline | matmul、gemm_relu、conv2d、depthwise_conv、batch_norm |
 
-总计 **31 个 MLIR 用例**。另有 `test-cases/triton/` 下 **28 个 Triton 对照 kernel**。
+总计 **31 个 MLIR 用例**。另有 `test-cases/triton/` 下 **28 个 Triton 对照 kernel**。数量差异来自 3 个 legacy MLIR 用例：`09_vecadd_128`、`10_fused_128`、`10_matmul_4x4x4` 复用已有 vecadd、fused、matmul 的 Triton 对照。
 
 ## 测试文件格式
 

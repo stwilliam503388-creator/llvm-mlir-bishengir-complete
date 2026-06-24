@@ -3,7 +3,7 @@
 
 set -uo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)" || exit 1
 FAIL=0
 
 red='\033[0;31m'
@@ -97,7 +97,12 @@ check_mlir_cases() {
     [ "$advanced" -eq 10 ] || fail "expected 10 advanced MLIR cases, got $advanced"
     [ "$total" -eq 31 ] || fail "expected 31 total MLIR cases, got $total"
 
-    missing_run=$(find "$mlir_dir" -mindepth 2 -maxdepth 2 -name '*.mlir' -exec sh -c 'grep -q "^// RUN:" "$1" || echo "$1"' _ {} \;)
+    missing_run=""
+    while IFS= read -r mlir; do
+        if ! grep -q "^// RUN:" "$mlir"; then
+            missing_run="${missing_run}${mlir}\n"
+        fi
+    done < <(find "$mlir_dir" -mindepth 2 -maxdepth 2 -name '*.mlir' | sort)
     if [ -n "$missing_run" ]; then
         echo "$missing_run"
         fail "some MLIR cases do not contain RUN annotations"

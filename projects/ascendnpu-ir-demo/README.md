@@ -22,7 +22,7 @@ test-cases/mlir/01_basic/01_vecadd.mlir
 | 类型 | 数量 | 路径 | 说明 |
 |---|---:|---|---|
 | MLIR 用例 | 31 | `test-cases/mlir/` | 按难度分为 basic / intermediate / advanced |
-| Triton 对照 | 28 | `test-cases/triton/` | 与多数 MLIR 用例一一对应的 Python kernel |
+| Triton 对照 | 28 | `test-cases/triton/` | 与主要 MLIR 用例对应的 Python kernel；3 个 legacy MLIR 用例复用现有 Triton 对照 |
 | matmul 优化变体 | 4 | `variants/` | baseline / tiling / vectorize / hardware mapping |
 
 ### MLIR 分级
