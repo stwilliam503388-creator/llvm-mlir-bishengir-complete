@@ -7,7 +7,8 @@
 #   bash run-tests.sh <pattern>    # 只运行匹配的用例
 
 # Intentionally omit `set -e`: individual test failures are counted and reported.
-# `-u` is safe because options and counters are initialized before use; `pipefail` propagates pipeline failures.
+# `-u` is safe because options and counters are initialized before use; `pipefail`
+# lets the runner detect pipeline failures without bypassing the failure counters.
 set -u
 set -o pipefail
 

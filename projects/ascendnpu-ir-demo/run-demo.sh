@@ -1,9 +1,9 @@
 #!/bin/bash
 # run-demo.sh — 用标准 mlir-opt 模拟 AscendNPU-IR 三阶段降级
 
-# Intentionally omit `set -e`: run_stage callers use `|| true` so unsupported lowering
-# stages can be logged while the demo continues. `-u` catches unset variables; `pipefail`
-# propagates failures in pipelines.
+# Intentionally omit `set -e`: the script should continue after a run_stage failure
+# so unsupported lowering stages are logged and all cases are processed. `-u` catches
+# unset variables; `pipefail` propagates pipeline failures for detection.
 set -u
 set -o pipefail
 

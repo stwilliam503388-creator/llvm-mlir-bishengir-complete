@@ -2,7 +2,8 @@
 # check-docs.sh — lightweight repository consistency checks with no LLVM dependency.
 
 # Intentionally omit `set -e`: this script aggregates all failures before exiting.
-# `-u` is safe because variables are initialized before use; `pipefail` propagates pipeline failures.
+# `-u` is safe because variables are initialized before use; `pipefail` propagates
+# pipeline failures for detection without forcing immediate script exit.
 set -u
 set -o pipefail
 
