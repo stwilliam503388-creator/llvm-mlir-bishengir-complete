@@ -1,18 +1,17 @@
-# 用例 4 — hivm-to-llvm
+# 用例 4 — hivm→llvm
 
-hivm → LLVM IR。最后一步 Lowering，回到你熟悉的 LLVM 世界。
+最后一步 Lowering：hivm.hir Ascend 专用指令 → 通用 LLVM IR。
 
-## 关键变化
+## 映射关系
 
-| hivm | LLVM |
-|------|------|
-| `hivm.load` | `llvm.load` |
-| `hivm.vadd` | `llvm.fadd` |
-| `hivm.store` | `llvm.store` |
-| Ascend 专有指令 | 通用 LLVM 指令 |
+| hivm.hir | LLVM |
+|----------|------|
+| `memref.alloc` | `llvm.alloca` |
+| `hivm.hir.load gm→ub` | `llvm.load + llvm.store` |
+| `hivm.hir.vadd` | `llvm.fadd` |
+| `hivm.hir.store ub→gm` | `llvm.store` |
+| `hacc.entry` | （丢弃） |
 
-> 所有 MLIR 的 Dialect，最终都要 Lowering 到 `llvm` dialect。这就是 MLIR 和 LLVM 的关系。
+> 所有 MLIR Dialect 最终都要 Lowering 到 `llvm` dialect。hivm.hir 也不例外。
 
-## 学完后
-
-→ 用例 5：完整 Pipeline 追踪
+→ 用例 5：完整 Pipeline

@@ -1,54 +1,98 @@
 # 02 — 一个 Ascend Pass 详解
 
-> 目标：逐层拆解一个真实的 MLIR Pass
-> 前置：[01 — Dialect 详解](./01-husion-hivm-Dialect详解.md)
-> 预估时间：25 分钟
+> 目标：理解真实 AscendNPU-IR Pass 的实现模式
+> 前置：[01 — hivm 和 hacc Dialect 详解](./01-husion-hivm-Dialect详解.md)
+> 预估时间：30 分钟
 
-## 1. 选 ConvertLinalgToHusion
+## 1. 从测试用例反推 Pass 做了什么
 
-这是 Lowering 流程的第一个关键 Pass。和 mlir-hello 的思路一致：遍历 IR → 匹配 → 替换。
+虽然源码被 git-lfs 保护，但测试用例清楚展示了每个 Pass 的效果。
 
-在 ascendnpu-ir 中：`bishengir/lib/Conversion/ConvertLinalgToHusion.cpp`
+**源文件位置**（在 AscendNPU-IR 中）：
+- 测试：`bishengir/test/Integration/HIVM/VecAdd/add.mlir`
+- 测试：`bishengir/test/Pass/pass-manager.mlir`
+- 测试：`bishengir/test/Pass/cpu-runner.mlir`
 
-## 2. MLIR Pass 的三部分
+## 2. ConvertLinalgToHivm — 最关键的 Pass
 
-| 部分 | 文件类型 | 内容 | mlir-hello 对应 |
-|------|---------|------|---------------|
-| ① Operation 定义 | `.td` (TableGen) | husion.elemwise_binary 长什么样 | test.mlir 里的 func.func |
-| ② 匹配模式 | `.cpp` 中的 Pattern | 怎么找到逐元素运算 | func.walk() |
-| ③ Pass 注册 | `.cpp` 中的 Plugin | 怎么加载到 mlir-opt | main() |
+这个 Pass 把 MLIR 标准的 `linalg.generic` Lowering 为 Ascend 专用的 `hivm.hir.*` 指令。
 
-### ① Operation 定义 (.td)
+### 输入 (linalg)
 
-```tablegen
-def Husion_ElemwiseBinaryOp : Husion_Op<"elemwise_binary"> {
-  let arguments = (ins
-    StrAttr:$op_type,       // "add"/"mul"/"sub"
-    AnyTensor:$inputs,
-    AnyTensor:$outputs
-  );
-  let results = (outs AnyTensor:$result);
+```mlir
+func.func @add(%A: tensor<16xf16>, %B: tensor<16xf16>) -> tensor<16xf16> {
+  %0 = linalg.generic {
+    indexing_maps = [affine_map<(d0) -> (d0)>, affine_map<(d0) -> (d0)>],
+    iterator_types = ["parallel"]
+  } ins(%A, %B : tensor<16xf16>, tensor<16xf16>)
+    outs(%A : tensor<16xf16>) {
+  ^bb0(%a: f16, %b: f16, %c: f16):
+    %add = arith.addf %a, %b : f16
+    linalg.yield %add : f16
+  } -> tensor<16xf16>
+  func.return %0 : tensor<16xf16>
 }
 ```
 
-### ② 匹配模式（核心）
+### 输出 (hivm)
+
+```mlir
+func.func @add(%A: memref<16xf16, #hivm.address_space<gm>>,
+               %B: memref<16xf16, #hivm.address_space<gm>>,
+               %C: memref<16xf16, #hivm.address_space<gm>>)
+    attributes {hacc.entry, hacc.function_kind = #hacc.function_kind<DEVICE>} {
+  %ub_a = memref.alloc() : memref<16xf16, #hivm.address_space<ub>>
+  hivm.hir.load ins(%A) outs(%ub_a)
+  %ub_b = memref.alloc() : memref<16xf16, #hivm.address_space<ub>>
+  hivm.hir.load ins(%B) outs(%ub_b)
+  %ub_c = memref.alloc() : memref<16xf16, #hivm.address_space<ub>>
+  hivm.hir.vadd ins(%ub_a, %ub_b) outs(%ub_c)
+  hivm.hir.store ins(%ub_c) outs(%C)
+  return
+}
+```
+
+### 逐行对比 Pass 做了什么
+
+| 输入 (linalg) | 输出 (hivm) | Pass 做了什么 |
+|--------------|------------|--------------|
+| `tensor<16xf16>` 参数 | `memref<..., gm>` 参数 | tensor→memref 转换，标记 Global Memory |
+| （隐式） | `memref.alloc() : memref<..., ub>` | 分配 Unified Buffer |
+| （隐式） | `hivm.hir.load ins(%A) outs(%ub_a)` | 显式加载：HBM→片上 |
+| `linalg.generic { arith.addf }` | `hivm.hir.vadd ins(%ub_a, %ub_b) outs(%ub_c)` | 逐元素 add→向量 add |
+| `func.return %0` | `hivm.hir.store ins(%ub_c) outs(%C)` | 显式存储：片上→HBM |
+| （无） | `hacc.entry, #hacc.function_kind<DEVICE>` | 标记为 NPU kernel |
+
+### Pass 的逻辑推断
 
 ```cpp
-struct LinalgGenericToElemwiseBinary : OpRewritePattern<linalg::GenericOp> {
+// ConvertLinalgToHivm 的核心逻辑（推断，实际代码在 bishengir/lib/Conversion/）
+struct LinalgGenericToHivm : OpRewritePattern<linalg::GenericOp> {
   LogicalResult matchAndRewrite(linalg::GenericOp op,
                                 PatternRewriter &rewriter) const {
-    // Step 1: 检查是不是逐元素运算
-    if (!isElementwise(op)) return failure();
+    // Step 1: 提取核心操作（addf, mulf, subf 等）
+    Operation *innerOp = getInnerOp(op);  // arith.addf
 
-    // Step 2: 提取操作类型
-    StringRef opType = getOpType(op);  // "add"
+    // Step 2: 分配 Unified Buffer
+    auto ubType = MemRefType::get(shape, elemType, ubSpace);
+    Value ub_a = rewriter.create<memref::AllocOp>(loc, ubType);
 
-    // Step 3: 创建新的 husion 操作
-    auto newOp = rewriter.create<HusionElemwiseBinaryOp>(
-        op.getLoc(), opType, op.getInputs(), op.getOutputs());
+    // Step 3: 创建 hivm.hir.load
+    rewriter.create<hivm::hir::LoadOp>(loc, ub_a, gm_arg);
 
-    // Step 4: 替换
-    rewriter.replaceOp(op, newOp);
+    // Step 4: 创建 hivm.hir.vadd（根据 innerOp 类型）
+    if (isa<arith::AddFOp>(innerOp))
+      rewriter.create<hivm::hir::VAddOp>(loc, ub_a, ub_b, ub_c);
+
+    // Step 5: 创建 hivm.hir.store
+    rewriter.create<hivm::hir::StoreOp>(loc, ub_c, gm_out);
+
+    // Step 6: 添加 kernel 属性
+    func->setAttr("hacc.entry", UnitAttr::get(ctx));
+    func->setAttr("hacc.function_kind",
+                  hacc::FunctionKindAttr::get(ctx, hacc::FunctionKind::DEVICE));
+
+    rewriter.eraseOp(op);  // 删除原来的 linalg.generic
     return success();
   }
 };
@@ -56,58 +100,34 @@ struct LinalgGenericToElemwiseBinary : OpRewritePattern<linalg::GenericOp> {
 
 **和 mlir-hello 的对比**：
 
-| | mlir-hello | ConvertLinalgToHusion |
+| | mlir-hello | ConvertLinalgToHivm |
 |---|---|---|
-| 继承 | `PassWrapper<HelloMLIRPass, ...>` | `OpRewritePattern<GenericOp>` |
-| 核心函数 | `runOnOperation()` | `matchAndRewrite(Operation, Rewriter)` |
-| 遍历 | `func.walk()` | 框架自动 |
-| 修改 IR | 不改 | `rewriter.replaceOp()` |
+| 遍历 | `func.walk()` | `OpRewritePattern` |
+| 做判断 | （不判断） | `getInnerOp()` 识别 add/sub/mul |
+| 创建新操作 | （不创建） | `create<LoadOp>`, `create<VAddOp>`, `create<StoreOp>` |
+| 修改 IR | 不改 | 替换整个函数体 |
+| 行数 | 45 行 | ~200 行 |
 
-## 3. 看测试用例
+## 3. 源码导读（文件位置）
 
-**输入** (linalg, 15 行):
-```mlir
-func.func @simple_add(%A: tensor<128xf32>, %B: tensor<128xf32>)
-    -> tensor<128xf32> {
-  %0 = linalg.generic {
-    indexing_maps = [affine_map<(d0) -> (d0)>, affine_map<(d0) -> (d0)>],
-    iterator_types = ["parallel"]
-  } ins(%A, %B : tensor<128xf32>, tensor<128xf32>)
-    outs(%A : tensor<128xf32>) {
-  ^bb0(%a: f32, %b: f32, %c: f32):
-    %add = arith.addf %a, %b : f32
-    linalg.yield %add : f32
-  } -> tensor<128xf32>
-  func.return %0 : tensor<128xf32>
-}
+| 想看什么 | 文件（在 AscendNPU-IR 中） |
+|---------|--------------------------|
+| hivm 操作定义 | `bishengir/include/.../HIVM/` |
+| LoadOp / StoreOp | 同上，`.td` TableGen 文件 |
+| 地址空间定义 | `#hivm.address_space` 属性 |
+| 转换 Pass | `bishengir/lib/Conversion/` |
+| 融合优化 | `bishengir/lib/Transforms/` |
+| 测试用例 | `bishengir/test/Integration/HIVM/` |
+
+## 4. 验证所学
+
+去 AscendNPU-IR 里找一个测试文件，画出 IR 变换前后对照：
+```bash
+cd AscendNPU-IR
+cat bishengir/test/Integration/HIVM/VecAdd/add.mlir
+# 这个文件本身就是 hivm IR
+# 和 ascend-samples/03 的 input.mlir 对比，看 linalg→hivm 的差异
 ```
-
-**输出** (husion, 3 行):
-```mlir
-func.func @simple_add(%A: tensor<128xf32>, %B: tensor<128xf32>)
-    -> tensor<128xf32> {
-  %0 = husion.elemwise_binary "add" ins(%A, %B) outs(%A)
-      : tensor<128xf32>
-  func.return %0 : tensor<128xf32>
-}
-```
-
-**15 行 → 3 行**。Pass 做了什么一目了然。
-
-## 4. 动手：加一个新功能
-
-想支持 `arith.subf`（减法）：
-1. 确认 `.td` 中 `elemwise_binary` 已支持 `"sub"`
-2. `matchAndRewrite` 中加判断
-3. 测试文件加一个减法用例
-
-和 mlir-hello 挑战 2（统计 add 指令数）思路一样。
-
-## 验证
-
-- [ ] 能说出 MLIR Pass 的三部分
-- [ ] 能对照测试用例说出 Pass 做了什么变换
-- [ ] 能说出 `matchAndRewrite` 的 4 个步骤
 
 > 📖 [术语表](../glossary.md)
 > **下一步**：[03 — 构建与调试指南](./03-构建与调试指南.md)

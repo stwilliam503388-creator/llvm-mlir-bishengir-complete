@@ -1,17 +1,15 @@
 # 用例 2 — fusion-add-mul
 
-两个独立 linalg.generic（add + mul）融合为一个 husion.elemwise_binary "add_mul"。
+两个 linalg.generic（先 add 后 mul）→ hivm 中用 Unified Buffer 复用中间结果。
 
-30 行 → 5 行。10 倍压缩。这就是融合的力量。
+## 融合的关键
 
-## 关键点
+| 未融合（如果各写回 HBM） | 融合后 |
+|------------------------|--------|
+| add → store 到 gm | add 结果留在 ub |
+| load 从 gm → mul | 直接 mul 用 ub 中的结果 |
+| 4 次 HBM↔UB 搬运 | 2 次搬运（省 50%） |
 
-| input.mlir | expected.mlir |
-|-----------|--------------|
-| 2 个 linalg.generic | 1 个 husion.elemwise_binary |
-| add 和 mul 各写一次中间结果 | 一次读写完成 |
-| 4 次数据搬运（HBM↔L1） | 2 次数据搬运 |
+**融合的本质**：hivm 在 Unified Buffer 中直接把 add 的结果传给 mul，不经过 Global Memory。
 
-## 学完后
-
-→ 用例 3：husion → hivm 的 Lowering
+→ 用例 3：hivm 内部更细的操作

@@ -1,17 +1,15 @@
-# 用例 3 — husion-to-hivm
+# 用例 3 — hivm 内部结构
 
-husion.elemwise_binary "add" → hivm.load + hivm.vadd + hivm.store。
+hivm 的每个操作都有固定模式：alloc → load → compute → store。
 
-husion 是融合后的高级 IR，hivm 是接近硬件的虚拟指令。
+## 三步模式
 
-## 关键变化
+| 步骤 | 操作 | 说明 |
+|------|------|------|
+| 1. load | `hivm.hir.load gm → ub` | 从 HBM 搬到片上 |
+| 2. compute | `hivm.hir.vadd` | 在 Vector Unit 上计算 |
+| 3. store | `hivm.hir.store ub → gm` | 结果写回 HBM |
 
-| husion | hivm |
-|--------|------|
-| 隐式数据搬运（tensor） | 显式搬运（memref + load/store） |
-| 一个操作 `elemwise_binary` | 多个操作 `load → vadd → store` |
-| 适合融合优化 | 适合代码生成 |
+这是所有 Ascend kernel 的通用模板。
 
-## 学完后
-
-→ 用例 4：hivm → LLVM IR
+→ 用例 4：hivm.hir → llvm
