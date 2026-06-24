@@ -8,7 +8,8 @@
 
 # Intentionally omit `set -e`: individual test failures are counted and reported.
 # `-u` is safe because options and counters are initialized before use; `pipefail` propagates pipeline failures.
-set -uo pipefail
+set -u
+set -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CASES_DIR="$SCRIPT_DIR/test-cases/mlir"

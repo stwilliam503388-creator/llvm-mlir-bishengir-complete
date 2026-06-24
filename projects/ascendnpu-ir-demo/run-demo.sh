@@ -4,7 +4,8 @@
 # Intentionally omit `set -e`: run_stage callers use `|| true` so unsupported lowering
 # stages can be logged while the demo continues. `-u` catches unset variables; `pipefail`
 # propagates failures in pipelines.
-set -uo pipefail
+set -u
+set -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CASES_DIR="$SCRIPT_DIR/test-cases/mlir"

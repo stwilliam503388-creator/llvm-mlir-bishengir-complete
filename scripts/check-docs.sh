@@ -3,7 +3,8 @@
 
 # Intentionally omit `set -e`: this script aggregates all failures before exiting.
 # `-u` is safe because variables are initialized before use; `pipefail` propagates pipeline failures.
-set -uo pipefail
+set -u
+set -o pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)" || exit 1
 FAIL=0
