@@ -13,14 +13,14 @@ EXPECTED_ADVANCED_MLIR_CASES=10
 EXPECTED_TOTAL_MLIR_CASES=31
 EXPECTED_TRITON_CASES=28
 
-red='\033[0;31m'
-green='\033[0;32m'
-yellow='\033[0;33m'
-nc='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
 
-fail() { echo -e "${red}✗${nc} $1"; FAIL=$((FAIL + 1)); }
-pass() { echo -e "${green}✓${nc} $1"; }
-warn() { echo -e "${yellow}⚠${nc} $1"; }
+fail() { echo -e "${RED}✗${NC} $1"; FAIL=$((FAIL + 1)); }
+pass() { echo -e "${GREEN}✓${NC} $1"; }
+warn() { echo -e "${YELLOW}⚠${NC} $1"; }
 
 check_required_paths() {
     local paths=(
@@ -147,9 +147,9 @@ check_shell_scripts
 
 if [ $FAIL -gt 0 ]; then
     echo ""
-    echo -e "${red}检查失败: $FAIL 项${nc}"
+    echo -e "${RED}检查失败: $FAIL 项${NC}"
     exit 1
 fi
 
 echo ""
-echo -e "${green}全部检查通过${nc}"
+echo -e "${GREEN}全部检查通过${NC}"

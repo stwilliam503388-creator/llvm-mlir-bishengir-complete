@@ -43,7 +43,7 @@ Ascend NPU 执行
 |---|---|
 | AscendNPU-IR | 官方仓库和文档中使用的项目名称 |
 | BishengIR | 源码、命名空间和工具名中常见的名称，如 `bishengir-opt` |
-| HFusion | 表达融合后高层算子语义的 Ascend 自定义 dialect 语境；部分历史文件名或笔记可能写作 Husion |
+| HFusion | 表达融合后高层算子语义的 Ascend 自定义 dialect 语境；少数历史文件名保留了另一种拼写 |
 | HIVM | 更接近 NPU 指令/硬件抽象的 dialect 语境 |
 
 典型 lowering 链路可以理解为：

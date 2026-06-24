@@ -43,6 +43,7 @@ run_stage() {
 while IFS= read -r mlir; do
     rel=${mlir#"$CASES_DIR"/}
     name=${rel%.mlir}
+    # Use filesystem-safe names for result files derived from nested case paths.
     safe_name=${name//\//__}
 
     echo "──────────────────────────────────────────────────────────────"

@@ -32,6 +32,7 @@ PASS=0
 FAIL=0
 SKIP=0
 TOTAL=0
+# Number of output lines shown for a failing RUN command in verbose diagnostics.
 ERROR_OUTPUT_LINES=5
 
 log_pass() { echo -e "  ${GREEN}✓ PASS${NC}: $1"; PASS=$((PASS + 1)); }
