@@ -101,10 +101,12 @@ bash scripts/check-docs.sh
 ## 常用入口
 
 - 快速入门：[docs/quickstart.md](docs/quickstart.md)
+- 完整学习路径与项目背景：[docs/learning-path.md](docs/learning-path.md)
 - 术语表：[docs/glossary.md](docs/glossary.md)
 - 技术术语速查手册：[docs/reference/技术术语速查手册.md](docs/reference/技术术语速查手册.md)
 - 动手项目索引：[projects/README.md](projects/README.md)
 - 综合 demo：[projects/ascendnpu-ir-demo/README.md](projects/ascendnpu-ir-demo/README.md)
+- 综合 demo 用例导读：[docs/ascendnpu-ir-demo-case-guide.md](docs/ascendnpu-ir-demo-case-guide.md)
 - 历史总结：[SUMMARY.md](SUMMARY.md)
 
 ## 许可证

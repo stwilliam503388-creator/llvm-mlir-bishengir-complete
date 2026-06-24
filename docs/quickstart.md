@@ -99,6 +99,8 @@ projects/ascendnpu-ir-demo/test-cases/mlir/01_basic/01_vecadd.mlir
 | LLVM 进阶 | IR 变换、Pass 模式、调试测试 | [docs/llvm/README.md](./llvm/README.md) |
 | MLIR | Dialect、Operation、Pattern、Lowering | [docs/mlir/README.md](./mlir/README.md) |
 | Ascend 后端 | NPU 硬件、hfusion/hivm、构建调试 | [docs/ascend/README.md](./ascend/README.md) |
+| 完整路线 | 项目背景、分阶段路线、工程对应关系 | [完整学习路径与项目背景](./learning-path.md) |
+| Demo 用例 | 31 个 MLIR 用例的 AI 场景和 lowering 语义 | [ascendnpu-ir-demo 用例导读](./ascendnpu-ir-demo-case-guide.md) |
 | 动手项目 | 所有示例项目索引 | [projects/README.md](../projects/README.md) |
 
 ## 遇到不认识的术语？

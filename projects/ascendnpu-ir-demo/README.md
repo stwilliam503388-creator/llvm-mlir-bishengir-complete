@@ -120,4 +120,5 @@ ascendnpu-ir-demo/
 - Primer 入门：[../../docs/primer/README.md](../../docs/primer/README.md)
 - MLIR 学习：[../../docs/mlir/README.md](../../docs/mlir/README.md)
 - Ascend 后端：[../../docs/ascend/README.md](../../docs/ascend/README.md)
+- 用例导读：[../../docs/ascendnpu-ir-demo-case-guide.md](../../docs/ascendnpu-ir-demo-case-guide.md)
 - Triton 对照映射：[test-cases/triton/MAPPING.md](test-cases/triton/MAPPING.md)

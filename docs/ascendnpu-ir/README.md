@@ -27,8 +27,10 @@ docs/ascendnpu-ir/
 |---|---|
 | Ascend NPU 硬件和后端概念 | [docs/ascend/README.md](../ascend/README.md) |
 | MLIR 基础和 Toy Tutorial | [docs/mlir/README.md](../mlir/README.md) |
+| 完整学习路径与项目背景 | [docs/learning-path.md](../learning-path.md) |
 | Ascend Lowering 精选用例 | [projects/ascend-samples](../../projects/ascend-samples/) |
 | 标准 MLIR 模拟 AscendNPU-IR 降级 | [projects/ascendnpu-ir-demo](../../projects/ascendnpu-ir-demo/) |
+| 31 个 demo 用例的教学导读 | [docs/ascendnpu-ir-demo-case-guide.md](../ascendnpu-ir-demo-case-guide.md) |
 | 自定义 Pass 参考代码 | [projects/ascendnpu-ir-op-counter](../../projects/ascendnpu-ir-op-counter/) |
 | 本项目文件与外部源码的映射 | [references/ascendnpu-ir-mapping.md](../../references/ascendnpu-ir-mapping.md) |
 
