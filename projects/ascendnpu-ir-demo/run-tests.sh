@@ -32,6 +32,7 @@ PASS=0
 FAIL=0
 SKIP=0
 TOTAL=0
+ERROR_OUTPUT_LINES=5
 
 log_pass() { echo -e "  ${GREEN}✓ PASS${NC}: $1"; PASS=$((PASS + 1)); }
 log_fail() {
@@ -105,7 +106,7 @@ run_test_file() {
         output=$(eval "$cmd" 2>&1)
         rc=$?
         if [ $rc -ne 0 ]; then
-            log_fail "$label (RUN[$run_idx] 退出码=$rc)" "$(echo "$output" | head -5)"
+            log_fail "$label (RUN[$run_idx] 退出码=$rc)" "$(echo "$output" | head -n "$ERROR_OUTPUT_LINES")"
             all_pass=false
             break
         fi

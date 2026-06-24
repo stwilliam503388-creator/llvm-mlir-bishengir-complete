@@ -7,6 +7,11 @@ set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)" || exit 1
 FAIL=0
+EXPECTED_BASIC_MLIR_CASES=10
+EXPECTED_INTERMEDIATE_MLIR_CASES=11
+EXPECTED_ADVANCED_MLIR_CASES=10
+EXPECTED_TOTAL_MLIR_CASES=31
+EXPECTED_TRITON_CASES=28
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -98,10 +103,10 @@ check_mlir_cases() {
     advanced=$(find "$mlir_dir/03_advanced" -maxdepth 1 -name '*.mlir' | wc -l | tr -d ' ')
     total=$((basic + intermediate + advanced))
 
-    [ "$basic" -eq 10 ] || fail "expected 10 basic MLIR cases, got $basic"
-    [ "$intermediate" -eq 11 ] || fail "expected 11 intermediate MLIR cases, got $intermediate"
-    [ "$advanced" -eq 10 ] || fail "expected 10 advanced MLIR cases, got $advanced"
-    [ "$total" -eq 31 ] || fail "expected 31 total MLIR cases, got $total"
+    [ "$basic" -eq "$EXPECTED_BASIC_MLIR_CASES" ] || fail "expected $EXPECTED_BASIC_MLIR_CASES basic MLIR cases, got $basic"
+    [ "$intermediate" -eq "$EXPECTED_INTERMEDIATE_MLIR_CASES" ] || fail "expected $EXPECTED_INTERMEDIATE_MLIR_CASES intermediate MLIR cases, got $intermediate"
+    [ "$advanced" -eq "$EXPECTED_ADVANCED_MLIR_CASES" ] || fail "expected $EXPECTED_ADVANCED_MLIR_CASES advanced MLIR cases, got $advanced"
+    [ "$total" -eq "$EXPECTED_TOTAL_MLIR_CASES" ] || fail "expected $EXPECTED_TOTAL_MLIR_CASES total MLIR cases, got $total"
 
     missing_run=""
     while IFS= read -r mlir; do
@@ -116,7 +121,7 @@ check_mlir_cases() {
 
     local triton_total
     triton_total=$(find "$ROOT/projects/ascendnpu-ir-demo/test-cases/triton" -mindepth 2 -maxdepth 2 -name '*.py' | wc -l | tr -d ' ')
-    [ "$triton_total" -eq 28 ] || fail "expected 28 Triton cases, got $triton_total"
+    [ "$triton_total" -eq "$EXPECTED_TRITON_CASES" ] || fail "expected $EXPECTED_TRITON_CASES Triton cases, got $triton_total"
 
     if [ $FAIL -eq 0 ]; then pass "MLIR/Triton case counts and RUN annotations are consistent"; fi
 }

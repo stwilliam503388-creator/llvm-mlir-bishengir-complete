@@ -73,11 +73,11 @@ HIVM → CANN Runtime → Ascend NPU
 
 | 读者 | 可以从哪里开始 |
 |---|---|
-| 没有编译器基础的 AI 工程师 | `docs/primer/` |
-| 会写 Triton，但看不懂 MLIR 的学习者 | `docs/quickstart.md` → `projects/ascendnpu-ir-demo/` |
-| 想理解 LLVM Pass 的开发者 | `docs/llvm/` → `projects/hello-pass/` |
-| 想学习 MLIR dialect / lowering 的开发者 | `docs/mlir/` → `projects/standalone-mlir/` |
-| 想阅读 AscendNPU-IR / triton-ascend 源码的人 | `docs/ascendnpu-ir/`、`references/` |
+| 没有编译器基础的 AI 工程师 | [docs/primer/](./primer/) |
+| 会写 Triton，但看不懂 MLIR 的学习者 | [docs/quickstart.md](./quickstart.md) → [projects/ascendnpu-ir-demo/](../projects/ascendnpu-ir-demo/) |
+| 想理解 LLVM Pass 的开发者 | [docs/llvm/](./llvm/) → [projects/hello-pass/](../projects/hello-pass/) |
+| 想学习 MLIR dialect / lowering 的开发者 | [docs/mlir/](./mlir/) → [projects/standalone-mlir/](../projects/standalone-mlir/) |
+| 想阅读 AscendNPU-IR / triton-ascend 源码的人 | [docs/ascendnpu-ir/](./ascendnpu-ir/)、[references/](../references/) |
 
 前置知识不要求编译器经验；能读基础 C++、Python 和命令行输出即可。
 
