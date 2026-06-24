@@ -1,0 +1,137 @@
+#!/bin/bash
+# check-docs.sh — lightweight repository consistency checks with no LLVM dependency.
+
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+FAIL=0
+
+red='\033[0;31m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+nc='\033[0m'
+
+fail() { echo -e "${red}✗${nc} $1"; FAIL=$((FAIL + 1)); }
+pass() { echo -e "${green}✓${nc} $1"; }
+warn() { echo -e "${yellow}⚠${nc} $1"; }
+
+check_required_paths() {
+    local paths=(
+        README.md
+        SUMMARY.md
+        setup.sh
+        docs/quickstart.md
+        docs/why-ascend.md
+        docs/primer/README.md
+        docs/llvm/README.md
+        docs/mlir/README.md
+        docs/ascend/README.md
+        docs/ascendnpu-ir/README.md
+        projects/README.md
+        projects/hello-pass
+        projects/opt-pass
+        projects/mlir-hello
+        projects/toy-mini
+        projects/standalone-mlir
+        projects/ascendnpu-ir-op-counter
+        projects/ascend-samples
+        projects/ascendnpu-ir-demo
+        projects/ascendnpu-ir-demo/run-tests.sh
+        projects/ascendnpu-ir-demo/test-cases/mlir/01_basic
+        projects/ascendnpu-ir-demo/test-cases/mlir/02_intermediate
+        projects/ascendnpu-ir-demo/test-cases/mlir/03_advanced
+    )
+
+    for rel in "${paths[@]}"; do
+        if [ ! -e "$ROOT/$rel" ]; then fail "missing required path: $rel"; fi
+    done
+    [ $FAIL -eq 0 ] && pass "required paths exist"
+}
+
+check_markdown_links() {
+    python3 - "$ROOT" <<'PY'
+import os, re, sys
+from pathlib import Path
+root = Path(sys.argv[1])
+errors = []
+link_re = re.compile(r'\[[^\]]+\]\(([^)]+)\)')
+for md in root.rglob('*.md'):
+    if '.git' in md.parts:
+        continue
+    text = md.read_text(encoding='utf-8', errors='ignore')
+    for match in link_re.finditer(text):
+        raw = match.group(1).strip()
+        if not raw or raw.startswith(('#', 'http://', 'https://', 'mailto:')):
+            continue
+        target = raw.split('#', 1)[0]
+        if not target:
+            continue
+        target = target.replace('%20', ' ')
+        path = (md.parent / target).resolve()
+        try:
+            path.relative_to(root.resolve())
+        except ValueError:
+            errors.append(f'{md.relative_to(root)} -> {raw} escapes repository')
+            continue
+        if not path.exists():
+            errors.append(f'{md.relative_to(root)} -> {raw}')
+if errors:
+    print('\n'.join(errors))
+    sys.exit(1)
+PY
+    if [ $? -eq 0 ]; then pass "markdown local links resolve"; else fail "markdown local links have missing targets"; fi
+}
+
+check_mlir_cases() {
+    local mlir_dir="$ROOT/projects/ascendnpu-ir-demo/test-cases/mlir"
+    local total basic intermediate advanced missing_run
+    basic=$(find "$mlir_dir/01_basic" -maxdepth 1 -name '*.mlir' | wc -l | tr -d ' ')
+    intermediate=$(find "$mlir_dir/02_intermediate" -maxdepth 1 -name '*.mlir' | wc -l | tr -d ' ')
+    advanced=$(find "$mlir_dir/03_advanced" -maxdepth 1 -name '*.mlir' | wc -l | tr -d ' ')
+    total=$((basic + intermediate + advanced))
+
+    [ "$basic" -eq 10 ] || fail "expected 10 basic MLIR cases, got $basic"
+    [ "$intermediate" -eq 11 ] || fail "expected 11 intermediate MLIR cases, got $intermediate"
+    [ "$advanced" -eq 10 ] || fail "expected 10 advanced MLIR cases, got $advanced"
+    [ "$total" -eq 31 ] || fail "expected 31 total MLIR cases, got $total"
+
+    missing_run=$(find "$mlir_dir" -mindepth 2 -maxdepth 2 -name '*.mlir' -exec sh -c 'grep -q "^// RUN:" "$1" || echo "$1"' _ {} \;)
+    if [ -n "$missing_run" ]; then
+        echo "$missing_run"
+        fail "some MLIR cases do not contain RUN annotations"
+    fi
+
+    local triton_total
+    triton_total=$(find "$ROOT/projects/ascendnpu-ir-demo/test-cases/triton" -mindepth 2 -maxdepth 2 -name '*.py' | wc -l | tr -d ' ')
+    [ "$triton_total" -eq 28 ] || fail "expected 28 Triton cases, got $triton_total"
+
+    if [ $FAIL -eq 0 ]; then pass "MLIR/Triton case counts and RUN annotations are consistent"; fi
+}
+
+check_shell_scripts() {
+    local scripts=(setup.sh scripts/check-docs.sh projects/ascendnpu-ir-demo/run-tests.sh projects/ascendnpu-ir-demo/run-demo.sh)
+    for rel in "${scripts[@]}"; do
+        bash -n "$ROOT/$rel" || fail "shell syntax failed: $rel"
+    done
+    [ $FAIL -eq 0 ] && pass "shell script syntax checks pass"
+}
+
+echo "╔════════════════════════════════════════════╗"
+echo "║  ascend-npu-compiler-learning: 文档检查    ║"
+echo "╚════════════════════════════════════════════╝"
+
+check_required_paths
+n_before=$FAIL
+check_markdown_links
+[ $FAIL -gt $n_before ] && warn "上方列出了缺失链接，请修复路径或改为纯文本"
+check_mlir_cases
+check_shell_scripts
+
+if [ $FAIL -gt 0 ]; then
+    echo ""
+    echo -e "${red}检查失败: $FAIL 项${nc}"
+    exit 1
+fi
+
+echo ""
+echo -e "${green}全部检查通过${nc}"
