@@ -1,3 +1,7 @@
+> 📍 Phase 3 MLIR | [返回入口](./README.md)
+> 前置：[00-从LLVM到MLIR](./00-从LLVM到MLIR.md)
+> 预估时间：40 min
+
 ---
 
 created: 2026-06-21
@@ -338,3 +342,6 @@ mlir-opt \
 | **Ch5 ⭐** | **Partial Lowering** | **ConversionTarget, RewritePattern** | **Linalg→HFusion→HIVM 转换** |
 | **Ch6** | Lower to LLVM | CodeGen, Runtime functions | → 最终目标指令 |
 | **Ch7** | Debug Info | MLIR 的 debug 信息传递 | 可选 |
+
+
+> 📖 [术语表](../glossary.md)

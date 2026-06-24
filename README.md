@@ -470,7 +470,10 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 ./setup.sh
 
 # 2. 开始学习
-# 从 docs/primer/ 开始，或直接进 projects/hello-pass/
+# Phase 1: docs/primer/
+# Phase 2: projects/hello-pass/  (一键运行)
+# Phase 3: projects/mlir-hello/   (一键运行)
+# Phase 4: projects/ascend-samples/ (精选用例)
 ```
 
 详见 [快速入门指南](./docs/quickstart.md)

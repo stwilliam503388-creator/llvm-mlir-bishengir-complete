@@ -1,3 +1,7 @@
+> 📍 Phase 3 MLIR | [返回入口](./README.md)
+> 前置：[00-从LLVM到MLIR](./00-从LLVM到MLIR.md)
+> 预估时间：30 min
+
 ---
 created: 2026-06-21
 tags: [mlir, llvm, compiler, ascendnpu-ir, learning]
@@ -607,3 +611,6 @@ ascendnpu-ir/
 | **memref** | 内存引用 | 带布局信息的缓冲区引用（可以指显存地址）|
 | **tensor** | 张量 | 多维数组值（在计算域中，与硬件无关）|
 | **CANN** | 昇腾计算框架 | Huawei 的 NPU SDK（包含了 blas/加速库）|
+
+
+> 📖 [术语表](../glossary.md)

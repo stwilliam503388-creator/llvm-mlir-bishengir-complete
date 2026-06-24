@@ -1,46 +1,36 @@
 # 动手项目
 
-本目录包含与学习路线各阶段配套的动手实践项目。每个项目力求最小化——不需要复杂的项目结构，也不需要理解额外的上下文，只需聚焦对应学习阶段的核心概念。
+本目录包含与学习路线各阶段配套的动手实践项目。
 
-## 已完成项目
-
-| 项目 | 难度 | 对应阶段 | 说明 |
-|------|------|---------|------|
-| [hello-pass](./hello-pass/) | ⭐ | Phase 2 LLVM | 第一个 LLVM Pass：打印函数信息 |
-
-## 计划中项目
+## 项目列表
 
 | 项目 | 难度 | 对应阶段 | 说明 | 状态 |
 |------|------|---------|------|------|
-| mini-pass | ⭐⭐ | Phase 3 MLIR | 编写简单 MLIR Pass | 待开发 |
-| mini-demo | ⭐⭐⭐ | Phase 4 Ascend | 综合性 Demo：端到端编译流程 | 待开发 |
+| [hello-pass](./hello-pass/) | ⭐ | Phase 2 LLVM | 第一个 LLVM Pass：打印函数信息 | ✅ |
+| [mlir-hello](./mlir-hello/) | ⭐ | Phase 3 MLIR | MLIR 版 HelloPass，45 行独立程序 | ✅ |
+| [ascend-samples](./ascend-samples/) | ⭐⭐ | Phase 4 Ascend | 5 个 IR Lowering 精选用例 | ✅ |
 
 ## 快速开始
 
 ```bash
-# 以 hello-pass 为例
-cd hello-pass
-chmod +x run.sh
-./run.sh
+# LLVM Pass — 一键运行
+cd hello-pass && ./run.sh
+
+# MLIR Pass — 一键运行
+cd mlir-hello && ./run.sh
+
+# Ascend 用例 — 需先构建 AscendNPU-IR
+cd ascend-samples && cat 01-simple-add/README.md
 ```
 
 ## 编写指南
 
-为达到上述目标，每个项目应遵守：
-
-- 提供最小、最直接的功能复现（项目的核心概念）
+- 提供最小、最直接的功能复现
 - 清晰直白的注释
 - 通过文件树展示清晰的项目结构
 - 必要的测试用例和预期输出
 - 提供一键运行的 `run.sh` 脚本
 
-## 相关问题
+## 与 LLVM 官方示例的区别
 
-### 与编译原理实践的区别
-
-编译原理实践偏向传统的"实现一个简单编译器"。
-在这里，我们更专注于在现有工业编译器基础设施（如 LLVM 和 MLIR）上构建自定义的编译流程和专用 Pass。
-
-### 与 LLVM 官方示例的区别
-
-本项目将 LLVM 和 MLIR 的官方示例重新组织和改编为更易于初学者理解的版本，并根据需要补充背景知识。
+本项目将 LLVM 和 MLIR 的官方示例重新组织和改编为更易于初学者理解的版本，并根据需要补充背景知识。Ascend-samples 的用例来自 AscendNPU-IR 官方项目的 131 个测试，精选 5 个关键用例并附逐行解读。

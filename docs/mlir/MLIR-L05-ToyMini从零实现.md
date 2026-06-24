@@ -1,3 +1,7 @@
+> 📍 Phase 3 MLIR | [返回入口](./README.md)
+> 前置：[00-从LLVM到MLIR](./00-从LLVM到MLIR.md)
+> 预估时间：15 min
+
 ---
 created: 2026-06-21
 tags: [toy, mini, parser, learning]
@@ -142,3 +146,6 @@ module {
   }
 }
 ```
+
+
+> 📖 [术语表](../glossary.md)

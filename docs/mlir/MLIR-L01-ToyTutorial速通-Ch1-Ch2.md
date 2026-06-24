@@ -1,3 +1,7 @@
+> 📍 Phase 3 MLIR | [返回入口](./README.md)
+> 前置：[00-从LLVM到MLIR](./00-从LLVM到MLIR.md)
+> 预估时间：30 min
+
 ---
 
 created: 2026-06-21
@@ -378,3 +382,6 @@ mlir::Value MLIRGenImpl::mlirGen(LiteralExprAST &lit) {
 | **最终目标** | LLVM IR → CPU | HIVM IR → Ascend NPU |
 
 Toy Tutorial 学完，AscendNPU-IR 的 dialect 定义和 pass 体系**本质是一回事**，只是 ops 不一样、dialect 名字不同。
+
+
+> 📖 [术语表](../glossary.md)

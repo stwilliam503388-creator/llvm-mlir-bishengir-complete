@@ -1,3 +1,7 @@
+> 📍 Phase 3 MLIR | [返回入口](./README.md)
+> 前置：[00-从LLVM到MLIR](./00-从LLVM到MLIR.md)
+> 预估时间：30 min
+
 ---
 created: 2026-06-21
 tags: [mlir, pass, ascendnpu-ir, pattern-rewriting]
@@ -229,3 +233,6 @@ bishengir-opt \
 ├── src/Ch1~Ch7/                              # Toy Tutorial 官方源码
 └── README.md                                 # 工作区说明
 ```
+
+
+> 📖 [术语表](../glossary.md)

@@ -1,3 +1,7 @@
+> 📍 Phase 3 MLIR | [返回入口](./README.md)
+> 前置：[00-从LLVM到MLIR](./00-从LLVM到MLIR.md)
+> 预估时间：15 min
+
 ---
 created: 2026-06-21
 tags: [mlir, standalone, cmake, learning]
@@ -91,3 +95,6 @@ Homebrew 的 `find_package(MLIR)` 会加载 `AddMLIR.cmake`，其中包含与 CM
 | **继续用 mlir-opt 做实操** | ⭐⭐⭐ |
 | **标准 MLIR Toy Tutorial 概念理解（已有笔记）** | ⭐⭐⭐ |
 | **用 LLVM 源码构建（含完整 tablegen 支持）** | ⭐⭐（耗时） |
+
+
+> 📖 [术语表](../glossary.md)
