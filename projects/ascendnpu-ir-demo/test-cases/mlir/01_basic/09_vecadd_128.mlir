@@ -5,6 +5,10 @@
 // 用在哪: Transformer 残差连接 / ResNet shortcut
 // 降级: linalg.generic + arith.addf, 3行→行LLVM
 // bishengir: hfusion.elemwise_binary {fun = add}
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: arith.addf
 //
 module {
   func.func @vecadd(%A: memref<128xf16>, %B: memref<128xf16>, %C: memref<128xf16>) {

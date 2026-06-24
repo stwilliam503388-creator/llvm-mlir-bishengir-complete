@@ -5,6 +5,11 @@
 // 用在哪: 编译器优化概念演示
 // 降级: 连续两次 linalg.generic
 // bishengir: HFusion 算子融合概念演示
+// RUN: mlir-opt --convert-linalg-to-affine-loops %s | FileCheck %s
+// RUN: mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm %s
+// CHECK: affine.for
+// CHECK: arith.addf
+// CHECK: arith.mulf
 //
 module {
   func.func @fused(%A: memref<128xf32>, %B: memref<128xf32>, %D: memref<128xf32>) {

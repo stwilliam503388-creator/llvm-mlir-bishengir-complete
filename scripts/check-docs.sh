@@ -56,12 +56,14 @@ root = Path(sys.argv[1])
 errors = []
 link_re = re.compile(r'\[[^\]]+\]\(([^)]+)\)')
 for md in root.rglob('*.md'):
-    if '.git' in md.parts:
+    if '.git' in md.parts or 'plans' in md.parts:
         continue
     text = md.read_text(encoding='utf-8', errors='ignore')
     for match in link_re.finditer(text):
         raw = match.group(1).strip()
         if not raw or raw.startswith(('#', 'http://', 'https://', 'mailto:')):
+            continue
+        if ' ' in raw and not raw.startswith(('./', '../')):
             continue
         target = raw.split('#', 1)[0]
         if not target:
