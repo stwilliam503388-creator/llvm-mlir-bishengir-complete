@@ -1,5 +1,9 @@
 # 03：动手——看 MLIR 长什么样
 
+> 目标：了解 MLIR 项目的基本文件结构
+> 前置：[02-Pass与Lowering](./02-Pass与Lowering.md)
+> 预估时间：10 分钟
+
 > 阅读时间：10 分钟 | 前置知识：Primer 00, 01, 02
 > 需要：Homebrew LLVM `mlir-opt` 可用
 
