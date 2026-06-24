@@ -1,8 +1,8 @@
 #!/bin/bash
 # check-docs.sh — lightweight repository consistency checks with no LLVM dependency.
 
-# Do not use `set -e`: this script aggregates all failures before exiting.
-# `-u` catches unset variables; `pipefail` propagates failures in pipelines.
+# Intentionally omit `set -e`: this script aggregates all failures before exiting.
+# `-u` is safe because variables are initialized before use; `pipefail` propagates pipeline failures.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)" || exit 1

@@ -6,8 +6,8 @@
 #   bash run-tests.sh --verbose    # 显示详细输出
 #   bash run-tests.sh <pattern>    # 只运行匹配的用例
 
-# Do not use `set -e`: individual test failures are counted and reported.
-# `-u` catches unset variables; `pipefail` propagates failures in pipelines.
+# Intentionally omit `set -e`: individual test failures are counted and reported.
+# `-u` is safe because options and counters are initialized before use; `pipefail` propagates pipeline failures.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

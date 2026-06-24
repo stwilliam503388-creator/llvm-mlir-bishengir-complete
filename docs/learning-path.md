@@ -19,7 +19,7 @@ MLIR Linalg / Arith / Func 等标准 dialect
         │
         ▼
 AscendNPU-IR / BishengIR
-  Linalg → HFusion/Husion → HIVM
+  Linalg → HFusion → HIVM
         │
         ▼
 CANN Runtime
@@ -43,7 +43,7 @@ Ascend NPU 执行
 |---|---|
 | AscendNPU-IR | 官方仓库和文档中使用的项目名称 |
 | BishengIR | 源码、命名空间和工具名中常见的名称，如 `bishengir-opt` |
-| HFusion / Husion | 表达融合后高层算子语义的 Ascend 自定义 dialect 语境 |
+| HFusion | 表达融合后高层算子语义的 Ascend 自定义 dialect 语境；部分历史文件名或笔记可能写作 Husion |
 | HIVM | 更接近 NPU 指令/硬件抽象的 dialect 语境 |
 
 典型 lowering 链路可以理解为：
@@ -53,15 +53,15 @@ Ascend NPU 执行
         │
         ▼
 Pass1: -convert-linalg-to-hfusion
-        Linalg → HFusion/Husion
+        Linalg → HFusion
         │
         ▼
 Pass2: -convert-arith-to-hfusion
-        Arith → HFusion/Husion
+        Arith → HFusion
         │
         ▼
 Pass3: -convert-hfusion-to-hivm
-        HFusion/Husion → HIVM
+        HFusion → HIVM
         │
         ▼
 HIVM → CANN Runtime → Ascend NPU
@@ -147,7 +147,7 @@ HIVM → CANN Runtime → Ascend NPU
 |---|---|---|---|
 | 3.1 | `docs/mlir/MLIR-L06-TritonMLIR体系分析.md` | Triton TT / TritonGPU Dialect | 了解 Triton IR 层级 |
 | 3.2 | `docs/mlir/MLIR-L07-triton-ascend后端深度分析.md` | Triton 到 Ascend 后端 | 看懂 Python 与 C++ 接口层 |
-| 3.3 | `docs/ascend/01-husion-hivm-Dialect详解.md` | HFusion/Husion、HIVM | 对照 Ascend 自定义 dialect |
+| 3.3 | `docs/ascend/01-husion-hivm-Dialect详解.md` | HFusion、HIVM | 对照 Ascend 自定义 dialect |
 | 3.4 | `docs/ascendnpu-ir/translations/` | 官方文档翻译与分析 | 深入 pass / dialect 细节 |
 | 3.5 | `references/ascendnpu-ir-mapping.md` | 本仓库与外部源码映射 | 定位真实源码文件 |
 
