@@ -82,7 +82,7 @@ run_test_file() {
     echo "── $label ──"
 
     # grep -c returns 1 when no lines match; keep that as count=0 instead of aborting.
-    has_run=$(grep -c "^// RUN:" "$mlir" 2>/dev/null || echo 0)
+    has_run=$(grep -c "^// RUN:" "$mlir" 2>/dev/null || true)
     if [ "$has_run" -eq 0 ]; then
         log_skip "$label (无 RUN 标注)"
         return

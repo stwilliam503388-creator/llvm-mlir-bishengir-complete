@@ -50,7 +50,7 @@ check_required_paths() {
 }
 
 check_markdown_links() {
-    python3 - "$ROOT" <<'PY'
+    if python3 - "$ROOT" <<'PYCHECK'
 import os, re, sys
 from pathlib import Path
 root = Path(sys.argv[1])
@@ -81,8 +81,12 @@ for md in root.rglob('*.md'):
 if errors:
     print('\n'.join(errors))
     sys.exit(1)
-PY
-    if [ $? -eq 0 ]; then pass "markdown local links resolve"; else fail "markdown local links have missing targets"; fi
+PYCHECK
+    then
+        pass "markdown local links resolve"
+    else
+        fail "markdown local links have missing targets"
+    fi
 }
 
 check_mlir_cases() {
@@ -105,7 +109,7 @@ check_mlir_cases() {
         fi
     done < <(find "$mlir_dir" -mindepth 2 -maxdepth 2 -name '*.mlir' | sort)
     if [ -n "$missing_run" ]; then
-        echo "$missing_run"
+        printf '%b' "$missing_run"
         fail "some MLIR cases do not contain RUN annotations"
     fi
 

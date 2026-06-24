@@ -67,7 +67,7 @@ echo "╔═══════════════════════�
 echo "║  AscendNPU-IR ↔ 标准 MLIR 对照                               ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
-echo "  AscendNPU-IR: Linalg → HFusion/Husion → HIVM → CANN/LLVM"
+echo "  AscendNPU-IR: Linalg → HFusion → HIVM → CANN/LLVM"
 echo "  标准 MLIR:    Linalg → Affine/SCF/CF → LLVM dialect"
 echo ""
 echo "结果保存在: $RESULT_DIR/"
