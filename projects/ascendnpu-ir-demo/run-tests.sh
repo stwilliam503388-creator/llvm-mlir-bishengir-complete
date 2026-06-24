@@ -81,9 +81,7 @@ run_test_file() {
     TOTAL=$((TOTAL + 1))
     echo "── $label ──"
 
-    # grep -c returns 1 when no lines match; keep that as count=0 instead of aborting.
-    has_run=$(grep -c "^// RUN:" "$mlir" 2>/dev/null || true)
-    if [ "$has_run" -eq 0 ]; then
+    if ! grep -q "^// RUN:" "$mlir" 2>/dev/null; then
         log_skip "$label (无 RUN 标注)"
         return
     fi
@@ -116,7 +114,6 @@ run_test_file() {
             if ! echo "$output" | grep -qF "$pattern"; then
                 log_fail "$label (CHECK-RUN${run_idx}: 未找到 '$pattern')"
                 all_pass=false
-                break
             fi
         done < <(grep "^// CHECK-RUN${run_idx}:" "$mlir")
 
