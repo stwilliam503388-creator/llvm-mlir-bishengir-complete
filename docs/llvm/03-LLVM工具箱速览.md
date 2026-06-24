@@ -70,4 +70,4 @@ llvm-dis hello.bc -o hello.ll
 
 > 📖 遇到不认识的术语？→ [术语表](../glossary.md)
 
-> **下一步**：[Phase 3: MLIR 学习](../mlir/README.md)
+> **下一步**：[Phase 2 进阶：写有实际效果的 Pass](./04-写一个会修改IR的Pass.md)

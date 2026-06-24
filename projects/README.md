@@ -9,6 +9,7 @@
 | [hello-pass](./hello-pass/) | ⭐ | Phase 2 LLVM | 第一个 LLVM Pass：打印函数信息 | ✅ |
 | [mlir-hello](./mlir-hello/) | ⭐ | Phase 3 MLIR | MLIR 版 HelloPass，45 行独立程序 | ✅ |
 | [ascend-samples](./ascend-samples/) | ⭐⭐ | Phase 4 Ascend | 5 个 IR Lowering 精选用例 | ✅ |
+| [opt-pass](./opt-pass/) | ⭐⭐ | Phase 2 进阶 | 死代码消除 Pass，35 行 | ✅ |
 
 ## 快速开始
 
