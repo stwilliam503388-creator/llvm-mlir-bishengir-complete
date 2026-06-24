@@ -1,5 +1,14 @@
 # 02：Pass 和 Lowering（IR 是怎么变成机器码的）
 
+> 目标：理解 Pass 和 Lowering 的概念
+> 前置：[01-AST与IR](./01-AST与IR.md)
+> 预估时间：15 分钟
+
+> 目标：理解 Pass 和 Lowering 的概念
+> 前置：[01-AST与IR](./01-AST与IR.md)
+> 预估时间：15 分钟
+
+
 > 阅读时间：6 分钟 | 前置知识：Primer 00, 01
 > 遇到不认识的术语 → 查 `docs/reference/技术术语速查手册.md`
 

@@ -82,7 +82,7 @@ Hello: say_hello
 
 | 阶段 | 内容 | 状态 |
 |------|------|------|
-| Phase 2 进阶 | 更复杂的 LLVM Pass、IR 变换 | 计划中 |
+| Phase 2 进阶 | 更复杂的 LLVM Pass、IR 变换 | ✅ 已完成 |
 | Phase 3 | [MLIR — 多层中间表示框架](./mlir/README.md) | ✅ 已完成 |
 | Phase 4 | [Ascend NPU 编译器后端实战](./ascend/README.md) | ✅ 已完成 |
 

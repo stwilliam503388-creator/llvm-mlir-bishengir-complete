@@ -48,10 +48,24 @@
 | [AST 与 IR](../primer/01-AST与IR.md) | [LLVM IR 快速入门](./01-LLVM-IR快速入门.md) — 看真的 IR |
 | [编译器是什么](../primer/00-编译器是什么.md) | [LLVM 工具箱速览](./03-LLVM工具箱速览.md) — 用真的工具链 |
 
+### 进阶（Phase 2 进阶）
+
+| # | 文档 | 目标 | 时间 |
+|---|------|------|------|
+| 04 | [写一个会修改 IR 的 Pass](./04-写一个会修改IR的Pass.md) | return true + 删除/替换指令 | 15 min |
+| 05 | [常见 Pass 模式](./05-常见Pass模式.md) | DCE/常量折叠/指令合并 | 20 min |
+| 06 | [Pass 调试与测试](./06-Pass调试与测试.md) | opt -S 对比 + FileCheck | 15 min |
+
+| 项目 | 说明 |
+|------|------|
+| **[opt-pass](../../projects/opt-pass/)** | 死代码消除 Pass，35 行，一键运行 |
+
 ## 学完本阶段后
 
 你应能：
 - [ ] 在自己的机器上装好 LLVM
 - [ ] 用 clang 把 C 代码编译成 LLVM IR 并读懂
 - [ ] 写一个简单的 FunctionPass 并在 opt 中运行
+- [ ] 写一个会修改 IR 的 Pass（删除/替换指令）
+- [ ] 知道三种常见 Pass 模式（DCE/常量折叠/指令合并）
 - [ ] 知道 LLVM 全家桶中每个工具的用途
