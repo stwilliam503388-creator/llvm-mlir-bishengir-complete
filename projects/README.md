@@ -12,7 +12,7 @@
 
 | 项目 | 难度 | 对应阶段 | 说明 | 状态 |
 |------|------|---------|------|------|
-| mini-pass | ⭐⭐ | Phase 3 MLIR | 编写简单 MLIR Pass | 待开发 |
+| [mlir-hello](./mlir-hello/) | ⭐ | Phase 3 MLIR | MLIR 版 HelloPass | ✅ |
 | mini-demo | ⭐⭐⭐ | Phase 4 Ascend | 综合性 Demo：端到端编译流程 | 待开发 |
 
 ## 快速开始

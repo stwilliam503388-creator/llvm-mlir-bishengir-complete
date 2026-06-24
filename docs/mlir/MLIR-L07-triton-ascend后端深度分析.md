@@ -1,3 +1,7 @@
+> 📍 Phase 3 MLIR | [返回入口](./README.md)
+> 前置：[00-从LLVM到MLIR](./00-从LLVM到MLIR.md)
+> 预估时间：25 min
+
 ---
 created: 2026-06-21
 tags: [triton, ascend, backend, compiler]
@@ -275,3 +279,6 @@ ascendnpu-ir/bishengir/
 │   └── HFusionToHIVM/
 └── tools/bishengir-opt/              ★ 编译入口
 ```
+
+
+> 📖 [术语表](../glossary.md)

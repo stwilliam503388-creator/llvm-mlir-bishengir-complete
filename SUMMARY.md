@@ -166,14 +166,18 @@ projects/hello-pass/             ← 动手项目：第一个 LLVM Pass
 
 ### 阶段三学习目录
 
-> 🚧 **计划中** — MLIR 学习内容正在开发
+> ✅ **已完成** — 4篇桥接 + MLIR-L00~L08 实战文档
+>
+> 详见 [docs/mlir/README.md](docs/mlir/README.md)
 > 
 > 预计包含：MLIR 基础概念、Dialect 定义、Pattern 改写、
 > 从 LLVM IR 到 MLIR 的转换
 
 ## 🌳 阶段四: Ascend NPU 编译器后端开发
 
-> 🚧 **计划中** — Ascend NPU 编译器后端学习内容正在开发
+> ✅ **已完成** — 4篇文档 + ascend-samples 项目
+>
+> 详见 [docs/ascend/README.md](docs/ascend/README.md)
 > 
 > 预计包含：Ascend NPU 硬件架构、CANN 软件栈、
 > TBE 算子开发、从 MLIR 到 Ascend 的 Lowering

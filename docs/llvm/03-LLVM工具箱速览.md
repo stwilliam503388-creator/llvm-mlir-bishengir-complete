@@ -70,4 +70,4 @@ llvm-dis hello.bc -o hello.ll
 
 > 📖 遇到不认识的术语？→ [术语表](../glossary.md)
 
-> **下一步**：[Phase 3: MLIR 入门](../../plans/phase3-4-implementation-plan.md)（计划中）
+> **下一步**：[Phase 3: MLIR 学习](../mlir/README.md)
