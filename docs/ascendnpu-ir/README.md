@@ -1,45 +1,42 @@
 # AscendNPU-IR 相关文档
 
-> 💡 **术语不懂？** → 查 `参考/技术术语速查手册.md`（`docs/reference/`），有"hfusion/hivm/Cube/CANN/ConversionTarget"等 AscendNPU-IR 专用术语的解释。
+本目录整理 AscendNPU-IR / BishengIR 相关资料，包括官方文档翻译、dialect/pass 说明和本项目中的对照入口。
 
-## 目录说明
+> 💡 术语不懂：查 [技术术语速查手册](../reference/技术术语速查手册.md)，其中包含 `hfusion`、`hivm`、`Cube`、`CANN`、`ConversionTarget` 等 AscendNPU-IR 常见术语。
 
-```
+## 当前目录
+
+```text
 docs/ascendnpu-ir/
-├── README.md               ← 本文件
-├── translations/           ← 9 篇中文翻译文档（来自官方文档）
-│   ├── 01-AnnotationPasses.md     — Annotation dialect 转换 Pass
-│   ├── 02-HACCPasses.md           — HACC dialect 转换 Pass
-│   ├── 03-ScopePasses.md          — Scope dialect 转换 Pass
-│   ├── 04-SymbolPasses.md         — Symbol dialect 转换 Pass
-│   ├── 05-AnnotationDialect.md    — Annotation dialect 定义
-│   ├── 06-ScopeDialect.md         — Scope dialect 定义
-│   ├── 07-SymbolDialect.md        — Symbol dialect 定义
-│   ├── 08-MathExtDialect.md       — 数学扩展 dialect
-│   └── 09-MemRefExtDialect.md     — 内存引用扩展 dialect
-└── analysis/               ← 2 篇深度分析笔记
-    ├── BishengIR代码仓库解读.md    — 代码仓库逐目录解读
-    └── AscendNPUIR文档总结.md      — 官方文档体系总结
+├── README.md
+└── translations/        # 官方文档翻译与分析笔记
 ```
 
-## 与源码的对应
+## translations 内容范围
 
-| 文档 | 对应 ascendnpu-ir 源码路径 |
-|------|--------------------------|
-| 翻译文档 | `bishengir/docs/cn/` |
-| 代码仓库解读 | `bishengir/` 全目录 |
-| 文档总结 | `bishengir/docs/` 全目录 |
+| 类型 | 示例 | 用途 |
+|---|---|---|
+| Dialect 文档 | `HFusionDialect.md`、`HIVMDialect-翻译-上.md`、`HACCDialect.md` | 理解 AscendNPU-IR 自定义 IR 层级 |
+| Pass 文档 | `HFusionPasses-翻译.md`、`HIVMPasses-翻译.md`、`HACCPasses.md-翻译.md` | 理解 lowering 和转换流程 |
+| 接口/开发指南 | `Triton接口文档分析.md`、`developer_guide-passes-dialects分析.md` | 对照 Triton 接入与 pass/dialect 开发 |
+| 扩展 dialect | `MathExtDialect.md-翻译.md`、`MemRefExtDialect.md-翻译.md` | 理解标准 MLIR dialect 的扩展点 |
 
-## 与本项目笔记的对应
+## 与本仓库其他内容的关系
 
-| 这些文档 | 对应本项目笔记 |
-|---------|--------------|
-| 翻译文档 | `docs/mlir/L00-速通与AscendNPU-IR实战.md` |
-| 代码仓库解读 | `docs/mlir/L06-TritonMLIR体系分析.md`, `L07-triton-ascend后端分析.md` |
-| 文档总结 | `docs/mlir/L00.md` + `references/ascendnpu-ir-mapping.md` |
+| 想了解 | 推荐入口 |
+|---|---|
+| Ascend NPU 硬件和后端概念 | [docs/ascend/README.md](../ascend/README.md) |
+| MLIR 基础和 Toy Tutorial | [docs/mlir/README.md](../mlir/README.md) |
+| 完整学习路径与项目背景 | [docs/learning-path.md](../learning-path.md) |
+| Ascend Lowering 精选用例 | [projects/ascend-samples](../../projects/ascend-samples/) |
+| 标准 MLIR 模拟 AscendNPU-IR 降级 | [projects/ascendnpu-ir-demo](../../projects/ascendnpu-ir-demo/) |
+| 31 个 demo 用例的教学导读 | [docs/ascendnpu-ir-demo-case-guide.md](../ascendnpu-ir-demo-case-guide.md) |
+| 自定义 Pass 参考代码 | [projects/ascendnpu-ir-op-counter](../../projects/ascendnpu-ir-op-counter/) |
+| 本项目文件与外部源码的映射 | [references/ascendnpu-ir-mapping.md](../../references/ascendnpu-ir-mapping.md) |
 
-## 先读哪个
+## 建议阅读顺序
 
-1. 先读 `analysis/AscendNPUIR文档总结.md` — 了解文档全貌
-2. 再读 `analysis/BishengIR代码仓库解读.md` — 了解代码仓库结构
-3. 需要深入了解某个 dialect → 读对应的翻译文档
+1. 先读 [docs/ascend/00-Ascend-NPU硬件概述.md](../ascend/00-Ascend-NPU硬件概述.md)。
+2. 再读 [docs/ascend/01-husion-hivm-Dialect详解.md](../ascend/01-husion-hivm-Dialect详解.md)。
+3. 跑或阅读 [projects/ascendnpu-ir-demo](../../projects/ascendnpu-ir-demo/) 中的 `01_vecadd.mlir`。
+4. 需要深入某个 dialect/pass 时，再查 `translations/` 中的对应文档。

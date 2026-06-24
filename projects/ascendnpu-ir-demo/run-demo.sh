@@ -1,115 +1,78 @@
 #!/bin/bash
-# run-demo.sh — 用 mlir-opt 模拟 bishengir 三阶段降级
-set -e
+# run-demo.sh — 用标准 mlir-opt 模拟 AscendNPU-IR 三阶段降级
 
-export LLVM_DIR="/opt/homebrew/opt/llvm"
-export PATH="$LLVM_DIR/bin:$PATH"
+# Intentionally omit `set -e`: the script should continue after a run_stage failure
+# so unsupported lowering stages are logged and all cases are processed. `-u` catches
+# unset variables; `pipefail` propagates pipeline failures for detection.
+set -u
+set -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CASES_DIR="$SCRIPT_DIR/test-cases"
+CASES_DIR="$SCRIPT_DIR/test-cases/mlir"
 RESULT_DIR="$SCRIPT_DIR/results"
+MLIR_OPT="${MLIR_OPT:-mlir-opt}"
 mkdir -p "$RESULT_DIR"
 
-LLVM_VERSION=$(mlir-opt --version 2>&1 | head -1 || echo "unknown")
+if ! command -v "$MLIR_OPT" &>/dev/null; then
+    echo "❌ mlir-opt 未找到。请安装 LLVM/MLIR，或设置 MLIR_OPT=/path/to/mlir-opt。"
+    exit 1
+fi
+
+LLVM_VERSION=$($MLIR_OPT --version 2>&1 | head -1 || echo "unknown")
 
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║  ascendnpu-ir-demo: 模拟三阶段降级                            ║"
 echo "║  MLIR: $LLVM_VERSION"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
-
-# ============================================================
-# 定义流水线
-# ============================================================
-
-# bishengir 三阶段对照:
-BISHENGIR_PIPELINE="convert-linalg-to-hfusion + convert-arith-to-hfusion + convert-hfusion-to-hivm"
-# 标准 MLIR 等效:
-STD_PIPELINE="convert-linalg-to-affine-loops + lower-affine + convert-scf-to-cf"
-
-echo "bishengir 流水线:  $BISHENGIR_PIPELINE"
-echo "标准 MLIR 流水线:  $STD_PIPELINE"
+echo "AscendNPU-IR 流水线:  convert-linalg-to-hfusion + convert-arith-to-hfusion + convert-hfusion-to-hivm"
+echo "标准 MLIR 流水线:     convert-linalg-to-affine-loops + lower-affine + convert-scf-to-cf + convert-func-to-llvm"
 echo ""
 
-# ============================================================
-# 处理每个测试用例
-# ============================================================
-for mlir in "$CASES_DIR"/*.mlir; do
-    name=$(basename "$mlir" .mlir)
+run_stage() {
+    local label="$1"
+    local out="$2"
+    shift 2
+    if "$MLIR_OPT" "$@" > "$out" 2>&1; then
+        echo "    ✓ $label: $out ($(wc -l < "$out")行, $(wc -c < "$out")字节)"
+        return 0
+    fi
+    echo "    ⚠ $label: 失败，日志已保存到 $out"
+    return 1
+}
+
+while IFS= read -r mlir; do
+    rel=${mlir#"$CASES_DIR"/}
+    name=${rel%.mlir}
+    # Use filesystem-safe names for result files derived from nested case paths.
+    safe_name=${name//\//__}
+
     echo "──────────────────────────────────────────────────────────────"
-    echo "  用例: $name"
+    echo "  用例: $rel"
     echo "──────────────────────────────────────────────────────────────"
+    echo "  [Stage 0] 原始 MLIR: $mlir ($(wc -l < "$mlir")行)"
 
-    # Stage 0: 原始 IR
+    stage1="$RESULT_DIR/${safe_name}_stage1_affine.mlir"
+    stage2="$RESULT_DIR/${safe_name}_stage2_cf.mlir"
+    stage3="$RESULT_DIR/${safe_name}_stage3_llvm.mlir"
+
+    echo "  [Stage 1] linalg → affine  (类比 -convert-linalg-to-hfusion)"
+    run_stage "Stage1" "$stage1" --convert-linalg-to-affine-loops "$mlir" || true
+
+    echo "  [Stage 2] affine → cf  (类比 -convert-arith-to-hfusion)"
+    run_stage "Stage2" "$stage2" --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf "$mlir" || true
+
+    echo "  [Stage 3] → LLVM dialect  (类比 -convert-hfusion-to-hivm 后继续 lowering)"
+    run_stage "Stage3" "$stage3" --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf --convert-func-to-llvm "$mlir" || true
     echo ""
-    echo "  [Stage 0] 原始 Linalg IR:"
-    echo "    mlir-opt $name.mlir  (原样输出)"
-    HEAD=$(head -5 "$mlir")
-    echo "    $HEAD"
-    echo "    (${name}.mlir, 共 $(wc -l < "$mlir") 行)"
-    echo ""
+done < <(find "$CASES_DIR" -mindepth 2 -maxdepth 2 -name '*.mlir' | sort)
 
-    # Stage 1: Linalg → Affine (模拟 bishengir 的 LinalgToHFusion)
-    echo "  [Stage 1] linalg → affine  (对应 bishengir -convert-linalg-to-hfusion)"
-    STAGE1="$RESULT_DIR/${name}_stage1_affine.mlir"
-    mlir-opt --convert-linalg-to-affine-loops "$mlir" > "$STAGE1" 2>&1
-    ST1_LINES=$(wc -l < "$STAGE1")
-    ST1_SIZE=$(wc -c < "$STAGE1")
-    echo "    输出: $STAGE1 (${ST1_LINES}行, ${ST1_SIZE}字节)"
-
-    # Stage 2: Lower Affine + SCF (模拟 bishengir 的 ArithToHFusion)
-    echo "  [Stage 2] affine → scf → cf  (对应 bishengir -convert-arith-to-hfusion)"
-    STAGE2="$RESULT_DIR/${name}_stage2_scf.mlir"
-    mlir-opt --convert-linalg-to-affine-loops --lower-affine --convert-scf-to-cf "$mlir" > "$STAGE2" 2>&1
-    ST2_LINES=$(wc -l < "$STAGE2")
-    ST2_SIZE=$(wc -c < "$STAGE2")
-    echo "    输出: $STAGE2 (${ST2_LINES}行, ${ST2_SIZE}字节)"
-
-    # Stage 3: LLVM Dialect (模拟 bishengir 的 HFusionToHIVM 最终输出)
-    echo "  [Stage 3] → LLVM IR  (对应 bishengir hivm.vadd/store 输出)"
-    STAGE3="$RESULT_DIR/${name}_stage3_llvm.mlir"
-    mlir-opt \
-      --convert-linalg-to-affine-loops \
-      --lower-affine \
-      --convert-scf-to-cf \
-      --convert-func-to-llvm \
-      "$mlir" > "$STAGE3" 2>&1
-    ST3_LINES=$(wc -l < "$STAGE3")
-    ST3_SIZE=$(wc -c < "$STAGE3")
-    echo "    输出: $STAGE3 (${ST3_LINES}行, ${ST3_SIZE}字节)"
-
-    # 摘要: 每阶段的行数变化反映降级复杂度
-    echo ""
-    echo "  降级摘要:  原始 ${name}.mlir  →  $(wc -l < "$mlir")行"
-    echo "              Stage1 (affine)   →  ${ST1_LINES}行"
-    echo "              Stage2 (scf)      →  ${ST2_LINES}行"
-    echo "              Stage3 (llvm)     →  ${ST3_LINES}行"
-    echo ""
-done
-
-# ============================================================
-# 对照表: bishengir vs 标准 MLIR
-# ============================================================
-echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  bishengir ↔ 标准 MLIR 对照表                              ║"
+echo "║  AscendNPU-IR ↔ 标准 MLIR 对照                               ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
-echo "  bishengir 流水线:                   标准 MLIR 流水线:"
-echo "  ─────────────────────────           ─────────────────────"
-echo "  输入: Linalg IR                      输入: Linalg IR"
-echo "    │                                     │"
-echo "  Pass1: -convert-linalg-to-hfusion     Pass1: --convert-linalg-to-affine-loops"
-echo "    Linalg → HFusion dialect              Linalg → affine dialect"
-echo "    │                                     │"
-echo "  Pass2: -convert-arith-to-hfusion      Pass2: --lower-affine"
-echo "    Arith → HFusion dialect               affine → scf dialect"
-echo "    │                                     │"
-echo "  Pass3: -convert-hfusion-to-hivm       Pass3: --convert-scf-to-cf"
-echo "    HFusion → HIVM dialect                scf → cf dialect"
-echo "    │                                     │"
-echo "  NPU IR (可通过 CANN 执行)             LLVM IR (可通过 lli 执行)"
+echo "  AscendNPU-IR: Linalg → HFusion → HIVM → CANN/LLVM"
+echo "  标准 MLIR:    Linalg → Affine/SCF/CF → LLVM dialect"
 echo ""
-
 echo "结果保存在: $RESULT_DIR/"
 ls -lh "$RESULT_DIR/"

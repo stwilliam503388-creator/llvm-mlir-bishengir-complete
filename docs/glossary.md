@@ -10,27 +10,27 @@
 
 | 术语 | 英文 | 一句话解释 | 在哪学 |
 |------|------|-----------|--------|
-| 编译器 | Compiler | 把源代码翻译成机器码的程序 | [primer/00](../primer/00-编译器是什么.md) |
-| 解释器 | Interpreter | 逐行执行源代码，不生成机器码 | [primer/00](../primer/00-编译器是什么.md) |
-| 前端 | Frontend | 编译器的"入口"，解析源码生成 AST | [primer/01](../primer/01-AST与IR.md) |
-| 后端 | Backend | 编译器的"出口"，把 IR 变成机器码 | [primer/00](../primer/00-编译器是什么.md) |
-| AST | Abstract Syntax Tree | 抽象语法树，源码的树形表示 | [primer/01](../primer/01-AST与IR.md) |
-| IR | Intermediate Representation | 中间表示，前端和后端之间的"通用语言" | [primer/01](../primer/01-AST与IR.md) |
-| SSA | Static Single Assignment | 静态单赋值：每个变量只赋值一次 | [llvm/01](../llvm/01-LLVM-IR快速入门.md) |
-| 基本块 | Basic Block | 连续执行的直线代码，一个入口一个出口 | [llvm/01](../llvm/01-LLVM-IR快速入门.md) |
-| phi 节点 | Phi Node | 多路汇合处的选择器，根据来路选值 | [llvm/01](../llvm/01-LLVM-IR快速入门.md) |
-| Pass | Pass | 对 IR 做一次检查或变换的"质检员" | [primer/02](../primer/02-Pass与Lowering.md) |
-| Lowering | Lowering | 把高级 IR 逐步"降级"到底层 IR 的过程 | [primer/02](../primer/02-Pass与Lowering.md) |
+| 编译器 | Compiler | 把源代码翻译成机器码的程序 | [primer/00](./primer/00-编译器是什么.md) |
+| 解释器 | Interpreter | 逐行执行源代码，不生成机器码 | [primer/00](./primer/00-编译器是什么.md) |
+| 前端 | Frontend | 编译器的"入口"，解析源码生成 AST | [primer/01](./primer/01-AST与IR.md) |
+| 后端 | Backend | 编译器的"出口"，把 IR 变成机器码 | [primer/00](./primer/00-编译器是什么.md) |
+| AST | Abstract Syntax Tree | 抽象语法树，源码的树形表示 | [primer/01](./primer/01-AST与IR.md) |
+| IR | Intermediate Representation | 中间表示，前端和后端之间的"通用语言" | [primer/01](./primer/01-AST与IR.md) |
+| SSA | Static Single Assignment | 静态单赋值：每个变量只赋值一次 | [llvm/01](./llvm/01-LLVM-IR快速入门.md) |
+| 基本块 | Basic Block | 连续执行的直线代码，一个入口一个出口 | [llvm/01](./llvm/01-LLVM-IR快速入门.md) |
+| phi 节点 | Phi Node | 多路汇合处的选择器，根据来路选值 | [llvm/01](./llvm/01-LLVM-IR快速入门.md) |
+| Pass | Pass | 对 IR 做一次检查或变换的"质检员" | [primer/02](./primer/02-Pass与Lowering.md) |
+| Lowering | Lowering | 把高级 IR 逐步"降级"到底层 IR 的过程 | [primer/02](./primer/02-Pass与Lowering.md) |
 
 ## LLVM 工具
 
 | 工具 | 全称 | 作用 | 在哪学 |
 |------|------|------|--------|
-| clang | C language | C/C++ 编译器前端 | [llvm/03](../llvm/03-LLVM工具箱速览.md) |
-| opt | Optimizer | IR 优化器，加载 Pass 运行 | [llvm/02](../llvm/02-第一个LLVM-Pass.md) |
-| llc | LLVM Compiler | IR → 汇编代码 | [llvm/03](../llvm/03-LLVM工具箱速览.md) |
-| lli | LLVM Interpreter | 直接运行 IR（不编译） | [llvm/03](../llvm/03-LLVM工具箱速览.md) |
-| llvm-dis | LLVM Disassembler | 二进制 IR → 可读文本 | [llvm/03](../llvm/03-LLVM工具箱速览.md) |
+| clang | C language | C/C++ 编译器前端 | [llvm/03](./llvm/03-LLVM工具箱速览.md) |
+| opt | Optimizer | IR 优化器，加载 Pass 运行 | [llvm/02](./llvm/02-第一个LLVM-Pass.md) |
+| llc | LLVM Compiler | IR → 汇编代码 | [llvm/03](./llvm/03-LLVM工具箱速览.md) |
+| lli | LLVM Interpreter | 直接运行 IR（不编译） | [llvm/03](./llvm/03-LLVM工具箱速览.md) |
+| llvm-dis | LLVM Disassembler | 二进制 IR → 可读文本 | [llvm/03](./llvm/03-LLVM工具箱速览.md) |
 
 ## 文件格式
 
